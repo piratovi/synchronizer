@@ -1,0 +1,25 @@
+<div xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
+     layout:fragment="content"
+     layout:decorate="~{layout}"
+>
+    <h1 class="widget-header">Ext</h1>
+
+    <p></p>
+
+    <p></p>
+
+
+    <div>
+        <table class="pure-table pure-table-bordered" id="table" th:fragment="table">
+
+
+            <tr th:each="ext : ${exts}">
+                <td th:text="${ext}"></td>
+
+
+            </tr>
+
+        </table>
+    </div>
+    </div>
+</div>

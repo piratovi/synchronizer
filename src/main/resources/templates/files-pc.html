@@ -1,0 +1,30 @@
+<div xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
+     layout:fragment="content"
+     layout:decorate="~{layout}"
+>
+    <h1 class="widget-header">Files</h1>
+
+    <p></p>
+
+    <p></p>
+
+
+    <div>
+        <table class="pure-table pure-table-bordered" id="table" th:fragment="table">
+            <tr>
+                <th>File Name</th>
+                <th colspan="2">Action</th>
+            </tr>
+
+            <tr th:each="file : ${files}">
+                <td th:text="${file}"></td>
+
+                <td><a class="pure-button pure-button-primary" th:href="${'/cards-edit/'}">Edit</a></td>
+
+                <td><a class="pure-button pure-button-primary" th:href="${'/cards-delete/'}">Delete</a></td>
+            </tr>
+
+        </table>
+    </div>
+    </div>
+</div>
