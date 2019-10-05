@@ -1,5 +1,6 @@
 package com.kolosov.synchronizer.service;
 
+import com.kolosov.synchronizer.domain.FileEntity;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
 
@@ -7,28 +8,31 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
 public class FileService {
-    Map<String, File> fileMap;
+
+    public static final Path PATH_TO_MUSIC = Path.of("D:", "Music");
+
+    List<FileEntity> fileEntities;
 
     public FileService() throws IOException {
-        Path pathToMusic = Path.of("D:", "Music");
-        try (Stream<Path> stream = Files.walk(pathToMusic)) {
-            this.fileMap = stream
-                    .map(Path::toFile)
-                    .collect(Collectors.toMap(File::getAbsolutePath, file -> file));
+        try (Stream<Path> stream = Files.walk(PATH_TO_MUSIC)) {
+            this.fileEntities = stream
+                    .map(FileEntity::new)
+                    .collect(Collectors.toList());
         }
     }
 
     public Set<String> getExt() {
-        return fileMap.entrySet().stream()
-                .filter(e -> e.getValue().isFile())
-                .map(e -> FilenameUtils.getExtension(e.getKey()))
+        return fileEntities.stream()
+                .map(p -> p.getAbsolutePath().toFile())
+                .filter(File::isFile)
+                .map(f -> FilenameUtils.getExtension(f.getAbsolutePath()))
                 .collect(Collectors.toSet());
     }
 }

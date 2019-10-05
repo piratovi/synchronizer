@@ -2,9 +2,6 @@ package com.kolosov.synchronizer.controller;
 
 import com.kolosov.synchronizer.service.FileService;
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import org.apache.commons.io.FilenameUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,16 +38,9 @@ public class FileController {
 
     @GetMapping(value = "pc/ext")
     public String getFilesPCExt(Model model) throws IOException {
-        Path pathToMusic = Path.of("D:", "Music");
         Set<String> extSet;
-//        try (Stream<Path> stream = Files.walk(pathToMusic)) {
-//            extSet = stream.map(Path::toFile)
-//                    .filter(File::isFile)
-//                    .map(file -> FilenameUtils.getExtension(file.getName()))
-//                    .collect(Collectors.toSet());
-//        }
         extSet = fileService.getExt();
-        model.addAttribute("exts", extSet);
+        model.addAttribute("extensions", extSet);
         return "files-pc-ext";
     }
 
