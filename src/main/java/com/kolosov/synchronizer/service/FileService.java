@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,7 +19,8 @@ public class FileService {
 
     public static final Path PATH_TO_MUSIC = Path.of("D:", "Music");
 
-    List<FileEntity> fileEntities;
+    private List<FileEntity> fileEntities;
+    private Map<String, List<File>> collect;
 
     public FileService() throws IOException {
         try (Stream<Path> stream = Files.walk(PATH_TO_MUSIC)) {
@@ -29,10 +31,9 @@ public class FileService {
     }
 
     public Set<String> getExt() {
-        return fileEntities.stream()
+        collect = fileEntities.stream()
                 .map(p -> p.getAbsolutePath().toFile())
                 .filter(File::isFile)
-                .map(f -> FilenameUtils.getExtension(f.getAbsolutePath()))
-                .collect(Collectors.toSet());
+                .collect(Collectors.groupingBy(f -> FilenameUtils.getExtension(f.getAbsolutePath()), Collectors.toList()));
     }
 }
