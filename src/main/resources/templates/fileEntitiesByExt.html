@@ -2,7 +2,7 @@
      layout:fragment="content"
      layout:decorate="~{layout}"
 >
-    <h1 class="widget-header">Ext</h1>
+    <h1 class="widget-header">FileEntities By Ext</h1>
 
     <p></p>
 
@@ -13,9 +13,10 @@
         <table class="pure-table pure-table-bordered" id="table" th:fragment="table">
 
 
-            <tr th:each="ext : ${extensions}">
-                <td><a th:href="${'/files/pc/ext/' + ext}" th:text="${ext}"></a></td>
-<!--                <td th:text="${ext}"></td>-->
+            <tr th:each="ext : ${fileEntitiesByExt}">
+
+                <td th:text="${ext.absolutePath}"></td>
+                <td><a th:href="${'/files/pc/ext/delete'}">Delete</a></td>
 
 
             </tr>
