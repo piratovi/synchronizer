@@ -11,13 +11,11 @@
     <div>
         <table class="pure-table pure-table-bordered" id="table" th:fragment="table">
 
-            <a th:href="@{${#httpServletRequest.requestURI} +'/deleteAll'}">Delete ALL</a>
+            <a th:href="${'/files/pc/empty/delete'}">Delete ALL</a>
 
-            <tr th:each="fileEntity : ${fileEntitiesByExt}">
+            <tr th:each="fileEntity : ${files}">
 
                 <td th:text="${fileEntity.absolutePath}"></td>
-                <td th:text="${fileEntity.id}"></td>
-                <td><a th:href="@{'/files/pc/ext/delete/' + ${fileEntity.id}}">Delete</a></td>
 
             </tr>
 

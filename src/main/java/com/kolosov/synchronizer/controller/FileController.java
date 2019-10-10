@@ -4,6 +4,7 @@ import com.kolosov.synchronizer.domain.FileEntity;
 import com.kolosov.synchronizer.repository.FileEntityRepo;
 import com.kolosov.synchronizer.service.FileService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +26,7 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public class FileController {
 
-    private static final String REDIRECT_EXT_FILES = "redirect:/";
+    public static final String REDIRECT_ROOT = "redirect:/";
 
     FileService fileService;
 
@@ -40,7 +41,7 @@ public class FileController {
     }
 
     @GetMapping(value = "pc/ext")
-    public String getFilesPCExt(Model model) throws IOException {
+    public String getFilesPCExt(Model model) {
         Set<String> extSet = fileService.getExt();
         model.addAttribute("extensions", extSet);
         return "files-pc-ext";
@@ -54,10 +55,33 @@ public class FileController {
     }
 
     @GetMapping("pc/ext/delete/{id}")
-    public String delete(@PathVariable Long id, Model model) throws IOException {
+    public String delete(@PathVariable Long id) {
         fileService.deleteById(id);
-        model.addAttribute("fileEntitiesByExt", fileService.getFileEntitiesByExt("ext"));
         return "redirect:/files/pc/ext";
     }
 
+    @GetMapping("pc/ext/{ext}/deleteAll")
+    public String deleteAll(@PathVariable String ext) {
+        fileService.deleteExtAll(ext);
+        return "redirect:/files/pc/ext";
+    }
+
+    @GetMapping("pc/refresh")
+    public String refresh() {
+        fileService.refresh();
+        return REDIRECT_ROOT;
+    }
+
+    @GetMapping(value = "pc/empty")
+    public String getEmpty(Model model) {
+        List<FileEntity> fileEntities = fileService.getEmptyFolders();
+        model.addAttribute("files", fileEntities);
+        return "empty-folders-pc";
+    }
+
+    @GetMapping(value = "pc/empty/delete")
+    public String deleteEmpty() {
+        fileService.deleteEmptyFolders();
+        return REDIRECT_ROOT;
+    }
 }

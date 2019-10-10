@@ -36,29 +36,30 @@ public class FileService {
             this.fileEntities = getFileEntitiesFromDisk();
         }
         this.fileEntitiesByExt = separateExtensions();
-        System.out.printf("");
-        System.out.printf("");
-        log.info("postConstruct");
+        log.info("postConstruct is done");
     }
 
-    private List<FileEntity> getFileEntitiesFromDisk() throws IOException {
+    private List<FileEntity> getFileEntitiesFromDisk() {
         List<FileEntity> fileEntities;
         try (Stream<Path> stream = Files.walk(PATH_TO_MUSIC)) {
             fileEntities = stream
+                    .skip(1)
                     .map(Path::toString)
                     .map(FileEntity::new)
                     .map(fileEntityRepo::save)
                     .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException("Error while reading from disk");
         }
         return fileEntities;
     }
 
     private Map<String, List<FileEntity>> separateExtensions() {
         return fileEntities.stream()
-                    .filter(fileEntity -> (new File(fileEntity.getAbsolutePath())).isFile())
-                    .collect(Collectors.groupingBy(
-                            file -> FilenameUtils.getExtension(file.getAbsolutePath()), Collectors.toList())
-                    );
+                .filter(fileEntity -> (new File(fileEntity.getAbsolutePath())).isFile())
+                .collect(Collectors.groupingBy(
+                        file -> FilenameUtils.getExtension(file.getAbsolutePath().toLowerCase()), Collectors.toList())
+                );
     }
 
     public Set<String> getExt() {
@@ -69,12 +70,48 @@ public class FileService {
         return fileEntitiesByExt.get(ext);
     }
 
-    public void deleteById(Long id) throws IOException {
+    public void deleteById(Long id) {
         FileEntity deleteItem = fileEntityRepo.findById(id).orElseThrow();
-        Files.deleteIfExists(Path.of(deleteItem.absolutePath));
-        fileEntityRepo.deleteById(id);
-        fileEntities.remove(deleteItem);
-        String extension = FilenameUtils.getExtension(deleteItem.getAbsolutePath());
-        fileEntitiesByExt.get(extension).removeIf(fileEntity -> fileEntity.getId() == id);
+        deleteFileFromDisk(deleteItem);
+        refresh();
+    }
+
+    private void deleteFileFromDisk(FileEntity deleteItem) {
+        try {
+            Files.delete(Path.of(deleteItem.absolutePath));
+        } catch (IOException e) {
+            throw new RuntimeException("Error while deleting " + deleteItem.getAbsolutePath());
+        }
+    }
+
+    public void deleteExtAll(String ext) {
+        for (FileEntity fileEntity : getFileEntitiesByExt(ext)) {
+            deleteFileFromDisk(fileEntity);
+        }
+        refresh();
+    }
+
+    public void refresh() {
+        log.info("refresh start");
+        fileEntityRepo.deleteAll();
+        this.fileEntities = getFileEntitiesFromDisk();
+        this.fileEntitiesByExt = separateExtensions();
+        log.info("refresh done");
+    }
+
+    public List<FileEntity> getEmptyFolders() {
+        return fileEntities.stream()
+                .filter(fileEntity -> {
+                    final File file = new File(fileEntity.absolutePath);
+                    return file.isDirectory() && file.listFiles().length == 0;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public void deleteEmptyFolders() {
+        for (FileEntity emptyFolder : getEmptyFolders()) {
+            deleteFileFromDisk(emptyFolder);
+        }
+        refresh();
     }
 }
