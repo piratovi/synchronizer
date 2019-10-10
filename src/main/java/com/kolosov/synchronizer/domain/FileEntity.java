@@ -27,9 +27,9 @@ public class FileEntity {
 
     @Column
     public String relativePath;
-
-    @Column
-    public String ext;
+//
+//    @Column
+//    public String ext;
 
     public FileEntity(String absolutePath) {
         this.absolutePath = absolutePath;

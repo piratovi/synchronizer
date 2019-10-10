@@ -8,16 +8,14 @@
 
     <p></p>
 
-
     <div>
         <table class="pure-table pure-table-bordered" id="table" th:fragment="table">
 
+            <tr th:each="fileEntity : ${fileEntitiesByExt}">
 
-            <tr th:each="ext : ${fileEntitiesByExt}">
-
-                <td th:text="${ext.absolutePath}"></td>
-                <td><a th:href="${'/files/pc/ext/delete'}">Delete</a></td>
-
+                <td th:text="${fileEntity.absolutePath}"></td>
+                <td th:text="${fileEntity.id}"></td>
+                <td><a th:href="@{'/files/pc/ext/delete/' + ${fileEntity.id}}">Delete</a></td>
 
             </tr>
 

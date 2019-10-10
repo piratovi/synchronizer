@@ -34,14 +34,8 @@ public class FileController {
     @GetMapping(value = "pc")
     public String getFilesPC(Model model) throws IOException {
 
-        Path pathToMusic = Path.of("D:", "Music", "MusicBase");
-        List<String> fileList;
-        try (Stream<Path> stream = Files.walk(pathToMusic)) {
-            fileList = stream.map(Path::toFile)
-                    .map(File::getName)
-                    .collect(Collectors.toList());
-        }
-        model.addAttribute("files", fileList);
+        List<FileEntity> fileEntities = fileService.getFileEntities();
+        model.addAttribute("files", fileEntities);
         return "files-pc";
     }
 
@@ -54,15 +48,16 @@ public class FileController {
 
     @GetMapping(value = "pc/ext/{ext}")
     public String getFilesWithCurrentExt(@PathVariable String ext, Model model) {
-        model.addAttribute("fileEntitiesByExt", fileService.getFileEntitiesByExt(ext));
+        List<FileEntity> fileEntitiesByExt = fileService.getFileEntitiesByExt(ext);
+        model.addAttribute("fileEntitiesByExt", fileEntitiesByExt);
         return "fileEntitiesByExt";
     }
 
-    @GetMapping("pc/ext/{ext}/delete/{id}")
-    public String delete(@PathVariable FileEntity ext, @PathVariable Long id, Model model) {
+    @GetMapping("pc/ext/delete/{id}")
+    public String delete(@PathVariable Long id, Model model) throws IOException {
         fileService.deleteById(id);
         model.addAttribute("fileEntitiesByExt", fileService.getFileEntitiesByExt("ext"));
-        return "redirect:/pc/ext/{ext}";
+        return "redirect:/files/pc/ext";
     }
 
 }

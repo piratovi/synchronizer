@@ -3,6 +3,7 @@ package com.kolosov.synchronizer.service;
 import com.kolosov.synchronizer.domain.FileEntity;
 import com.kolosov.synchronizer.repository.FileEntityRepo;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ import java.util.stream.Stream;
 
 @Service
 @Data
+@Slf4j
 public class FileService {
 
     public static final Path PATH_TO_MUSIC = Path.of("D:", "Music");
@@ -34,6 +36,9 @@ public class FileService {
             this.fileEntities = getFileEntitiesFromDisk();
         }
         this.fileEntitiesByExt = separateExtensions();
+        System.out.printf("");
+        System.out.printf("");
+        log.info("postConstruct");
     }
 
     private List<FileEntity> getFileEntitiesFromDisk() throws IOException {
@@ -50,10 +55,7 @@ public class FileService {
 
     private Map<String, List<FileEntity>> separateExtensions() {
         return fileEntities.stream()
-                    .map(FileEntity::getAbsolutePath)
-                    .map(File::new)
-                    .filter(File::isFile)
-                    .map(FileEntity::new)
+                    .filter(fileEntity -> (new File(fileEntity.getAbsolutePath())).isFile())
                     .collect(Collectors.groupingBy(
                             file -> FilenameUtils.getExtension(file.getAbsolutePath()), Collectors.toList())
                     );
@@ -67,8 +69,9 @@ public class FileService {
         return fileEntitiesByExt.get(ext);
     }
 
-    public void deleteById(Long id) {
-        FileEntity deleteItem = fileEntityRepo.getOne(id);
+    public void deleteById(Long id) throws IOException {
+        FileEntity deleteItem = fileEntityRepo.findById(id).orElseThrow();
+        Files.deleteIfExists(Path.of(deleteItem.absolutePath));
         fileEntityRepo.deleteById(id);
         fileEntities.remove(deleteItem);
         String extension = FilenameUtils.getExtension(deleteItem.getAbsolutePath());
