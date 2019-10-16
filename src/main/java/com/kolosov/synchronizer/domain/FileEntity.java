@@ -8,6 +8,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.validation.constraints.NotBlank;
 import java.io.File;
 import java.nio.file.Path;
 
@@ -22,10 +23,12 @@ public class FileEntity {
     @GeneratedValue
     private Long id;
 
-    @Column
+    @Column(unique = true)
+    @NotBlank
     public String absolutePath;
 
     @Column
+    @NotBlank
     public String relativePath;
 //
 //    @Column
