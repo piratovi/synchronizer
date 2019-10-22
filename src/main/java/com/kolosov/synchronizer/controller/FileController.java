@@ -4,22 +4,15 @@ import com.kolosov.synchronizer.domain.FileEntity;
 import com.kolosov.synchronizer.repository.FileEntityRepo;
 import com.kolosov.synchronizer.service.FileService;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Controller
 @RequestMapping("files")
@@ -42,7 +35,7 @@ public class FileController {
 
     @GetMapping(value = "pc/ext")
     public String getFilesPCExt(Model model) {
-        Set<String> extSet = fileService.getExt();
+        Set<String> extSet = fileService.getExtensions();
         model.addAttribute("extensions", extSet);
         return "files-pc-ext";
     }
@@ -68,7 +61,7 @@ public class FileController {
 
     @GetMapping("pc/refresh")
     public String refresh() {
-        fileService.refresh();
+//        fileService.refresh();
         return REDIRECT_ROOT;
     }
 

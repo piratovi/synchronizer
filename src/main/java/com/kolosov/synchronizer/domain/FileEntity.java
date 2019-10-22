@@ -9,10 +9,11 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.nio.file.Path;
 
-import static com.kolosov.synchronizer.service.FileService.PATH_TO_MUSIC;
+import static com.kolosov.synchronizer.service.PcDirectFileOperationsService.PATH_TO_MUSIC;
 
 @Data
 @Entity
@@ -25,21 +26,26 @@ public class FileEntity {
 
     @Column(unique = true)
     @NotBlank
-    public String absolutePath;
+    private String absolutePath;
 
     @Column
     @NotBlank
-    public String relativePath;
-//
-//    @Column
-//    public String ext;
+    private String relativePath;
+
+    @Column
+    @NotNull
+    private Boolean isFile;
+
+    @Column
+    private String ext;
 
     public FileEntity(String absolutePath) {
         this.absolutePath = absolutePath;
         this.relativePath = PATH_TO_MUSIC.relativize(Path.of(absolutePath)).toString();
-    }
-
-    public FileEntity(File file) {
-        this(file.getAbsolutePath());
+        final File file = new File(absolutePath);
+        this.isFile = file.isFile();
+        if (this.isFile) {
+            this.ext = FilenameUtils.getExtension(absolutePath);
+        }
     }
 }
