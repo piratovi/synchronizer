@@ -13,7 +13,8 @@ import java.util.stream.Stream;
 @Service
 public class PcDirectFileOperationsService implements DirectFileOperationsService {
 
-    public static final Path PATH_TO_MUSIC = Path.of("C:", "Users", "pirat", "Music");
+    public static final Path PATH_TO_MUSIC_PC = Path.of("D:", "Music");
+    public static final Path PATH_TO_MUSIC_PHONE = Path.of("Z:", "Music");
 
     @Override
     public void deleteFile(FileEntity fileEntity) {
@@ -27,7 +28,7 @@ public class PcDirectFileOperationsService implements DirectFileOperationsServic
     @Override
     public List<String> getFiles() {
         List<String> fileEntities;
-        try (Stream<Path> stream = Files.walk(PcDirectFileOperationsService.PATH_TO_MUSIC)) {
+        try (Stream<Path> stream = Files.walk(PcDirectFileOperationsService.PATH_TO_MUSIC_PHONE)) {
             fileEntities = stream
                     .skip(1)
                     .map(Path::toString)
@@ -37,4 +38,18 @@ public class PcDirectFileOperationsService implements DirectFileOperationsServic
         }
         return fileEntities;
     }
+
+//    @Override
+//    public List<String> findFilesFromPC() {
+//        List<String> fileEntities;
+//        try (Stream<Path> stream = Files.walk(PcDirectFileOperationsService.PATH_TO_MUSIC_PHONE)) {
+//            fileEntities = stream
+//                    .skip(1)
+//                    .map(Path::toString)
+//                    .collect(Collectors.toList());
+//        } catch (IOException e) {
+//            throw new RuntimeException("Error while reading from disk");
+//        }
+//        return fileEntities;
+//    }
 }

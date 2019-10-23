@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.nio.file.Path;
 
-import static com.kolosov.synchronizer.service.PcDirectFileOperationsService.PATH_TO_MUSIC;
+import static com.kolosov.synchronizer.service.PcDirectFileOperationsService.PATH_TO_MUSIC_PHONE;
 
 @Data
 @Entity
@@ -41,11 +41,11 @@ public class FileEntity {
 
     public FileEntity(String absolutePath) {
         this.absolutePath = absolutePath;
-        this.relativePath = PATH_TO_MUSIC.relativize(Path.of(absolutePath)).toString();
+        this.relativePath = PATH_TO_MUSIC_PHONE.relativize(Path.of(absolutePath)).toString();
         final File file = new File(absolutePath);
         this.isFile = file.isFile();
         if (this.isFile) {
-            this.ext = FilenameUtils.getExtension(absolutePath);
+            this.ext = FilenameUtils.getExtension(absolutePath).toLowerCase();
         }
     }
 }

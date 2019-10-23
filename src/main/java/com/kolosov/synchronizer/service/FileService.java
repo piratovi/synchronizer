@@ -89,12 +89,19 @@ public class FileService {
 
     public void deleteEmptyFolders() {
         deleteFileEntities(getEmptyFolders());
-
     }
 
     private void deleteFileEntities(List<FileEntity> emptyFolders) {
         for (FileEntity emptyFolder : emptyFolders) {
             deleteFileEntity(emptyFolder);
         }
+    }
+
+    public void refresh() {
+        log.info("refresh start");
+        fileEntityRepo.deleteAll();
+        this.fileEntities = getFileEntitiesFromDisk();
+        this.fileEntitiesByExt = separateFilesByExtensions();
+        log.info("refresh done");
     }
 }

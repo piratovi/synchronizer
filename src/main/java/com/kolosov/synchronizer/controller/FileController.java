@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -26,7 +25,7 @@ public class FileController {
     FileEntityRepo fileEntityRepo;
 
     @GetMapping(value = "pc")
-    public String getFilesPC(Model model) throws IOException {
+    public String getFilesPC(Model model) {
 
         List<FileEntity> fileEntities = fileService.getFileEntities();
         model.addAttribute("files", fileEntities);
@@ -61,7 +60,7 @@ public class FileController {
 
     @GetMapping("pc/refresh")
     public String refresh() {
-//        fileService.refresh();
+        fileService.refresh();
         return REDIRECT_ROOT;
     }
 
