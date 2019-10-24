@@ -24,11 +24,11 @@ public class FileEntity {
     @GeneratedValue
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     @NotBlank
     private String absolutePath;
 
-    @Column
+    @Column(nullable = false )
     @NotBlank
     private String relativePath;
 
