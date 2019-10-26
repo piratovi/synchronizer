@@ -27,7 +27,7 @@ public class FileController {
     @GetMapping(value = "pc")
     public String getFilesPC(Model model) {
 
-        List<FileEntity> fileEntities = fileService.getFileEntities();
+        List<FileEntity> fileEntities = fileService.getFileEntitiesOnPC();
         model.addAttribute("files", fileEntities);
         return "files-pc";
     }

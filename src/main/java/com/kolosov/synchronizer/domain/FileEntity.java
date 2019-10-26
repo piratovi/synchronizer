@@ -1,6 +1,7 @@
 package com.kolosov.synchronizer.domain;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
 
@@ -13,39 +14,56 @@ import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.nio.file.Path;
 
-import static com.kolosov.synchronizer.service.PcDirectFileOperationsService.PATH_TO_MUSIC_PHONE;
+import static com.kolosov.synchronizer.service.DirectFileOperationsService.PATH_TO_MUSIC_PC;
+import static com.kolosov.synchronizer.service.DirectFileOperationsService.PATH_TO_MUSIC_PHONE;
 
 @Data
 @Entity
 @NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class FileEntity {
 
     @Id
     @GeneratedValue
-    private Long id;
+    public Long id;
 
     @Column(unique = true, nullable = false)
     @NotBlank
-    private String absolutePath;
+    public String absolutePath;
 
     @Column(nullable = false )
     @NotBlank
-    private String relativePath;
+    @EqualsAndHashCode.Include
+    public String relativePath;
 
     @Column
     @NotNull
-    private Boolean isFile;
+    public Boolean isFile;
 
     @Column
-    private String ext;
+    public String ext;
+
+    @Column
+    public Location location;
 
     public FileEntity(String absolutePath) {
         this.absolutePath = absolutePath;
-        this.relativePath = PATH_TO_MUSIC_PHONE.relativize(Path.of(absolutePath)).toString();
         final File file = new File(absolutePath);
         this.isFile = file.isFile();
         if (this.isFile) {
             this.ext = FilenameUtils.getExtension(absolutePath).toLowerCase();
         }
+        if (absolutePath.startsWith(PATH_TO_MUSIC_PC.toString())) {
+            this.relativePath = PATH_TO_MUSIC_PC.relativize(Path.of(absolutePath)).toString();
+            this.location = Location.PC;
+        } else {
+            this.relativePath = PATH_TO_MUSIC_PHONE.relativize(Path.of(absolutePath)).toString();
+            this.location = Location.Phone;
+        }
+    }
+
+    public enum Location {
+        PC,
+        Phone
     }
 }

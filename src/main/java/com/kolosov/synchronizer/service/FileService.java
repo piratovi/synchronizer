@@ -4,7 +4,6 @@ import com.kolosov.synchronizer.domain.FileEntity;
 import com.kolosov.synchronizer.repository.FileEntityRepo;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -14,39 +13,70 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.kolosov.synchronizer.service.DirectFileOperationsService.PATH_TO_MUSIC_PC;
+
 @Service
 @Data
 @Slf4j
 public class FileService {
 
-    @Autowired
-    PcDirectFileOperationsService pcDirectOperationsService;
-
-    private List<FileEntity> fileEntities;
-    private Map<String, List<FileEntity>> fileEntitiesByExt;
+    private final DirectFileOperationsService directOperationsService;
     private final FileEntityRepo fileEntityRepo;
+
+    public List<FileEntity> fileEntitiesOnPC;
+    public List<FileEntity> fileEntitiesOnPhone;
+    private Map<String, List<FileEntity>> fileEntitiesByExt;
 
     @PostConstruct
     public void postConstruct() {
-        List<FileEntity> fileEntitiesFromRepo = fileEntityRepo.findAll();
-        if (!fileEntitiesFromRepo.isEmpty()) {
-            this.fileEntities = fileEntitiesFromRepo;
-        } else {
-            this.fileEntities = getFileEntitiesFromDisk();
-        }
+        log.info("PostConstruct start");
+        initPC();
+        initPhone();
         this.fileEntitiesByExt = separateFilesByExtensions();
-        log.info("postConstruct is done");
+        log.info("PostConstruct end");
     }
 
-    private List<FileEntity> getFileEntitiesFromDisk() {
-        return pcDirectOperationsService.getFiles().stream()
+    private void initPC() {
+        if (!PATH_TO_MUSIC_PC.toFile().exists()) {
+            throw new RuntimeException("PC directory doesn't exist");
+        }
+        log.info("InitPC start");
+        List<FileEntity> fileEntitiesOnPcFromDB = fileEntityRepo.findAllByLocation(FileEntity.Location.PC);
+        if (fileEntitiesOnPcFromDB.isEmpty()) {
+            this.fileEntitiesOnPC = getFileEntitiesFromPC();
+        } else {
+            this.fileEntitiesOnPC = fileEntitiesOnPcFromDB;
+        }
+        log.info("InitPC end");
+    }
+
+    private void initPhone() {
+        log.info("InitPhone start");
+        List<FileEntity> fileEntitiesOnPhoneFromDB = fileEntityRepo.findAllByLocation(FileEntity.Location.Phone);
+        if (fileEntitiesOnPhoneFromDB.isEmpty()) {
+            this.fileEntitiesOnPhone = getFileEntitiesFromPhone();
+        } else {
+            this.fileEntitiesOnPhone = fileEntitiesOnPhoneFromDB;
+        }
+        log.info("InitPhone end");
+    }
+
+    private List<FileEntity> getFileEntitiesFromPC() {
+        return directOperationsService.findFilesFromPC().stream()
+                .map(FileEntity::new)
+                .map(fileEntityRepo::save)
+                .collect(Collectors.toList());
+    }
+
+    private List<FileEntity> getFileEntitiesFromPhone() {
+        return directOperationsService.findFilesFromPhone().stream()
                 .map(FileEntity::new)
                 .map(fileEntityRepo::save)
                 .collect(Collectors.toList());
     }
 
     private Map<String, List<FileEntity>> separateFilesByExtensions() {
-        return fileEntities.stream()
+        return fileEntitiesOnPC.stream()
                 .filter(FileEntity::getIsFile)
                 .collect(Collectors.groupingBy(
                         FileEntity::getExt, Collectors.toList())
@@ -73,12 +103,12 @@ public class FileService {
     }
 
     private void deleteFileEntity(FileEntity fileEntity) {
-        pcDirectOperationsService.deleteFile(fileEntity);
-        fileEntities.remove(fileEntity);
+        directOperationsService.deleteFile(fileEntity);
+        fileEntitiesOnPC.remove(fileEntity);
     }
 
     public List<FileEntity> getEmptyFolders() {
-        return fileEntities.stream()
+        return fileEntitiesOnPC.stream()
                 .filter(fileEntity -> !fileEntity.getIsFile())
                 .filter(fileEntity -> {
                     File file = new File(fileEntity.getAbsolutePath());
@@ -100,7 +130,7 @@ public class FileService {
     public void refresh() {
         log.info("refresh start");
         fileEntityRepo.deleteAll();
-        this.fileEntities = getFileEntitiesFromDisk();
+        this.fileEntitiesOnPC = getFileEntitiesFromPC();
         this.fileEntitiesByExt = separateFilesByExtensions();
         log.info("refresh done");
     }
