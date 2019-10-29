@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -133,5 +134,20 @@ public class FileService {
         this.fileEntitiesOnPC = getFileEntitiesFromPC();
         this.fileEntitiesByExt = separateFilesByExtensions();
         log.info("refresh done");
+    }
+
+    public List<FileEntity> onlyOnPC() {
+        return subtract(fileEntitiesOnPC, fileEntitiesOnPhone);
+    }
+
+    public List<FileEntity> onlyOnPhone() {
+        return subtract(fileEntitiesOnPhone, fileEntitiesOnPC);
+    }
+
+    private List<FileEntity> subtract(List<FileEntity> list1, List<FileEntity> list2) {
+        List<FileEntity> diff = new ArrayList<>(list1);
+        return diff.stream()
+                .filter(fileEntity -> !list2.contains(fileEntity))
+                .collect(Collectors.toList());
     }
 }
