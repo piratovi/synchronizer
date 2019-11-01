@@ -1,7 +1,7 @@
 package com.kolosov.synchronizer.service;
 
 import com.kolosov.synchronizer.domain.FileEntity;
-import com.kolosov.synchronizer.repository.FileEntityRepo;
+import com.kolosov.synchronizer.repository.FileEntityRepository;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import static com.kolosov.synchronizer.service.DirectFileOperationsService.PATH_
 public class FileService {
 
     private final DirectFileOperationsService directOperationsService;
-    private final FileEntityRepo fileEntityRepo;
+    private final FileEntityRepository fileEntityRepository;
 
     public List<FileEntity> fileEntitiesOnPC;
     public List<FileEntity> fileEntitiesOnPhone;
@@ -42,7 +42,7 @@ public class FileService {
             throw new RuntimeException("PC directory doesn't exist");
         }
         log.info("InitPC start");
-        List<FileEntity> fileEntitiesOnPcFromDB = fileEntityRepo.findAllByLocation(FileEntity.Location.PC);
+        List<FileEntity> fileEntitiesOnPcFromDB = fileEntityRepository.findAllByLocation(FileEntity.Location.PC);
         if (fileEntitiesOnPcFromDB.isEmpty()) {
             this.fileEntitiesOnPC = getFileEntitiesFromPC();
         } else {
@@ -53,7 +53,7 @@ public class FileService {
 
     private void initPhone() {
         log.info("InitPhone start");
-        List<FileEntity> fileEntitiesOnPhoneFromDB = fileEntityRepo.findAllByLocation(FileEntity.Location.Phone);
+        List<FileEntity> fileEntitiesOnPhoneFromDB = fileEntityRepository.findAllByLocation(FileEntity.Location.Phone);
         if (fileEntitiesOnPhoneFromDB.isEmpty()) {
             this.fileEntitiesOnPhone = getFileEntitiesFromPhone();
         } else {
@@ -65,14 +65,14 @@ public class FileService {
     private List<FileEntity> getFileEntitiesFromPC() {
         return directOperationsService.findFilesFromPC().stream()
                 .map(FileEntity::new)
-                .map(fileEntityRepo::save)
+                .map(fileEntityRepository::save)
                 .collect(Collectors.toList());
     }
 
     private List<FileEntity> getFileEntitiesFromPhone() {
         return directOperationsService.findFilesFromPhone().stream()
                 .map(FileEntity::new)
-                .map(fileEntityRepo::save)
+                .map(fileEntityRepository::save)
                 .collect(Collectors.toList());
     }
 
@@ -93,7 +93,7 @@ public class FileService {
     }
 
     public void deleteById(Long id) {
-        FileEntity deleteItem = fileEntityRepo.findById(id).orElseThrow(RuntimeException::new);
+        FileEntity deleteItem = fileEntityRepository.findById(id).orElseThrow(RuntimeException::new);
         deleteFileEntity(deleteItem);
         fileEntitiesByExt = separateFilesByExtensions();
     }
@@ -130,7 +130,7 @@ public class FileService {
 
     public void refresh() {
         log.info("refresh start");
-        fileEntityRepo.deleteAll();
+        fileEntityRepository.deleteAll();
         this.fileEntitiesOnPC = getFileEntitiesFromPC();
         this.fileEntitiesByExt = separateFilesByExtensions();
         log.info("refresh done");

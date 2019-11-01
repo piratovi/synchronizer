@@ -1,7 +1,7 @@
 package com.kolosov.synchronizer.controller;
 
 import com.kolosov.synchronizer.domain.FileEntity;
-import com.kolosov.synchronizer.repository.FileEntityRepo;
+import com.kolosov.synchronizer.repository.FileEntityRepository;
 import com.kolosov.synchronizer.service.FileService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -21,8 +21,6 @@ public class FileController {
     public static final String REDIRECT_ROOT = "redirect:/";
 
     FileService fileService;
-
-    FileEntityRepo fileEntityRepo;
 
     @GetMapping(value = "pc")
     public String getFilesPC(Model model) {

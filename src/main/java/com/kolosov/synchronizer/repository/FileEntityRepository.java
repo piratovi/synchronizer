@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface FileEntityRepo extends JpaRepository<FileEntity, Long> {
+public interface FileEntityRepository extends JpaRepository<FileEntity, Long> {
 
     List<FileEntity> findAllByLocation(FileEntity.Location location);
 }
