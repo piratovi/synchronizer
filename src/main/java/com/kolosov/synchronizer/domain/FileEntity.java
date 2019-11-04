@@ -58,12 +58,12 @@ public class FileEntity {
             this.location = Location.PC;
         } else {
             this.relativePath = PATH_TO_MUSIC_PHONE.relativize(Path.of(absolutePath)).toString();
-            this.location = Location.Phone;
+            this.location = Location.PHONE;
         }
     }
 
     public enum Location {
         PC,
-        Phone
+        PHONE
     }
 }

@@ -14,8 +14,7 @@
 
 
             <tr th:each="ext : ${extensions}">
-                <td><a th:href="${'/files/pc/ext/' + ext}" th:text="${ext}"></a></td>
-<!--                <td th:text="${ext}"></td>-->
+                <td><a th:href="@{${ext}}" th:text="${ext}"></a></td>
 
 
             </tr>

@@ -1,7 +1,7 @@
 package com.kolosov.synchronizer.controller;
 
 import com.kolosov.synchronizer.domain.FileEntity;
-import com.kolosov.synchronizer.repository.FileEntityRepository;
+import com.kolosov.synchronizer.domain.FileEntity.Location;
 import com.kolosov.synchronizer.service.FileService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -22,24 +22,28 @@ public class FileController {
 
     FileService fileService;
 
-    @GetMapping(value = "pc")
-    public String getFilesPC(Model model) {
-
-        List<FileEntity> fileEntities = fileService.getFileEntitiesOnPC();
+    @GetMapping(value = "/all/{urlLocation}")
+    public String getAllFileEntities(@PathVariable String urlLocation, Model model) {
+        Location location = Location.valueOf(urlLocation.toUpperCase());
+        List<FileEntity> fileEntities = fileService.getFileEntitiesByLocation(location);
         model.addAttribute("files", fileEntities);
+        //TODO Move to templates
+        model.addAttribute("location", urlLocation);
         return "files-pc";
     }
 
-    @GetMapping(value = "pc/ext")
-    public String getFilesPCExt(Model model) {
-        Set<String> extSet = fileService.getExtensions();
+    @GetMapping(value = "ext/{urlLocation}")
+    public String getFilesPCExt(@PathVariable String urlLocation, Model model) {
+        Location location = Location.valueOf(urlLocation.toUpperCase());
+        Set<String> extSet = fileService.getExtensions(location);
         model.addAttribute("extensions", extSet);
         return "files-pc-ext";
     }
 
-    @GetMapping(value = "pc/ext/{ext}")
-    public String getFilesWithCurrentExt(@PathVariable String ext, Model model) {
-        List<FileEntity> fileEntitiesByExt = fileService.getFileEntitiesByExt(ext);
+    @GetMapping(value = "ext/{urlLocation}/{ext}")
+    public String getFilesWithCurrentExt(@PathVariable String urlLocation, @PathVariable String ext, Model model) {
+        Location location = Location.valueOf(urlLocation.toUpperCase());
+        List<FileEntity> fileEntitiesByExt = fileService.getFileEntitiesWithExt(location, ext);
         model.addAttribute("fileEntitiesByExt", fileEntitiesByExt);
         return "fileEntitiesByExt";
     }
@@ -50,10 +54,11 @@ public class FileController {
         return "redirect:/files/pc/ext";
     }
 
-    @GetMapping("pc/ext/{ext}/deleteAll")
-    public String deleteAll(@PathVariable String ext) {
-        fileService.deleteExtAll(ext);
-        return "redirect:/files/pc/ext";
+    @GetMapping("/ext/{urlLocation}/{ext}/deleteAll")
+    public String deleteFileEntitiesWithExtension(@PathVariable String urlLocation, @PathVariable String ext) {
+        Location location = Location.valueOf(urlLocation.toUpperCase());
+        fileService.deleteExtAll(location, ext);
+        return "redirect:/files/" + urlLocation + "/ext";
     }
 
     @GetMapping("pc/refresh")

@@ -1,6 +1,7 @@
 package com.kolosov.synchronizer.service;
 
 import com.kolosov.synchronizer.domain.FileEntity;
+import com.kolosov.synchronizer.domain.FileEntity.Location;
 import com.kolosov.synchronizer.repository.FileEntityRepository;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -26,14 +27,12 @@ public class FileService {
 
     public List<FileEntity> fileEntitiesOnPC;
     public List<FileEntity> fileEntitiesOnPhone;
-    private Map<String, List<FileEntity>> fileEntitiesByExt;
 
     @PostConstruct
     public void postConstruct() {
         log.info("PostConstruct start");
         initPC();
         initPhone();
-        this.fileEntitiesByExt = separateFilesByExtensions();
         log.info("PostConstruct end");
     }
 
@@ -53,7 +52,7 @@ public class FileService {
 
     private void initPhone() {
         log.info("InitPhone start");
-        List<FileEntity> fileEntitiesOnPhoneFromDB = fileEntityRepository.findAllByLocation(FileEntity.Location.Phone);
+        List<FileEntity> fileEntitiesOnPhoneFromDB = fileEntityRepository.findAllByLocation(FileEntity.Location.PHONE);
         if (fileEntitiesOnPhoneFromDB.isEmpty()) {
             this.fileEntitiesOnPhone = getFileEntitiesFromPhone();
         } else {
@@ -76,36 +75,49 @@ public class FileService {
                 .collect(Collectors.toList());
     }
 
-    private Map<String, List<FileEntity>> separateFilesByExtensions() {
-        return fileEntitiesOnPC.stream()
+    private Map<String, List<FileEntity>> separateFileEntitiesByExtensions(List<FileEntity> fileEntities) {
+        return fileEntities.stream()
                 .filter(FileEntity::getIsFile)
                 .collect(Collectors.groupingBy(
-                        FileEntity::getExt, Collectors.toList())
-                );
+                        FileEntity::getExt, Collectors.toList()));
     }
 
-    public Set<String> getExtensions() {
-        return fileEntitiesByExt.keySet();
+    public Set<String> getExtensions(Location location) {
+        List<FileEntity> fileEntities = getFileEntitiesByLocation(location);
+        Map<String, List<FileEntity>> fileEntitiesSeparatedByExtensions = separateFileEntitiesByExtensions(fileEntities);
+        return fileEntitiesSeparatedByExtensions.keySet();
     }
 
-    public List<FileEntity> getFileEntitiesByExt(String ext) {
-        return fileEntitiesByExt.get(ext);
+    public List<FileEntity> getFileEntitiesWithExt(Location location, String ext) {
+        List<FileEntity> fileEntities = getFileEntitiesByLocation(location);
+        Map<String, List<FileEntity>> fileEntitiesSeparatedByExtensions = separateFileEntitiesByExtensions(fileEntities);
+        return fileEntitiesSeparatedByExtensions.get(ext);
+
     }
 
     public void deleteById(Long id) {
         FileEntity deleteItem = fileEntityRepository.findById(id).orElseThrow(RuntimeException::new);
         deleteFileEntity(deleteItem);
-        fileEntitiesByExt = separateFilesByExtensions();
     }
 
-    public void deleteExtAll(String ext) {
-        deleteFileEntities(getFileEntitiesByExt(ext));
-        fileEntitiesByExt = separateFilesByExtensions();
+    public void deleteExtAll(Location location, String ext) {
+        List<FileEntity> fileEntitiesWithExt = getFileEntitiesWithExt(location, ext);
+        deleteFileEntities(fileEntitiesWithExt);
     }
 
     private void deleteFileEntity(FileEntity fileEntity) {
         directOperationsService.deleteFile(fileEntity);
-        fileEntitiesOnPC.remove(fileEntity);
+        switch (fileEntity.location) {
+            case PC: {
+                fileEntitiesOnPC.remove(fileEntity);
+                break;
+            }
+            case PHONE: {
+                fileEntitiesOnPhone.remove(fileEntity);
+                break;
+            }
+        }
+
     }
 
     public List<FileEntity> getEmptyFolders() {
@@ -122,9 +134,9 @@ public class FileService {
         deleteFileEntities(getEmptyFolders());
     }
 
-    private void deleteFileEntities(List<FileEntity> emptyFolders) {
-        for (FileEntity emptyFolder : emptyFolders) {
-            deleteFileEntity(emptyFolder);
+    private void deleteFileEntities(List<FileEntity> fileEntities) {
+        for (FileEntity fileEntity : fileEntities) {
+            deleteFileEntity(fileEntity);
         }
     }
 
@@ -132,7 +144,6 @@ public class FileService {
         log.info("refresh start");
         fileEntityRepository.deleteAll();
         this.fileEntitiesOnPC = getFileEntitiesFromPC();
-        this.fileEntitiesByExt = separateFilesByExtensions();
         log.info("refresh done");
     }
 
@@ -149,5 +160,19 @@ public class FileService {
         return diff.stream()
                 .filter(fileEntity -> !list2.contains(fileEntity))
                 .collect(Collectors.toList());
+    }
+
+    public List<FileEntity> getFileEntitiesByLocation(Location location) {
+        switch (location) {
+            case PC: {
+                return fileEntitiesOnPC;
+            }
+            case PHONE: {
+                return fileEntitiesOnPhone;
+            }
+            default: {
+                throw new IllegalStateException("Unexpected value: " + location);
+            }
+        }
     }
 }

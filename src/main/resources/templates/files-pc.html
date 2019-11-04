@@ -12,7 +12,7 @@
     <div>
         <table class="pure-table pure-table-bordered" id="table" th:fragment="table">
             <tr>
-                <th>FileEntities!</th>
+                <th th:text="${location}">!</th>
             </tr>
 
             <tr th:each="file : ${files}">
