@@ -120,9 +120,9 @@ public class FileService {
 
     }
 
-    public List<FileEntity> getEmptyFolders() {
-        return fileEntitiesOnPC.stream()
-                .filter(fileEntity -> !fileEntity.getIsFile())
+    public List<FileEntity> getEmptyFolders(Location location) {
+        return fileEntityRepository.findAllByLocation(location).stream()
+                .filter(fileEntity -> !fileEntity.isFile)
                 .filter(fileEntity -> {
                     File file = new File(fileEntity.getAbsolutePath());
                     return file.listFiles().length == 0;
@@ -130,8 +130,8 @@ public class FileService {
                 .collect(Collectors.toList());
     }
 
-    public void deleteEmptyFolders() {
-        deleteFileEntities(getEmptyFolders());
+    public void deleteEmptyFolders(Location location) {
+        deleteFileEntities(getEmptyFolders(location));
     }
 
     private void deleteFileEntities(List<FileEntity> fileEntities) {

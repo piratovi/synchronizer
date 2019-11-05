@@ -22,7 +22,7 @@ public class FileController {
 
     FileService fileService;
 
-    @GetMapping(value = "/all/{urlLocation}")
+    @GetMapping(value = "all/{urlLocation}")
     public String getAllFileEntities(@PathVariable String urlLocation, Model model) {
         Location location = Location.valueOf(urlLocation.toUpperCase());
         List<FileEntity> fileEntities = fileService.getFileEntitiesByLocation(location);
@@ -61,22 +61,24 @@ public class FileController {
         return "redirect:/files/" + urlLocation + "/ext";
     }
 
-    @GetMapping("pc/refresh")
-    public String refresh() {
+    @GetMapping("refresh/{urlLocation}")
+    public String refresh(@PathVariable String urlLocation) {
         fileService.refresh();
         return REDIRECT_ROOT;
     }
 
-    @GetMapping(value = "pc/empty")
-    public String getEmpty(Model model) {
-        List<FileEntity> fileEntities = fileService.getEmptyFolders();
+    @GetMapping(value = "empty/{urlLocation}")
+    public String getEmpty(@PathVariable String urlLocation, Model model) {
+        Location location = Location.valueOf(urlLocation.toUpperCase());
+        List<FileEntity> fileEntities = fileService.getEmptyFolders(location);
         model.addAttribute("files", fileEntities);
         return "empty-folders-pc";
     }
 
-    @GetMapping(value = "pc/empty/delete")
-    public String deleteEmpty() {
-        fileService.deleteEmptyFolders();
+    @GetMapping(value = "empty/delete/{urlLocation}")
+    public String deleteEmpty(@PathVariable String urlLocation) {
+        Location location = Location.valueOf(urlLocation.toUpperCase());
+        fileService.deleteEmptyFolders(location);
         return REDIRECT_ROOT;
     }
 }

@@ -1,6 +1,7 @@
 package com.kolosov.synchronizer.service;
 
 import com.kolosov.synchronizer.domain.FileEntity;
+import com.kolosov.synchronizer.repository.FileEntityRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class FileServiceTest {
 
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private FileEntityRepository fileEntityRepository;
 
     @Test
     public void PcSubtractionPhone() {
@@ -55,6 +59,20 @@ public class FileServiceTest {
             System.out.println(fileEntity);
         }
         System.out.println(diff.size());
+    }
+
+    @Test
+    public void timeRepo() {
+        long start = System.currentTimeMillis();
+        List<FileEntity> all = fileEntityRepository.findAll();
+        System.out.println(System.currentTimeMillis() - start);
+        start = System.currentTimeMillis();
+        List<FileEntity> fileEntitiesPC = fileEntityRepository.findAllByLocation(FileEntity.Location.PC);
+        System.out.println(System.currentTimeMillis() - start);
+        start = System.currentTimeMillis();
+        List<FileEntity> fileEntitiesPhone = fileEntityRepository.findAllByLocation(FileEntity.Location.PHONE);
+        System.out.println(System.currentTimeMillis() - start);
+
     }
 
 

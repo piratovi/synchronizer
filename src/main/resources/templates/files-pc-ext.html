@@ -14,8 +14,7 @@
 
 
             <tr th:each="ext : ${extensions}">
-                <td><a th:href="@{${ext}}" th:text="${ext}"></a></td>
-
+                <td><a th:href="@{|${#httpServletRequest.requestURI}/${ext}|}" th:text="${ext}"></a></td>
 
             </tr>
 
