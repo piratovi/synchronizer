@@ -1,21 +1,18 @@
 package com.kolosov.synchronizer.service;
 
 import com.kolosov.synchronizer.domain.FileEntity;
-import com.kolosov.synchronizer.domain.FileEntity.Location;
+import com.kolosov.synchronizer.domain.Location;
 import com.kolosov.synchronizer.repository.FileEntityRepository;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.kolosov.synchronizer.service.DirectFileOperationsService.PATH_TO_MUSIC_PC;
 
 @Service
 @Data
@@ -25,52 +22,30 @@ public class FileService {
     private final DirectFileOperationsService directOperationsService;
     private final FileEntityRepository fileEntityRepository;
 
-    public List<FileEntity> fileEntitiesOnPC;
-    public List<FileEntity> fileEntitiesOnPhone;
+//    @PostConstruct
+//    public void postConstruct() {
+//        log.info("PostConstruct start");
+//        init(Location.PC);
+//        init(Location.PHONE);
+//        log.info("PostConstruct end");
+//    }
 
-    @PostConstruct
-    public void postConstruct() {
-        log.info("PostConstruct start");
-        initPC();
-        initPhone();
-        log.info("PostConstruct end");
-    }
-
-    private void initPC() {
-        if (!PATH_TO_MUSIC_PC.toFile().exists()) {
-            throw new RuntimeException("PC directory doesn't exist");
+    private void init(Location location) {
+        log.info("Init " + location.name() + " start");
+        List<FileEntity> fileEntitiesFromDB = fileEntityRepository.findAllByLocation(location);
+        if (fileEntitiesFromDB.isEmpty()) {
+            if (!location.path.toFile().exists()) {
+                throw new RuntimeException(location.path + " directory doesn't exist");
+            } else {
+                readFilesAndCreateFileEntities(location);
+            }
         }
-        log.info("InitPC start");
-        List<FileEntity> fileEntitiesOnPcFromDB = fileEntityRepository.findAllByLocation(FileEntity.Location.PC);
-        if (fileEntitiesOnPcFromDB.isEmpty()) {
-            this.fileEntitiesOnPC = getFileEntitiesFromPC();
-        } else {
-            this.fileEntitiesOnPC = fileEntitiesOnPcFromDB;
-        }
-        log.info("InitPC end");
+        log.info("Init " + location.name() + " end");
     }
 
-    private void initPhone() {
-        log.info("InitPhone start");
-        List<FileEntity> fileEntitiesOnPhoneFromDB = fileEntityRepository.findAllByLocation(FileEntity.Location.PHONE);
-        if (fileEntitiesOnPhoneFromDB.isEmpty()) {
-            this.fileEntitiesOnPhone = getFileEntitiesFromPhone();
-        } else {
-            this.fileEntitiesOnPhone = fileEntitiesOnPhoneFromDB;
-        }
-        log.info("InitPhone end");
-    }
-
-    private List<FileEntity> getFileEntitiesFromPC() {
-        return directOperationsService.findFilesFromPC().stream()
-                .map(FileEntity::new)
-                .map(fileEntityRepository::save)
-                .collect(Collectors.toList());
-    }
-
-    private List<FileEntity> getFileEntitiesFromPhone() {
-        return directOperationsService.findFilesFromPhone().stream()
-                .map(FileEntity::new)
+    private List<FileEntity> readFilesAndCreateFileEntities(Location location) {
+        return directOperationsService.findFilesByLocation(location).stream()
+                .map(s -> new FileEntity(s, location))
                 .map(fileEntityRepository::save)
                 .collect(Collectors.toList());
     }
@@ -96,8 +71,9 @@ public class FileService {
     }
 
     public void deleteById(Long id) {
-        FileEntity deleteItem = fileEntityRepository.findById(id).orElseThrow(RuntimeException::new);
-        deleteFileEntity(deleteItem);
+        //TODO Создать свой эксепшен?
+        FileEntity fileEntityToDelete = fileEntityRepository.findById(id).orElseThrow(RuntimeException::new);
+        deleteFileEntity(fileEntityToDelete);
     }
 
     public void deleteExtAll(Location location, String ext) {
@@ -107,17 +83,7 @@ public class FileService {
 
     private void deleteFileEntity(FileEntity fileEntity) {
         directOperationsService.deleteFile(fileEntity);
-        switch (fileEntity.location) {
-            case PC: {
-                fileEntitiesOnPC.remove(fileEntity);
-                break;
-            }
-            case PHONE: {
-                fileEntitiesOnPhone.remove(fileEntity);
-                break;
-            }
-        }
-
+        fileEntityRepository.delete(fileEntity);
     }
 
     public List<FileEntity> getEmptyFolders(Location location) {
@@ -125,7 +91,7 @@ public class FileService {
                 .filter(fileEntity -> !fileEntity.isFile)
                 .filter(fileEntity -> {
                     File file = new File(fileEntity.getAbsolutePath());
-                    return file.listFiles().length == 0;
+                    return Objects.requireNonNull(file.listFiles()).length == 0;
                 })
                 .collect(Collectors.toList());
     }
@@ -140,19 +106,19 @@ public class FileService {
         }
     }
 
-    public void refresh() {
-        log.info("refresh start");
-        fileEntityRepository.deleteAll();
-        this.fileEntitiesOnPC = getFileEntitiesFromPC();
-        log.info("refresh done");
+    public void refresh(Location location) {
+        log.info("refresh" + location + " start");
+        fileEntityRepository.deleteAllByLocation(location);
+        readFilesAndCreateFileEntities(location);
+        log.info("refresh" + location + " done");
     }
 
     public List<FileEntity> onlyOnPC() {
-        return subtract(fileEntitiesOnPC, fileEntitiesOnPhone);
+        return subtract(getFileEntitiesByLocation(Location.PC), getFileEntitiesByLocation(Location.PHONE));
     }
 
     public List<FileEntity> onlyOnPhone() {
-        return subtract(fileEntitiesOnPhone, fileEntitiesOnPC);
+        return subtract(getFileEntitiesByLocation(Location.PHONE), getFileEntitiesByLocation(Location.PC));
     }
 
     private List<FileEntity> subtract(List<FileEntity> list1, List<FileEntity> list2) {
@@ -163,16 +129,7 @@ public class FileService {
     }
 
     public List<FileEntity> getFileEntitiesByLocation(Location location) {
-        switch (location) {
-            case PC: {
-                return fileEntitiesOnPC;
-            }
-            case PHONE: {
-                return fileEntitiesOnPhone;
-            }
-            default: {
-                throw new IllegalStateException("Unexpected value: " + location);
-            }
-        }
+        return fileEntityRepository.findAllByLocation(location);
     }
 }
+

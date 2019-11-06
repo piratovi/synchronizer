@@ -12,9 +12,6 @@ import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.nio.file.Path;
 
-import static com.kolosov.synchronizer.service.DirectFileOperationsService.PATH_TO_MUSIC_PC;
-import static com.kolosov.synchronizer.service.DirectFileOperationsService.PATH_TO_MUSIC_PHONE;
-
 @Data
 @Entity
 @NoArgsConstructor
@@ -30,7 +27,7 @@ public class FileEntity {
     @NonNull
     public String absolutePath;
 
-    @Column(nullable = false )
+    @Column(nullable = false)
     @NotBlank
     @EqualsAndHashCode.Include
     @NonNull
@@ -46,24 +43,14 @@ public class FileEntity {
     @Column
     public Location location;
 
-    public FileEntity(String absolutePath) {
+    public FileEntity(String absolutePath, Location location) {
         this.absolutePath = absolutePath;
         final File file = new File(absolutePath);
         this.isFile = file.isFile();
         if (this.isFile) {
             this.ext = FilenameUtils.getExtension(absolutePath).toLowerCase();
         }
-        if (absolutePath.startsWith(PATH_TO_MUSIC_PC.toString())) {
-            this.relativePath = PATH_TO_MUSIC_PC.relativize(Path.of(absolutePath)).toString();
-            this.location = Location.PC;
-        } else {
-            this.relativePath = PATH_TO_MUSIC_PHONE.relativize(Path.of(absolutePath)).toString();
-            this.location = Location.PHONE;
-        }
-    }
-
-    public enum Location {
-        PC,
-        PHONE
+        this.relativePath = location.path.relativize(Path.of(absolutePath)).toString();
+        this.location = location;
     }
 }

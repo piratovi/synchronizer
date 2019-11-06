@@ -1,7 +1,7 @@
 package com.kolosov.synchronizer.controller;
 
 import com.kolosov.synchronizer.domain.FileEntity;
-import com.kolosov.synchronizer.domain.FileEntity.Location;
+import com.kolosov.synchronizer.domain.Location;
 import com.kolosov.synchronizer.service.FileService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -41,21 +41,21 @@ public class FileController {
     }
 
     @GetMapping(value = "ext/{urlLocation}/{ext}")
-    public String getFilesWithCurrentExt(@PathVariable String urlLocation, @PathVariable String ext, Model model) {
+    public String getFilesByExtension(@PathVariable String urlLocation, @PathVariable String ext, Model model) {
         Location location = Location.valueOf(urlLocation.toUpperCase());
         List<FileEntity> fileEntitiesByExt = fileService.getFileEntitiesWithExt(location, ext);
         model.addAttribute("fileEntitiesByExt", fileEntitiesByExt);
         return "fileEntitiesByExt";
     }
 
-    @GetMapping("pc/ext/delete/{id}")
-    public String delete(@PathVariable Long id) {
+    @GetMapping("delete/{id}")
+    public String deleteFileEntityById(@PathVariable Long id) {
         fileService.deleteById(id);
-        return "redirect:/files/pc/ext";
+        return REDIRECT_ROOT;
     }
 
     @GetMapping("/ext/{urlLocation}/{ext}/deleteAll")
-    public String deleteFileEntitiesWithExtension(@PathVariable String urlLocation, @PathVariable String ext) {
+    public String deleteFileEntitiesByExtension(@PathVariable String urlLocation, @PathVariable String ext) {
         Location location = Location.valueOf(urlLocation.toUpperCase());
         fileService.deleteExtAll(location, ext);
         return "redirect:/files/" + urlLocation + "/ext";
@@ -63,12 +63,13 @@ public class FileController {
 
     @GetMapping("refresh/{urlLocation}")
     public String refresh(@PathVariable String urlLocation) {
-        fileService.refresh();
+        Location location = Location.valueOf(urlLocation.toUpperCase());
+        fileService.refresh(location);
         return REDIRECT_ROOT;
     }
 
     @GetMapping(value = "empty/{urlLocation}")
-    public String getEmpty(@PathVariable String urlLocation, Model model) {
+    public String getEmptyFolders(@PathVariable String urlLocation, Model model) {
         Location location = Location.valueOf(urlLocation.toUpperCase());
         List<FileEntity> fileEntities = fileService.getEmptyFolders(location);
         model.addAttribute("files", fileEntities);
@@ -76,7 +77,7 @@ public class FileController {
     }
 
     @GetMapping(value = "empty/delete/{urlLocation}")
-    public String deleteEmpty(@PathVariable String urlLocation) {
+    public String deleteEmptyFolders(@PathVariable String urlLocation) {
         Location location = Location.valueOf(urlLocation.toUpperCase());
         fileService.deleteEmptyFolders(location);
         return REDIRECT_ROOT;

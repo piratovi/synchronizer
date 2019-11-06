@@ -1,6 +1,7 @@
 package com.kolosov.synchronizer.service;
 
 import com.kolosov.synchronizer.domain.FileEntity;
+import com.kolosov.synchronizer.domain.Location;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -13,15 +14,9 @@ import java.util.stream.Stream;
 @Service
 public class DirectFileOperationsService {
 
-    public static final Path PATH_TO_MUSIC_PC = Path.of("D:", "Music");
-    public static final Path PATH_TO_MUSIC_PHONE = Path.of("Z:", "Music");
 
-    public List<String> findFilesFromPC() {
-        return findFiles(PATH_TO_MUSIC_PC);
-    }
-
-    public List<String> findFilesFromPhone() {
-        return findFiles(PATH_TO_MUSIC_PHONE);
+    public List<String> findFilesByLocation(Location location) {
+        return findFiles(location.path);
     }
 
     public List<String> findFiles(Path pathToMusic) {
