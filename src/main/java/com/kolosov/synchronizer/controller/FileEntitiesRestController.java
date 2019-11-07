@@ -16,19 +16,19 @@ public class FileEntitiesRestController {
 
     private final FileService fileService;
 
-    @GetMapping(value = "/onlyPC")
-    public List<FileEntity> onlyPC() {
-        return fileService.onlyOnPC();
-    }
-
-    @GetMapping(value = "/onlyPhone")
-    public List<FileEntity> onlyPhone() {
-        return fileService.onlyOnPhone();
-    }
-
-    @GetMapping(value = "/test")
-    public String test() {
-        return "test";
-    }
+//    @GetMapping(value = "/onlyPC")
+//    public List<FileEntity> onlyPC() {
+//        return fileService.onlyOnLocation(location);
+//    }
+//
+//    @GetMapping(value = "/onlyPhone")
+//    public List<FileEntity> onlyPhone() {
+//        return fileService.onlyOnPhone();
+//    }
+//
+//    @GetMapping(value = "/test")
+//    public String test() {
+//        return "test";
+//    }
 
 }

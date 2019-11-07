@@ -6,9 +6,7 @@ import com.kolosov.synchronizer.repository.FileEntityRepository;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,11 +41,10 @@ public class FileService {
         log.info("Init " + location.name() + " end");
     }
 
-    private List<FileEntity> readFilesAndCreateFileEntities(Location location) {
-        return directOperationsService.findFilesByLocation(location).stream()
+    private void readFilesAndCreateFileEntities(Location location) {
+        directOperationsService.findFilesByLocation(location).stream()
                 .map(s -> new FileEntity(s, location))
-                .map(fileEntityRepository::save)
-                .collect(Collectors.toList());
+                .forEach(fileEntityRepository::save);
     }
 
     private Map<String, List<FileEntity>> separateFileEntitiesByExtensions(List<FileEntity> fileEntities) {
@@ -73,16 +70,16 @@ public class FileService {
     public void deleteById(Long id) {
         //TODO Создать свой эксепшен?
         FileEntity fileEntityToDelete = fileEntityRepository.findById(id).orElseThrow(RuntimeException::new);
-        deleteFileEntity(fileEntityToDelete);
+        deleteFileEntity(fileEntityToDelete, fileEntityToDelete.location);
     }
 
     public void deleteExtAll(Location location, String ext) {
         List<FileEntity> fileEntitiesWithExt = getFileEntitiesWithExt(location, ext);
-        deleteFileEntities(fileEntitiesWithExt);
+        deleteFileEntities(fileEntitiesWithExt, location);
     }
 
-    private void deleteFileEntity(FileEntity fileEntity) {
-        directOperationsService.deleteFile(fileEntity);
+    private void deleteFileEntity(FileEntity fileEntity, Location location) {
+        directOperationsService.deleteFile(fileEntity, location);
         fileEntityRepository.delete(fileEntity);
     }
 
@@ -97,28 +94,27 @@ public class FileService {
     }
 
     public void deleteEmptyFolders(Location location) {
-        deleteFileEntities(getEmptyFolders(location));
+        deleteFileEntities(getEmptyFolders(location), location);
     }
 
-    private void deleteFileEntities(List<FileEntity> fileEntities) {
+    private void deleteFileEntities(List<FileEntity> fileEntities, Location location) {
         for (FileEntity fileEntity : fileEntities) {
-            deleteFileEntity(fileEntity);
+            deleteFileEntity(fileEntity, location);
         }
     }
 
     public void refresh(Location location) {
         log.info("refresh" + location + " start");
         fileEntityRepository.deleteAllByLocation(location);
-        readFilesAndCreateFileEntities(location);
+        init(location);
         log.info("refresh" + location + " done");
     }
 
-    public List<FileEntity> onlyOnPC() {
-        return subtract(getFileEntitiesByLocation(Location.PC), getFileEntitiesByLocation(Location.PHONE));
-    }
-
-    public List<FileEntity> onlyOnPhone() {
-        return subtract(getFileEntitiesByLocation(Location.PHONE), getFileEntitiesByLocation(Location.PC));
+    public List<FileEntity> onlyOnLocation(Location location) {
+        List<Location> locations = new ArrayList<>(Arrays.asList(Location.values()));
+        locations.remove(location);
+        Location anotherLocation = locations.get(0);
+        return subtract(getFileEntitiesByLocation(location), getFileEntitiesByLocation(anotherLocation));
     }
 
     private List<FileEntity> subtract(List<FileEntity> list1, List<FileEntity> list2) {
