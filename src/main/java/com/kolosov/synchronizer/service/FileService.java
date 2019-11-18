@@ -3,7 +3,7 @@ package com.kolosov.synchronizer.service;
 import com.kolosov.synchronizer.domain.FileEntity;
 import com.kolosov.synchronizer.domain.Location;
 import com.kolosov.synchronizer.repository.FileEntityRepository;
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +13,11 @@ import java.util.stream.Collectors;
 
 
 @Service
-@Data
+@RequiredArgsConstructor
 @Slf4j
 public class FileService {
 
-    private final DirectFileOperationsService directOperationsService;
+    private final DirectOperationsService directOperationsService;
     private final FileEntityRepository fileEntityRepository;
 
 //    @PostConstruct
@@ -70,16 +70,16 @@ public class FileService {
     public void deleteById(Long id) {
         //TODO Создать свой эксепшен?
         FileEntity fileEntityToDelete = fileEntityRepository.findById(id).orElseThrow(RuntimeException::new);
-        deleteFileEntity(fileEntityToDelete, fileEntityToDelete.location);
+        deleteFileEntity(fileEntityToDelete);
     }
 
     public void deleteExtAll(Location location, String ext) {
         List<FileEntity> fileEntitiesWithExt = getFileEntitiesWithExt(location, ext);
-        deleteFileEntities(fileEntitiesWithExt, location);
+        deleteFileEntities(fileEntitiesWithExt);
     }
 
-    private void deleteFileEntity(FileEntity fileEntity, Location location) {
-        directOperationsService.deleteFile(fileEntity, location);
+    private void deleteFileEntity(FileEntity fileEntity) {
+        directOperationsService.deleteFile(fileEntity);
         fileEntityRepository.delete(fileEntity);
     }
 
@@ -94,12 +94,12 @@ public class FileService {
     }
 
     public void deleteEmptyFolders(Location location) {
-        deleteFileEntities(getEmptyFolders(location), location);
+        deleteFileEntities(getEmptyFolders(location));
     }
 
-    private void deleteFileEntities(List<FileEntity> fileEntities, Location location) {
+    private void deleteFileEntities(List<FileEntity> fileEntities) {
         for (FileEntity fileEntity : fileEntities) {
-            deleteFileEntity(fileEntity, location);
+            deleteFileEntity(fileEntity);
         }
     }
 
