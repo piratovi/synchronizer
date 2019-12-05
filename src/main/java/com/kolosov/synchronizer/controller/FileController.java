@@ -34,7 +34,7 @@ public class FileController {
     }
 
     @GetMapping("ext/{urlLocation}")
-    public String getFilesPCExt(@PathVariable String urlLocation, Model model) {
+    public String getFileExtensions(@PathVariable String urlLocation, Model model) {
         Location location = Location.valueOf(urlLocation.toUpperCase());
         Set<String> extSet = fileService.getExtensions(location);
         model.addAttribute("extensions", extSet);
@@ -53,7 +53,7 @@ public class FileController {
     public String deleteFileEntitiesByExtension(@PathVariable String urlLocation, @PathVariable String ext) {
         Location location = Location.valueOf(urlLocation.toUpperCase());
         fileService.deleteExtAll(location, ext);
-        return "redirect:/files/" + urlLocation + "/ext";
+        return "redirect:/files/ext/" + urlLocation;
     }
 
     @GetMapping("delete/{id}")

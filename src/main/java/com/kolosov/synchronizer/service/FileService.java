@@ -28,30 +28,9 @@ public class FileService {
 //        log.info("PostConstruct end");
 //    }
 
-    private void init(Location location) {
-        log.info("Init " + location.name() + " start");
-        List<FileEntity> fileEntitiesFromDB = fileEntityRepository.findAllByLocation(location);
-        if (fileEntitiesFromDB.isEmpty()) {
-            if (!location.path.toFile().exists()) {
-                throw new RuntimeException(location.path + " directory doesn't exist");
-            } else {
-                readFilesAndCreateFileEntities(location);
-            }
-        }
-        log.info("Init " + location.name() + " end");
-    }
-
-    private void readFilesAndCreateFileEntities(Location location) {
-        directOperationsService.findFilesByLocation(location).stream()
-                .map(s -> new FileEntity(s, location))
-                .forEach(fileEntityRepository::save);
-    }
-
-    private Map<String, List<FileEntity>> separateFileEntitiesByExtensions(List<FileEntity> fileEntities) {
-        return fileEntities.stream()
-                .filter(FileEntity::getIsFile)
-                .collect(Collectors.groupingBy(
-                        FileEntity::getExt, Collectors.toList()));
+    private void createFileEntities(Location location) {
+        List<FileEntity> fileEntities = directOperationsService.getFileEntitiesByLocation(location);
+        fileEntities.forEach(fileEntityRepository::save);
     }
 
     public Set<String> getExtensions(Location location) {
@@ -65,6 +44,12 @@ public class FileService {
         Map<String, List<FileEntity>> fileEntitiesSeparatedByExtensions = separateFileEntitiesByExtensions(fileEntities);
         return fileEntitiesSeparatedByExtensions.get(ext);
 
+    }
+
+    private Map<String, List<FileEntity>> separateFileEntitiesByExtensions(List<FileEntity> fileEntities) {
+        return fileEntities.stream()
+                .filter(FileEntity::getIsFile)
+                .collect(Collectors.groupingBy(FileEntity::getExt, Collectors.toList()));
     }
 
     public void deleteById(Long id) {
@@ -87,7 +72,7 @@ public class FileService {
         return fileEntityRepository.findAllByLocation(location).stream()
                 .filter(fileEntity -> !fileEntity.isFile)
                 .filter(fileEntity -> {
-                    File file = new File(fileEntity.getAbsolutePath());
+                    File file = new File(fileEntity.relativePath);
                     return Objects.requireNonNull(file.listFiles()).length == 0;
                 })
                 .collect(Collectors.toList());
@@ -104,10 +89,10 @@ public class FileService {
     }
 
     public void refresh(Location location) {
-        log.info("refresh" + location + " start");
+        log.info("refresh " + location + " start");
         fileEntityRepository.deleteAllByLocation(location);
-        init(location);
-        log.info("refresh" + location + " done");
+        createFileEntities(location);
+        log.info("refresh " + location + " done");
     }
 
     public List<FileEntity> onlyOnLocation(Location location) {

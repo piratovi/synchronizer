@@ -1,5 +1,6 @@
 package com.kolosov.synchronizer.service;
 
+import com.kolosov.synchronizer.domain.FileEntity;
 import com.kolosov.synchronizer.domain.Location;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,9 +18,34 @@ public class DirectOperationsServiceTest {
     DirectOperationsService directOperationsService;
 
     @Test
-    public void findFilesByLocation() {
-        List<String> filesByLocation = directOperationsService.findFilesByLocation(Location.PHONE);
-        filesByLocation.forEach(System.out::println);
-        System.out.println(filesByLocation.size());
+    public void findFilesByLocationPhone() {
+        List<FileEntity> fileEntities = directOperationsService.getFileEntitiesByLocation(Location.PHONE);
+        fileEntities.forEach(x -> System.out.println(x.relativePath));
+        System.out.println(fileEntities.size());
     }
+
+    @Test
+    public void findFilesByLocationPC() {
+        List<FileEntity> fileEntities = directOperationsService.getFileEntitiesByLocation(Location.PC);
+        fileEntities.forEach(x -> System.out.println(x.relativePath));
+        System.out.println(fileEntities.size());
+    }
+
+    @Test
+    public void deleteFile() {
+        FileEntity fileEntity = new FileEntity();
+        fileEntity.relativePath = "Музыка в Авто от LORDEGRAF\\й.torrent";
+        fileEntity.location = Location.PHONE;
+        directOperationsService.deleteFile(fileEntity);
+    }
+
+    @Test
+    public void copyFileFromFTPToPC() {
+        FileEntity fileEntity = new FileEntity();
+        fileEntity.relativePath = "Музыка в Авто от LORDEGRAF\\й.torrent";
+        fileEntity.location = Location.PHONE;
+        directOperationsService.deleteFile(fileEntity);
+    }
+
+
 }

@@ -4,13 +4,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import org.apache.commons.io.FilenameUtils;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.io.File;
-import java.nio.file.Path;
 
 @Data
 @Entity
@@ -21,11 +21,6 @@ public class FileEntity {
     @Id
     @GeneratedValue
     public Long id;
-
-    @Column(unique = true, nullable = false)
-    @NotBlank
-    @NonNull
-    public String absolutePath;
 
     @Column(nullable = false)
     @NotBlank
@@ -43,14 +38,10 @@ public class FileEntity {
     @Column
     public Location location;
 
-    public FileEntity(String absolutePath, Location location) {
-        this.absolutePath = absolutePath;
-        final File file = new File(absolutePath);
-        this.isFile = file.isFile();
-        if (this.isFile) {
-            this.ext = FilenameUtils.getExtension(absolutePath).toLowerCase();
-        }
-        this.relativePath = location.path.relativize(Path.of(absolutePath)).toString();
+    public FileEntity(String relativePath, Boolean isFile, String ext, Location location) {
+        this.relativePath = relativePath;
+        this.isFile = isFile;
+        this.ext = ext;
         this.location = location;
     }
 }

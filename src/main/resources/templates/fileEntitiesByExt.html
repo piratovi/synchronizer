@@ -15,7 +15,7 @@
 
             <tr th:each="fileEntity : ${fileEntitiesByExt}">
 
-                <td th:text="${fileEntity.absolutePath}"></td>
+                <td th:text="${fileEntity.relativePath}"></td>
                 <td th:text="${fileEntity.id}"></td>
                 <td><a th:href="@{'/files/delete/' + ${fileEntity.id}}">Delete</a></td>
 
