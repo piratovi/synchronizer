@@ -102,7 +102,7 @@ public class FileService {
         return subtract(getFileEntitiesByLocation(location), getFileEntitiesByLocation(anotherLocation));
     }
 
-    private List<FileEntity> subtract(List<FileEntity> list1, List<FileEntity> list2) {
+    private static List<FileEntity> subtract(List<FileEntity> list1, List<FileEntity> list2) {
         List<FileEntity> diff = new ArrayList<>(list1);
         return diff.stream()
                 .filter(fileEntity -> !list2.contains(fileEntity))

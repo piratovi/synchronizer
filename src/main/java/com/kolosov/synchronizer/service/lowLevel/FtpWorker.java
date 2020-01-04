@@ -1,12 +1,15 @@
 package com.kolosov.synchronizer.service.lowLevel;
 
 import com.kolosov.synchronizer.domain.FileEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -15,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class FtpWorker implements LowLevelWorker {
 
 
@@ -27,7 +31,7 @@ public class FtpWorker implements LowLevelWorker {
     @Value("${com.kolosov.synchronizer.password}")
     private String password;
 
-    private final FTPClient ftpClient = new FTPClient();
+    public final FTPClient ftpClient = new FTPClient();
     private boolean connected = false;
 
     private void ftpConnect() throws IOException {
@@ -36,6 +40,24 @@ public class FtpWorker implements LowLevelWorker {
             ftpClient.login(username, password);
             ftpClient.changeWorkingDirectory("Music");
             connected = true;
+        }
+    }
+
+    @PostConstruct
+    private void postConstruct() {
+        try {
+            ftpConnect();
+        } catch (IOException e) {
+            log.error("Can't connect to FTP" + e);
+        }
+    }
+
+    @PreDestroy
+    private void preDestroy() {
+        try {
+            ftpDisconnect();
+        } catch (IOException e) {
+            log.error("Can't disconnect from FTP" + e);
         }
     }
 

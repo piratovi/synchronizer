@@ -3,6 +3,7 @@ package com.kolosov.synchronizer.service;
 import com.kolosov.synchronizer.domain.FileEntity;
 import com.kolosov.synchronizer.domain.Location;
 import com.kolosov.synchronizer.service.lowLevel.FtpWorker;
+import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
 import com.kolosov.synchronizer.service.lowLevel.PcWorker;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
@@ -43,11 +44,15 @@ public class DirectOperationsService {
     }
 
     public void deleteFile(FileEntity fileEntity) {
-        if (fileEntity.location.equals(Location.PC)) {
-            pcWorker.deleteFile(fileEntity);
-        } else {
-            ftpWorker.deleteFile(fileEntity);
+        LowLevelWorker worker = getWorkerByLocation(fileEntity.location);
+        worker.deleteFile(fileEntity);
+    }
+
+    private LowLevelWorker getWorkerByLocation(Location location) {
+        if (location.equals(Location.PC)) {
+            return pcWorker;
         }
+        return ftpWorker;
     }
 
 
