@@ -34,22 +34,11 @@ class FtpWorkerTest {
     @Test
     void delete() throws IOException {
         ftpWorker.ftpClient.changeWorkingDirectory("/test");
-        List<FTPFile> ftpFiles = Arrays.asList(ftpWorker.ftpClient.listFiles());
-        ftpWorker.ftpClient.mlistFile("test");
-        FTPFile test = getTestFile(ftpFiles);
+        FTPFile test = ftpWorker.ftpClient.listFiles("", file -> file.getName().equals("test"))[0];
         assertNotNull(test);
         ftpWorker.deleteFile(new FileEntity("test", null, null, null));
-        ftpFiles = Arrays.asList(ftpWorker.ftpClient.listFiles());
-        test = getTestFile(ftpFiles);
-        assertNull(test);
-
-    }
-
-    private FTPFile getTestFile(List<FTPFile> ftpFiles) {
-        return ftpFiles.stream()
-                .filter(ftpFile -> ftpFile.getName().equals("test"))
-                .findFirst()
-                .orElse(null);
+        FTPFile[] testFiles = ftpWorker.ftpClient.listFiles("", file -> file.getName().equals("test"));
+        assertEquals(0, testFiles.length);
     }
 
 }

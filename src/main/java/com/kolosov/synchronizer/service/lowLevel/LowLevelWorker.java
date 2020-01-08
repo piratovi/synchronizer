@@ -4,6 +4,7 @@ import com.kolosov.synchronizer.domain.FileEntity;
 import org.springframework.data.util.Pair;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 public interface LowLevelWorker {
@@ -14,5 +15,5 @@ public interface LowLevelWorker {
 
     InputStream getInputStreamFromFile(FileEntity fileEntity);
 
-    void copyFile(InputStream inputStream, FileEntity fileEntity);
+    OutputStream getOutputStreamToFile(FileEntity fileEntity);
 }

@@ -10,6 +10,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,10 +51,35 @@ public class DirectOperationsService {
     }
 
     private LowLevelWorker getWorkerByLocation(Location location) {
-        if (location.equals(Location.PC)) {
+        if (Location.PC.equals(location)) {
             return pcWorker;
         }
         return ftpWorker;
+    }
+
+    public void copyFileFromPhoneToPc(FileEntity fileEntity) {
+        try (
+                InputStream inputStream = ftpWorker.getInputStreamFromFile(fileEntity);
+                OutputStream outputStream = pcWorker.getOutputStreamToFile(fileEntity)
+        ) {
+            inputStream.transferTo(outputStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        ftpWorker.closeStream();
+
+    }
+
+    public void copyFileFromPcToPhone(FileEntity fileEntity) {
+        try (
+                InputStream inputStream = pcWorker.getInputStreamFromFile(fileEntity);
+                OutputStream outputStream = ftpWorker.getOutputStreamToFile(fileEntity)
+        ) {
+            inputStream.transferTo(outputStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        ftpWorker.closeStream();
     }
 
 

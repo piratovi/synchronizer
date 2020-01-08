@@ -52,10 +52,9 @@ public class PcWorker implements LowLevelWorker {
 
     @Override
     public InputStream getInputStreamFromFile(FileEntity fileEntity) {
-        String absolutePath = getAbsolutePath(fileEntity);
         FileInputStream fileInputStream;
         try {
-            fileInputStream = new FileInputStream(absolutePath);
+            fileInputStream = new FileInputStream(getAbsolutePath(fileEntity));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -63,14 +62,14 @@ public class PcWorker implements LowLevelWorker {
     }
 
     @Override
-    public void copyFile(InputStream inputStream, FileEntity fileEntity) {
-        FileOutputStream outputStream = null;
+    public OutputStream getOutputStreamToFile(FileEntity fileEntity) {
+        FileOutputStream outputStream;
         try {
             outputStream = new FileOutputStream(getAbsolutePath(fileEntity));
-            inputStream.transferTo(outputStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return outputStream;
     }
 
     private static String getAbsolutePath(FileEntity fileEntity) {

@@ -1,7 +1,9 @@
 package com.kolosov.synchronizer.service.lowLevel;
 
 import com.kolosov.synchronizer.domain.FileEntity;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +14,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +41,8 @@ public class FtpWorker implements LowLevelWorker {
         if (!connected) {
             ftpClient.connect(ftpServerUrl, ftpServerPort);
             ftpClient.login(username, password);
+            ftpClient.enterLocalPassiveMode();
+            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             ftpClient.changeWorkingDirectory("Music");
             connected = true;
         }
@@ -91,7 +96,7 @@ public class FtpWorker implements LowLevelWorker {
         if (subFiles != null && subFiles.length > 0) {
             for (FTPFile aFile : subFiles) {
                 String currentFileName = aFile.getName();
-                if (currentFileName.equals(".")|| currentFileName.equals("..")) {
+                if (currentFileName.equals(".") || currentFileName.equals("..")) {
                     // skip parent directory and directory itself
                     continue;
                 }
@@ -118,13 +123,24 @@ public class FtpWorker implements LowLevelWorker {
         }
     }
 
+    @SneakyThrows
     @Override
     public InputStream getInputStreamFromFile(FileEntity fileEntity) {
-        return null;
+        String relativePath = fileEntity.relativePath;
+        relativePath = relativePath.replaceAll("\\\\", "/");
+        return ftpClient.retrieveFileStream(relativePath);
     }
 
+    @SneakyThrows
     @Override
-    public void copyFile(InputStream inputStream, FileEntity fileEntity) {
+    public OutputStream getOutputStreamToFile(FileEntity fileEntity) {
+        String relativePath = fileEntity.relativePath;
+        relativePath = relativePath.replaceAll("\\\\", "/");
+        return ftpClient.storeFileStream(relativePath);
+    }
 
+    @SneakyThrows
+    public void closeStream() {
+        ftpClient.completePendingCommand();
     }
 }
