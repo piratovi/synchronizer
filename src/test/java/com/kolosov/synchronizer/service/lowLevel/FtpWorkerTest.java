@@ -41,4 +41,9 @@ class FtpWorkerTest {
         assertEquals(0, testFiles.length);
     }
 
+    @Test
+    void simple() {
+        System.out.println();
+    }
+
 }

@@ -90,6 +90,12 @@ public class FileController {
         List<FileEntity> fileEntities = fileService.onlyOnLocation(location);
         model.addAttribute("files", fileEntities);
         model.addAttribute("location", urlLocation);
-        return "files-pc";
+        return "files-pc-only";
+    }
+
+    @GetMapping("transfer/{id}")
+    public String transferFileEntity(@PathVariable Long id) {
+        fileService.transferFileEntity(id);
+        return REDIRECT_ROOT;
     }
 }

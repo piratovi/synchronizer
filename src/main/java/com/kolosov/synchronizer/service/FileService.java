@@ -17,20 +17,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FileService {
 
-    private final DirectOperationsService directOperationsService;
-    private final FileEntityRepository fileEntityRepository;
-
-//    @PostConstruct
-//    public void postConstruct() {
-//        log.info("PostConstruct start");
-//        init(Location.PC);
-//        init(Location.PHONE);
-//        log.info("PostConstruct end");
-//    }
+    private final DirectOperationsService directOperations;
+    private final FileEntityRepository repository;
 
     private void createFileEntities(Location location) {
-        List<FileEntity> fileEntities = directOperationsService.getFileEntitiesByLocation(location);
-        fileEntities.forEach(fileEntityRepository::save);
+        List<FileEntity> fileEntities = directOperations.getFileEntitiesByLocation(location);
+        fileEntities.forEach(repository::save);
     }
 
     public Set<String> getExtensions(Location location) {
@@ -54,7 +46,7 @@ public class FileService {
 
     public void deleteById(Long id) {
         //TODO Создать свой эксепшен?
-        FileEntity fileEntityToDelete = fileEntityRepository.findById(id).orElseThrow(RuntimeException::new);
+        FileEntity fileEntityToDelete = repository.findById(id).orElseThrow(RuntimeException::new);
         deleteFileEntity(fileEntityToDelete);
     }
 
@@ -64,12 +56,12 @@ public class FileService {
     }
 
     private void deleteFileEntity(FileEntity fileEntity) {
-        directOperationsService.deleteFile(fileEntity);
-        fileEntityRepository.delete(fileEntity);
+        directOperations.deleteFile(fileEntity);
+        repository.delete(fileEntity);
     }
 
     public List<FileEntity> getEmptyFolders(Location location) {
-        return fileEntityRepository.findAllByLocation(location).stream()
+        return repository.findAllByLocation(location).stream()
                 .filter(fileEntity -> !fileEntity.isFile)
                 .filter(fileEntity -> {
                     File file = new File(fileEntity.relativePath);
@@ -90,7 +82,7 @@ public class FileService {
 
     public void refresh(Location location) {
         log.info("refresh " + location + " start");
-        fileEntityRepository.deleteAllByLocation(location);
+        repository.deleteAllByLocation(location);
         createFileEntities(location);
         log.info("refresh " + location + " done");
     }
@@ -110,7 +102,20 @@ public class FileService {
     }
 
     public List<FileEntity> getFileEntitiesByLocation(Location location) {
-        return fileEntityRepository.findAllByLocation(location);
+        return repository.findAllByLocation(location);
+    }
+
+    public void transferFileEntity(Long id) {
+        FileEntity fileEntity = repository.findById(id).orElseThrow(RuntimeException::new);
+        FileEntity transferredEntity;
+        if (Location.PC.equals(fileEntity.location)) {
+            directOperations.copyFileFromPcToPhone(fileEntity);
+            transferredEntity = new FileEntity(fileEntity.relativePath, fileEntity.isFile, fileEntity.ext, Location.PHONE);
+        } else {
+            directOperations.copyFileFromPhoneToPc(fileEntity);
+            transferredEntity = new FileEntity(fileEntity.relativePath, fileEntity.isFile, fileEntity.ext, Location.PC);
+        }
+        repository.save(transferredEntity);
     }
 }
 

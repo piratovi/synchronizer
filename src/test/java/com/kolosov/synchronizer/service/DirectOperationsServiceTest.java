@@ -32,17 +32,9 @@ public class DirectOperationsServiceTest {
     }
 
     @Test
-    public void deleteFile() {
-//        FileEntity fileEntity = new FileEntity();
-//        fileEntity.relativePath = "Музыка в Авто от LORDEGRAF\\й.torrent";
-//        fileEntity.location = Location.PHONE;
-//        directOperationsService.deleteFile(fileEntity);
-    }
-
-    @Test
     public void copyFileFromPcToPhone() {
         FileEntity fileEntity = new FileEntity();
-        fileEntity.relativePath = "test\\test";
+        fileEntity.relativePath = "test\\inner\\test";
         fileEntity.location = Location.PC;
         directOperationsService.copyFileFromPcToPhone(fileEntity);
     }

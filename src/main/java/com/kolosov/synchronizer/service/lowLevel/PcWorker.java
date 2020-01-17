@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -17,12 +18,12 @@ public class PcWorker implements LowLevelWorker {
 
     @Override
     public List<Pair<String, Boolean>> getFileRelativePaths() {
-
-        List<String> absolutePaths = findFiles(Location.PC.path);
+        Path path = Paths.get(Location.PC.rootPath);
+        List<String> absolutePaths = findFiles(path);
         return absolutePaths.stream()
                 .map(s -> {
                     File file = new File(s);
-                    String relativePath = Location.PC.path.relativize(Path.of(s)).toString();
+                    String relativePath = path.relativize(Path.of(s)).toString();
                     return Pair.of(relativePath, file.isFile());
                 })
                 .collect(Collectors.toList());
@@ -44,7 +45,7 @@ public class PcWorker implements LowLevelWorker {
     @Override
     public void deleteFile(FileEntity fileEntity) {
         try {
-            Files.delete(Path.of(Location.PC.path + fileEntity.relativePath));
+            Files.delete(Path.of(Location.PC.rootPath + fileEntity.relativePath));
         } catch (IOException e) {
             throw new RuntimeException("Error while deleting " + fileEntity.relativePath);
         }
@@ -54,7 +55,7 @@ public class PcWorker implements LowLevelWorker {
     public InputStream getInputStreamFromFile(FileEntity fileEntity) {
         FileInputStream fileInputStream;
         try {
-            fileInputStream = new FileInputStream(getAbsolutePath(fileEntity));
+            fileInputStream = new FileInputStream(Utils.getAbsolutePath(fileEntity));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -62,17 +63,18 @@ public class PcWorker implements LowLevelWorker {
     }
 
     @Override
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public OutputStream getOutputStreamToFile(FileEntity fileEntity) {
         FileOutputStream outputStream;
         try {
-            outputStream = new FileOutputStream(getAbsolutePath(fileEntity));
+            String absolutePath = Utils.getAbsolutePath(fileEntity);
+            File file = new File(absolutePath);
+            file.getParentFile().mkdirs();
+            outputStream = new FileOutputStream(file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         return outputStream;
     }
 
-    private static String getAbsolutePath(FileEntity fileEntity) {
-        return Location.PC.path.toString() + File.separator + fileEntity.relativePath;
-    }
 }

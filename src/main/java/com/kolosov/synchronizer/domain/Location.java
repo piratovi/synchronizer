@@ -7,8 +7,8 @@ import java.nio.file.Path;
 @RequiredArgsConstructor
 public enum Location {
 
-    PC(Path.of("E:", "Music")),
-    PHONE(null);
+    PC("E:\\Music"),
+    PHONE("/Music");
 
-    public final Path path;
+    public final String rootPath;
 }

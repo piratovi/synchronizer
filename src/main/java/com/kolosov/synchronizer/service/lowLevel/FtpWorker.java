@@ -1,6 +1,7 @@
 package com.kolosov.synchronizer.service.lowLevel;
 
 import com.kolosov.synchronizer.domain.FileEntity;
+import com.kolosov.synchronizer.domain.Location;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.net.ftp.FTP;
@@ -16,14 +17,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class FtpWorker implements LowLevelWorker {
 
+
+    public static final Pattern SPLIT = Pattern.compile("/");
 
     @Value("${com.kolosov.synchronizer.ftpServerUrl}")
     private String ftpServerUrl;
@@ -115,7 +121,7 @@ public class FtpWorker implements LowLevelWorker {
     public void deleteFile(FileEntity fileEntity) {
         try {
             ftpConnect();
-            String pathToDelete = fileEntity.relativePath.replaceAll("\\\\", "/");
+            String pathToDelete = Utils.convertPathForFTP(fileEntity.relativePath);
             pathToDelete = new String(pathToDelete.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
             ftpClient.deleteFile(pathToDelete);
         } catch (IOException e) {
@@ -127,7 +133,7 @@ public class FtpWorker implements LowLevelWorker {
     @Override
     public InputStream getInputStreamFromFile(FileEntity fileEntity) {
         String relativePath = fileEntity.relativePath;
-        relativePath = relativePath.replaceAll("\\\\", "/");
+        relativePath = Utils.convertPathForFTP(relativePath);
         return ftpClient.retrieveFileStream(relativePath);
     }
 
@@ -135,8 +141,24 @@ public class FtpWorker implements LowLevelWorker {
     @Override
     public OutputStream getOutputStreamToFile(FileEntity fileEntity) {
         String relativePath = fileEntity.relativePath;
-        relativePath = relativePath.replaceAll("\\\\", "/");
+        relativePath = Utils.convertPathForFTP(relativePath);
+        prepareCatalogs(relativePath);
         return ftpClient.storeFileStream(relativePath);
+    }
+
+    @SneakyThrows
+    private void prepareCatalogs(String relativePath) {
+        List<String> dirs = new ArrayList<>(Arrays.asList(SPLIT.split(relativePath)));
+        dirs.remove(dirs.size() - 1);
+        String result = Location.PHONE.rootPath;
+        for (int i = 0; i < dirs.size(); i++) {
+            String current = dirs.get(i);
+            List<String> names = Arrays.asList(ftpClient.listNames(result));
+            result += "/" + current;
+            if (!names.contains(current)) {
+                ftpClient.makeDirectory(result);
+            }
+        }
     }
 
     @SneakyThrows

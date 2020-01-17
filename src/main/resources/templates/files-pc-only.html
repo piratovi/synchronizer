@@ -1,0 +1,26 @@
+<div xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
+     layout:fragment="content"
+     layout:decorate="~{layout}"
+>
+    <h1 class="widget-header">Files</h1>
+
+    <p th:text="${#lists.size(files)}"></p>
+
+    <p></p>
+
+
+    <div>
+        <table class="pure-table pure-table-bordered" id="table" th:fragment="table">
+            <tr>
+                <th th:text="${location}">!</th>
+            </tr>
+
+            <tr th:each="file : ${files}">
+                <td th:text="${file.getRelativePath()}"></td>
+                <td><a th:href="@{'/files/transfer/' + ${file.id}}">Transfer</a></td>
+            </tr>
+
+        </table>
+    </div>
+    </div>
+</div>
