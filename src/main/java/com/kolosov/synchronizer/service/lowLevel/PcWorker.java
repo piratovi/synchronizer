@@ -2,6 +2,7 @@ package com.kolosov.synchronizer.service.lowLevel;
 
 import com.kolosov.synchronizer.domain.FileEntity;
 import com.kolosov.synchronizer.domain.Location;
+import lombok.SneakyThrows;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,7 @@ public class PcWorker implements LowLevelWorker {
                 .collect(Collectors.toList());
     }
 
+    //TODO Sneaky?
     private List<String> findFiles(Path pathToMusic) {
         List<String> fileEntities;
         try (Stream<Path> stream = Files.walk(pathToMusic)) {
@@ -43,37 +45,28 @@ public class PcWorker implements LowLevelWorker {
     }
 
     @Override
+    @SneakyThrows
     public void deleteFile(FileEntity fileEntity) {
-        try {
-            Files.delete(Path.of(Location.PC.rootPath + fileEntity.relativePath));
-        } catch (IOException e) {
-            throw new RuntimeException("Error while deleting " + fileEntity.relativePath);
-        }
+        Files.delete(Path.of(Location.PC.rootPath + fileEntity.relativePath));
     }
 
     @Override
+    @SneakyThrows
     public InputStream getInputStreamFromFile(FileEntity fileEntity) {
         FileInputStream fileInputStream;
-        try {
-            fileInputStream = new FileInputStream(Utils.getAbsolutePath(fileEntity));
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        fileInputStream = new FileInputStream(Utils.getAbsolutePath(fileEntity));
         return fileInputStream;
     }
 
     @Override
     @SuppressWarnings("ResultOfMethodCallIgnored")
+    @SneakyThrows
     public OutputStream getOutputStreamToFile(FileEntity fileEntity) {
         FileOutputStream outputStream;
-        try {
-            String absolutePath = Utils.getAbsolutePath(fileEntity);
-            File file = new File(absolutePath);
-            file.getParentFile().mkdirs();
-            outputStream = new FileOutputStream(file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        String absolutePath = Utils.getAbsolutePath(fileEntity);
+        File file = new File(absolutePath);
+        file.getParentFile().mkdirs();
+        outputStream = new FileOutputStream(file);
         return outputStream;
     }
 
