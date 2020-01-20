@@ -26,9 +26,9 @@ public class FileEntitiesRestController {
 //        return fileService.onlyOnPhone();
 //    }
 //
-//    @GetMapping(value = "/test")
-//    public String test() {
-//        return "test";
-//    }
+    @GetMapping(value = "/test")
+    public String test() {
+        return "test";
+    }
 
 }
