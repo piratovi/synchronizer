@@ -17,7 +17,7 @@ import java.util.Set;
 @Controller
 @RequestMapping("files")
 @RequiredArgsConstructor
-public class FileController {
+public class FileEntitiesWebController {
 
     public static final String REDIRECT_ROOT = "redirect:/";
 
