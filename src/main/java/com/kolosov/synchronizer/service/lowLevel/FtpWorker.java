@@ -1,7 +1,7 @@
 package com.kolosov.synchronizer.service.lowLevel;
 
 import com.kolosov.synchronizer.domain.FileEntity;
-import com.kolosov.synchronizer.domain.Location;
+import com.kolosov.synchronizer.utils.LocationUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.net.ftp.FTP;
@@ -9,7 +9,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -17,17 +17,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@Service
+@Component
 @Slf4j
 public class FtpWorker implements LowLevelWorker {
-
 
     public static final Pattern SPLIT = Pattern.compile("/");
 
@@ -43,23 +41,24 @@ public class FtpWorker implements LowLevelWorker {
     public final FTPClient ftpClient = new FTPClient();
     private boolean connected = false;
 
-    private void ftpConnect() throws IOException {
-        if (!connected) {
-            ftpClient.connect(ftpServerUrl, ftpServerPort);
-            ftpClient.login(username, password);
-            ftpClient.enterLocalPassiveMode();
-            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-            ftpClient.changeWorkingDirectory("Music");
-            connected = true;
-        }
-    }
-
     @PostConstruct
     private void postConstruct() {
         try {
             ftpConnect();
         } catch (IOException e) {
             log.error("Can't connect to FTP" + e);
+        }
+    }
+
+    private void ftpConnect() throws IOException {
+        if (!connected) {
+            ftpClient.connect(ftpServerUrl, ftpServerPort);
+            ftpClient.login(username, password);
+            ftpClient.enterLocalPassiveMode();
+            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+            String rootPath = LocationUtils.getPhoneRootPath();
+            ftpClient.changeWorkingDirectory(rootPath);
+            connected = true;
         }
     }
 
@@ -83,11 +82,10 @@ public class FtpWorker implements LowLevelWorker {
             ftpConnect();
             List<Pair<String, Boolean>> fileList = new ArrayList<>();
             listDirectory(ftpClient, "/Music", "", fileList, "");
-            List<Pair<String, Boolean>> collected = fileList.stream().map(s -> {
+            return fileList.stream().map(s -> {
                 String relativePath = s.getFirst().substring(1);
                 return Pair.of(relativePath, s.getSecond());
             }).collect(Collectors.toList());
-            return collected;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -150,9 +148,8 @@ public class FtpWorker implements LowLevelWorker {
     private void prepareCatalogs(String relativePath) {
         List<String> dirs = new ArrayList<>(Arrays.asList(SPLIT.split(relativePath)));
         dirs.remove(dirs.size() - 1);
-        String result = Location.PHONE.rootPath;
-        for (int i = 0; i < dirs.size(); i++) {
-            String current = dirs.get(i);
+        String result = LocationUtils.getPhoneRootPath();
+        for (String current : dirs) {
             List<String> names = Arrays.asList(ftpClient.listNames(result));
             result += "/" + current;
             if (!names.contains(current)) {

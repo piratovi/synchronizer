@@ -6,3 +6,7 @@ http://localhost:8080/
 
 поменять порт можно в файле application.properties
 строка : server.port=8080
+
+Пути к рутовым папкам с музыкой меняются в application.properties
+location.path.pc = E:\\Music
+location.path.phone = /Music

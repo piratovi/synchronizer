@@ -1,7 +1,7 @@
 package com.kolosov.synchronizer.service.lowLevel;
 
 import com.kolosov.synchronizer.domain.FileEntity;
-import com.kolosov.synchronizer.domain.Location;
+import com.kolosov.synchronizer.utils.LocationUtils;
 import lombok.SneakyThrows;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ public class PcWorker implements LowLevelWorker {
 
     @Override
     public List<Pair<String, Boolean>> getFileRelativePaths() {
-        Path path = Paths.get(Location.PC.rootPath);
+        Path path = Paths.get(LocationUtils.getPcRootPath());
         List<String> absolutePaths = findFiles(path);
         return absolutePaths.stream()
                 .map(s -> {
@@ -47,7 +47,7 @@ public class PcWorker implements LowLevelWorker {
     @Override
     @SneakyThrows
     public void deleteFile(FileEntity fileEntity) {
-        Files.delete(Path.of(Location.PC.rootPath + fileEntity.relativePath));
+        Files.delete(Path.of(LocationUtils.getPcRootPath() + fileEntity.relativePath));
     }
 
     @Override

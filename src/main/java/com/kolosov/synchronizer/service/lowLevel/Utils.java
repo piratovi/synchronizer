@@ -1,7 +1,7 @@
 package com.kolosov.synchronizer.service.lowLevel;
 
 import com.kolosov.synchronizer.domain.FileEntity;
-import com.kolosov.synchronizer.domain.Location;
+import com.kolosov.synchronizer.utils.LocationUtils;
 
 import java.io.File;
 
@@ -12,6 +12,6 @@ public class Utils {
     }
 
     static String getAbsolutePath(FileEntity fileEntity) {
-        return Location.PC.rootPath.toString() + File.separator + fileEntity.relativePath;
+        return LocationUtils.getPcRootPath() + File.separator + fileEntity.relativePath;
     }
 }
