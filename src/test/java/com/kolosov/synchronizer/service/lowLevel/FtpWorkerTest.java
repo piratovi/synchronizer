@@ -1,6 +1,8 @@
 package com.kolosov.synchronizer.service.lowLevel;
 
+import com.kolosov.synchronizer.domain.AbstractFile;
 import com.kolosov.synchronizer.domain.FileEntity;
+import com.kolosov.synchronizer.domain.*;
 import org.apache.commons.net.ftp.FTPFile;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +39,15 @@ class FtpWorkerTest {
 
     @Test
     void simple() {
-        System.out.println();
+        List<AbstractFile> newFileRelativePaths = ftpWorker.getNewFileRelativePaths();
+        newFileRelativePaths.forEach(System.out::println);
+//        Folder folder = new Folder("1", Location.PHONE);
+//        Folder child = new Folder("2", Location.PHONE);
+//        FileItem fileItem = new FileItem("3", Location.PHONE);
+//        folder.list.add(child);
+//        child.list.add(fileItem);
+//        System.out.println(folder);
+
     }
 
 }
