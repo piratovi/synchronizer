@@ -1,5 +1,6 @@
 package com.kolosov.synchronizer.domain;
 
+import com.kolosov.synchronizer.enums.Location;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -10,13 +11,12 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 @Data
 @Entity
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class FileEntity {
+public abstract class AbstractSync {
 
     @Id
     @GeneratedValue
@@ -28,20 +28,21 @@ public class FileEntity {
     @NonNull
     public String relativePath;
 
-    @Column
-    @NotNull
-    public Boolean isFile;
+    @Column(nullable = false)
+    @NotBlank
+    @NonNull
+    public String name;
 
     @Column
-    public String ext;
+    public Boolean existOnPC;
 
     @Column
-    public Location location;
+    public Boolean existOnPhone;
 
-    public FileEntity(String relativePath, Boolean isFile, String ext, Location location) {
+    public AbstractSync(String relativePath, String name, Location location) {
         this.relativePath = relativePath;
-        this.isFile = isFile;
-        this.ext = ext;
-        this.location = location;
+        this.name = name;
+        this.existOnPC = Location.PC.equals(location);
+        this.existOnPhone = Location.PHONE.equals(location);
     }
 }

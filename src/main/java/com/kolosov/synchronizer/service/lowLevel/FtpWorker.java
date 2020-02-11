@@ -1,6 +1,9 @@
 package com.kolosov.synchronizer.service.lowLevel;
 
-import com.kolosov.synchronizer.domain.*;
+import com.kolosov.synchronizer.domain.AbstractSync;
+import com.kolosov.synchronizer.domain.FileSync;
+import com.kolosov.synchronizer.domain.FolderSync;
+import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.utils.LocationUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +11,6 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -21,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -63,7 +64,7 @@ public class FtpWorker implements LowLevelWorker {
     }
 
     @PreDestroy
-    private void preDestroy() {
+    private void tearDown() {
         try {
             ftpDisconnect();
         } catch (IOException e) {
@@ -78,19 +79,15 @@ public class FtpWorker implements LowLevelWorker {
 
     @Override
     @SneakyThrows
-    public List<Pair<String, Boolean>> getFileRelativePaths() {
+    public List<AbstractSync> getFileRelativePaths() {
         ftpConnect();
-        List<Pair<String, Boolean>> fileList = new ArrayList<>();
-        listDirectory(ftpClient, "/Music", "", fileList, "");
-        return fileList.stream()
-                .map(s -> {
-                    String relativePath = s.getFirst().substring(1);
-                    return Pair.of(relativePath, s.getSecond());
-                })
-                .collect(Collectors.toList());
+        List<AbstractSync> syncList = new ArrayList<>();
+        listDirectory(ftpClient, LocationUtils.getPhoneRootPath(), "", syncList, "", null);
+        syncList.forEach(s -> s.relativePath = s.relativePath.substring(1));
+        return syncList;
     }
 
-    private static void listDirectory(FTPClient ftpClient, String parentDir, String currentDir, List<Pair<String, Boolean>> fileList, String fromRootDir) throws IOException {
+    private void listDirectory(FTPClient ftpClient, String parentDir, String currentDir, List<AbstractSync> result, String fromRootDir, FolderSync parentFolderSync) throws IOException {
         String dirToList = parentDir;
         if (!currentDir.equals("")) {
             dirToList += "/" + currentDir;
@@ -100,53 +97,21 @@ public class FtpWorker implements LowLevelWorker {
             for (FTPFile aFile : subFiles) {
                 String currentFileName = aFile.getName();
                 if (currentFileName.equals(".") || currentFileName.equals("..")) {
-                    // skip parent directory and directory itself
                     continue;
                 }
                 String relativePath = new String((fromRootDir + "\\" + currentFileName).getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
                 if (aFile.isDirectory()) {
-                    fileList.add(Pair.of(relativePath, false));
-                    listDirectory(ftpClient, dirToList, currentFileName, fileList, fromRootDir + "\\" + currentFileName);
-                } else {
-                    fileList.add(Pair.of(relativePath, true));
-                }
-            }
-        }
-    }
-
-    @SneakyThrows
-    public List<AbstractFile> getNewFileRelativePaths() {
-        ftpConnect();
-        List<AbstractFile> fileList = new ArrayList<>();
-        newListDirectory(ftpClient, "/Music", "", fileList, "", null);
-        return fileList;
-    }
-
-    private static void newListDirectory(FTPClient ftpClient, String parentDir, String currentDir, List<AbstractFile> result, String fromRootDir, Folder parentFolder) throws IOException {
-        String dirToList = parentDir;
-        if (!currentDir.equals("")) {
-            dirToList += "/" + currentDir;
-        }
-        FTPFile[] subFiles = ftpClient.listFiles(dirToList);
-        if (subFiles != null && subFiles.length > 0) {
-            for (FTPFile aFile : subFiles) {
-                String currentFileName = aFile.getName();
-                if (currentFileName.equals(".") || currentFileName.equals("..")) {
-                    // skip parent directory and directory itself
-                    continue;
-                }
-                String relativePath = new String((fromRootDir + "\\" + currentFileName).getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
-                if (aFile.isDirectory()) {
-                    Folder nextFolder = new Folder(relativePath, Location.PHONE);
-                    if (parentFolder == null) {
-                        result.add(nextFolder);
+                    FolderSync nextFolderSync = new FolderSync(relativePath, currentFileName, Location.PHONE);
+                    if (parentFolderSync == null) {
+                        //Root Folder
+                        result.add(nextFolderSync);
                     } else {
-                        parentFolder.list.add(nextFolder);
+                        parentFolderSync.list.add(nextFolderSync);
                     }
-                    newListDirectory(ftpClient, dirToList, currentFileName, result, fromRootDir + "\\" + currentFileName, nextFolder);
+                    listDirectory(ftpClient, dirToList, currentFileName, result, fromRootDir + "\\" + currentFileName, nextFolderSync);
                 } else {
-                    if (parentFolder != null) {
-                        parentFolder.list.add(new FileItem(relativePath, Location.PHONE));
+                    if (parentFolderSync != null) {
+                        parentFolderSync.list.add(new FileSync(relativePath, currentFileName, Location.PHONE));
                     }
                 }
             }
@@ -155,9 +120,9 @@ public class FtpWorker implements LowLevelWorker {
 
     @Override
     @SneakyThrows
-    public void deleteFile(FileEntity fileEntity) {
+    public void deleteFile(AbstractSync abstractSync) {
         ftpConnect();
-        String pathToDelete = Utils.convertPathForFTP(fileEntity.relativePath);
+        String pathToDelete = Utils.convertPathForFTP(abstractSync.relativePath);
         pathToDelete = new String(pathToDelete.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
         ftpClient.deleteFile(pathToDelete);
 
@@ -165,16 +130,16 @@ public class FtpWorker implements LowLevelWorker {
 
     @SneakyThrows
     @Override
-    public InputStream getInputStreamFromFile(FileEntity fileEntity) {
-        String relativePath = fileEntity.relativePath;
+    public InputStream getInputStreamFromFile(AbstractSync abstractSync) {
+        String relativePath = abstractSync.relativePath;
         relativePath = Utils.convertPathForFTP(relativePath);
         return ftpClient.retrieveFileStream(relativePath);
     }
 
     @SneakyThrows
     @Override
-    public OutputStream getOutputStreamToFile(FileEntity fileEntity) {
-        String relativePath = fileEntity.relativePath;
+    public OutputStream getOutputStreamToFile(AbstractSync abstractSync) {
+        String relativePath = abstractSync.relativePath;
         relativePath = Utils.convertPathForFTP(relativePath);
         prepareCatalogs(relativePath);
         return ftpClient.storeFileStream(relativePath);

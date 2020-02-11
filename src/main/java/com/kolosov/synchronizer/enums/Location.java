@@ -1,4 +1,4 @@
-package com.kolosov.synchronizer.domain;
+package com.kolosov.synchronizer.enums;
 
 public enum Location {
     PC,

@@ -1,12 +1,14 @@
 package com.kolosov.synchronizer.utils;
 
-import com.kolosov.synchronizer.domain.Location;
+import com.kolosov.synchronizer.enums.Location;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Component
 @RequiredArgsConstructor
@@ -17,11 +19,14 @@ public class LocationUtils {
     private static String pcRootPath;
     @Getter
     private static String phoneRootPath;
+    @Getter
+    public static Path PATH;
 
     @PostConstruct
     public void setUp() {
         pcRootPath = env.getProperty("location.path.pc");
         phoneRootPath = env.getProperty("location.path.phone");
+        PATH = Paths.get(LocationUtils.getPcRootPath());
     }
 
     public static String getRootPath(Location location) {

@@ -1,6 +1,6 @@
 package com.kolosov.synchronizer.service.lowLevel;
 
-import com.kolosov.synchronizer.domain.FileEntity;
+import com.kolosov.synchronizer.domain.AbstractSync;
 import com.kolosov.synchronizer.utils.LocationUtils;
 
 import java.io.File;
@@ -11,7 +11,7 @@ public class Utils {
         return relativePath.replaceAll("\\\\", "/");
     }
 
-    static String getAbsolutePath(FileEntity fileEntity) {
-        return LocationUtils.getPcRootPath() + File.separator + fileEntity.relativePath;
+    static String getAbsolutePath(AbstractSync abstractSync) {
+        return LocationUtils.getPcRootPath() + File.separator + abstractSync.relativePath;
     }
 }

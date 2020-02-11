@@ -1,33 +1,68 @@
 package com.kolosov.synchronizer.service.lowLevel;
 
-import com.kolosov.synchronizer.domain.FileEntity;
+import com.kolosov.synchronizer.domain.AbstractSync;
+import com.kolosov.synchronizer.domain.FileSync;
+import com.kolosov.synchronizer.domain.FolderSync;
+import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.utils.LocationUtils;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.kolosov.synchronizer.utils.LocationUtils.PATH;
 
 @Service
 public class PcWorker implements LowLevelWorker {
 
     @Override
-    public List<Pair<String, Boolean>> getFileRelativePaths() {
-        Path path = Paths.get(LocationUtils.getPcRootPath());
-        List<String> absolutePaths = findFiles(path);
-        return absolutePaths.stream()
-                .map(s -> {
-                    File file = new File(s);
-                    String relativePath = path.relativize(Path.of(s)).toString();
-                    return Pair.of(relativePath, file.isFile());
-                })
-                .collect(Collectors.toList());
+    public List<AbstractSync> getFileRelativePaths() {
+//        Path path = Paths.get(LocationUtils.getPcRootPath());
+//        List<String> absolutePaths = findFiles(path);
+//        return absolutePaths.stream()
+//                .map(s -> {
+//                    File file = new File(s);
+//                    String relativePath = path.relativize(Path.of(s)).toString();
+//                    return Pair.of(relativePath, file.isFile());
+//                })
+//                .collect(Collectors.toList());
+        List<AbstractSync> syncList = new ArrayList<>();
+        File root = new File(LocationUtils.getPcRootPath());
+        listDirectory(root, syncList, null);
+        syncList.forEach(s -> s.relativePath = s.relativePath.substring(1));
+        return syncList;
+    }
+
+    //TODO проверка на null
+    public void listDirectory(File parentDir, List<AbstractSync> result, FolderSync parentFolderSync) {
+        for (final File file : parentDir.listFiles()) {
+            String relativePath = PATH.relativize(file.toPath()).toString();
+            String name = file.getName();
+            if (file.isDirectory()) {
+                FolderSync current = new FolderSync(relativePath, name, Location.PC);
+                if (parentFolderSync == null) {
+                    result.add(current);
+                } else {
+                    parentFolderSync.list.add(current);
+                }
+                listDirectory(file, result, current);
+            }
+            if (file.isFile()) {
+                FileSync current = new FileSync(relativePath, name, Location.PC);
+                parentFolderSync.list.add(current);
+            }
+        }
     }
 
     //TODO Sneaky?
@@ -46,24 +81,24 @@ public class PcWorker implements LowLevelWorker {
 
     @Override
     @SneakyThrows
-    public void deleteFile(FileEntity fileEntity) {
-        Files.delete(Path.of(LocationUtils.getPcRootPath() + fileEntity.relativePath));
+    public void deleteFile(AbstractSync abstractSync) {
+        Files.delete(Path.of(LocationUtils.getPcRootPath() + abstractSync.relativePath));
     }
 
     @Override
     @SneakyThrows
-    public InputStream getInputStreamFromFile(FileEntity fileEntity) {
+    public InputStream getInputStreamFromFile(AbstractSync abstractSync) {
         FileInputStream fileInputStream;
-        fileInputStream = new FileInputStream(Utils.getAbsolutePath(fileEntity));
+        fileInputStream = new FileInputStream(Utils.getAbsolutePath(abstractSync));
         return fileInputStream;
     }
 
     @Override
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @SneakyThrows
-    public OutputStream getOutputStreamToFile(FileEntity fileEntity) {
+    public OutputStream getOutputStreamToFile(AbstractSync abstractSync) {
         FileOutputStream outputStream;
-        String absolutePath = Utils.getAbsolutePath(fileEntity);
+        String absolutePath = Utils.getAbsolutePath(abstractSync);
         File file = new File(absolutePath);
         file.getParentFile().mkdirs();
         outputStream = new FileOutputStream(file);

@@ -1,9 +1,8 @@
 package com.kolosov.synchronizer.controller;
 
-import com.kolosov.synchronizer.domain.FileEntity;
-import com.kolosov.synchronizer.domain.Location;
+import com.kolosov.synchronizer.domain.AbstractSync;
+import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.service.FileService;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,7 +25,7 @@ public class FileEntitiesWebController {
     @GetMapping(value = "all/{urlLocation}")
     public String getAllFileEntities(@PathVariable String urlLocation, Model model) {
         Location location = Location.valueOf(urlLocation.toUpperCase());
-        List<FileEntity> fileEntities = fileService.getFileEntitiesByLocation(location);
+        List<AbstractSync> fileEntities = fileService.getFileEntitiesByLocation(location);
         model.addAttribute("files", fileEntities);
         //TODO Move to templates
         model.addAttribute("location", urlLocation);
@@ -44,7 +43,7 @@ public class FileEntitiesWebController {
     @GetMapping("ext/{urlLocation}/{ext}")
     public String getFilesByExtension(@PathVariable String urlLocation, @PathVariable String ext, Model model) {
         Location location = Location.valueOf(urlLocation.toUpperCase());
-        List<FileEntity> fileEntitiesByExt = fileService.getFileEntitiesWithExt(location, ext);
+        List<AbstractSync> fileEntitiesByExt = fileService.getFileEntitiesWithExt(location, ext);
         model.addAttribute("fileEntitiesByExt", fileEntitiesByExt);
         return "fileEntitiesByExt";
     }
@@ -72,7 +71,7 @@ public class FileEntitiesWebController {
     @GetMapping("empty/{urlLocation}")
     public String getEmptyFolders(@PathVariable String urlLocation, Model model) {
         Location location = Location.valueOf(urlLocation.toUpperCase());
-        List<FileEntity> fileEntities = fileService.getEmptyFolders(location);
+        List<AbstractSync> fileEntities = fileService.getEmptyFolders(location);
         model.addAttribute("files", fileEntities);
         return "empty-folders-pc";
     }
@@ -87,7 +86,7 @@ public class FileEntitiesWebController {
     @GetMapping("onlyOn/{urlLocation}")
     public String getOnlyOnLocationFileEntities(@PathVariable String urlLocation, Model model) {
         Location location = Location.valueOf(urlLocation.toUpperCase());
-        List<FileEntity> fileEntities = fileService.onlyOnLocation(location);
+        List<AbstractSync> fileEntities = fileService.onlyOnLocation(location);
         model.addAttribute("files", fileEntities);
         model.addAttribute("location", urlLocation);
         return "files-pc-only";
