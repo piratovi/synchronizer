@@ -11,9 +11,10 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,16 +43,17 @@ public class FtpWorker implements LowLevelWorker {
     public final FTPClient ftpClient = new FTPClient();
     private boolean connected = false;
 
-    @PostConstruct
-    private void postConstruct() {
+    @EventListener(ApplicationReadyEvent.class)
+    public void doSomethingAfterStartup() {
         try {
             ftpConnect();
-        } catch (IOException e) {
-            log.error("Can't connect to FTP" + e);
+        } catch (Exception e) {
+            log.error("Can't connect to FTP " + e.getMessage());
         }
     }
 
-    private void ftpConnect() throws IOException {
+    @SneakyThrows
+    private void ftpConnect() {
         if (!connected) {
             ftpClient.connect(ftpServerUrl, ftpServerPort);
             ftpClient.login(username, password);
