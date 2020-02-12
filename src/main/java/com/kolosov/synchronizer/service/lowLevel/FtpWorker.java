@@ -62,6 +62,7 @@ public class FtpWorker implements LowLevelWorker {
             String rootPath = LocationUtils.getPhoneRootPath();
             ftpClient.changeWorkingDirectory(rootPath);
             connected = true;
+            log.info("Connect to FTP");
         }
     }
 
@@ -79,17 +80,17 @@ public class FtpWorker implements LowLevelWorker {
         ftpClient.disconnect();
     }
 
+    //TODO Rename
     @Override
     @SneakyThrows
-    public List<AbstractSync> getFileRelativePaths() {
+    public List<FolderSync> getFileRelativePaths() {
         ftpConnect();
-        List<AbstractSync> syncList = new ArrayList<>();
+        List<FolderSync> syncList = new ArrayList<>();
         listDirectory(ftpClient, LocationUtils.getPhoneRootPath(), "", syncList, "", null);
-        syncList.forEach(s -> s.relativePath = s.relativePath.substring(1));
         return syncList;
     }
 
-    private void listDirectory(FTPClient ftpClient, String parentDir, String currentDir, List<AbstractSync> result, String fromRootDir, FolderSync parentFolderSync) throws IOException {
+    private void listDirectory(FTPClient ftpClient, String parentDir, String currentDir, List<FolderSync> result, String fromRootDir, FolderSync parentFolderSync) throws IOException {
         String dirToList = parentDir;
         if (!currentDir.equals("")) {
             dirToList += "/" + currentDir;
@@ -102,18 +103,21 @@ public class FtpWorker implements LowLevelWorker {
                     continue;
                 }
                 String relativePath = new String((fromRootDir + "\\" + currentFileName).getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+                relativePath = relativePath.substring(1);
                 if (aFile.isDirectory()) {
-                    FolderSync nextFolderSync = new FolderSync(relativePath, currentFileName, Location.PHONE);
+                    FolderSync nextFolderSync;
                     if (parentFolderSync == null) {
                         //Root Folder
+                        nextFolderSync = new FolderSync(relativePath, currentFileName, Location.PHONE, null);
                         result.add(nextFolderSync);
                     } else {
+                        nextFolderSync = new FolderSync(relativePath, currentFileName, Location.PHONE, parentFolderSync);
                         parentFolderSync.list.add(nextFolderSync);
                     }
                     listDirectory(ftpClient, dirToList, currentFileName, result, fromRootDir + "\\" + currentFileName, nextFolderSync);
                 } else {
                     if (parentFolderSync != null) {
-                        parentFolderSync.list.add(new FileSync(relativePath, currentFileName, Location.PHONE));
+                        parentFolderSync.list.add(new FileSync(relativePath, currentFileName, Location.PHONE, parentFolderSync));
                     }
                 }
             }

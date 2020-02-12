@@ -17,7 +17,7 @@ class PcWorkerTest {
 
     @Test
     void getFileRelativePaths() {
-        List<AbstractSync> fileRelativePaths = pcWorker.getFileRelativePaths();
-        System.out.println(fileRelativePaths);
+//        List<AbstractSync> fileRelativePaths = pcWorker.getFileRelativePaths();
+//        System.out.println(fileRelativePaths);
     }
 }

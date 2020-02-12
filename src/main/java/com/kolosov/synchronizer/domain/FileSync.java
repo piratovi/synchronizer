@@ -13,8 +13,8 @@ public class FileSync extends AbstractSync {
     @Column
     public String ext;
 
-    public FileSync(String relativePath, String name, Location location) {
-        super(relativePath, name, location);
+    public FileSync(String relativePath, String name, Location location, FolderSync folder) {
+        super(relativePath, name, location, folder);
     }
 
     @Override

@@ -1,8 +1,9 @@
 package com.kolosov.synchronizer.controller;
 
 import com.kolosov.synchronizer.domain.AbstractSync;
-import com.kolosov.synchronizer.domain.FileSync;
+import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.enums.Location;
+import com.kolosov.synchronizer.service.DirectOperationsService;
 import com.kolosov.synchronizer.service.FileService;
 import com.kolosov.synchronizer.service.lowLevel.PcWorker;
 import lombok.Data;
@@ -23,6 +24,7 @@ public class FileEntitiesRestController {
 
     private final FileService fileService;
     private final PcWorker pcWorker;
+    private final DirectOperationsService directOperationsService;
 
     @GetMapping(value = "all/{urlLocation}")
     public ResponseEntity<List<AbstractSync>> getAllFileEntities(@PathVariable String urlLocation) {
@@ -44,9 +46,10 @@ public class FileEntitiesRestController {
     }
 
     @GetMapping("/data")
-    public ResponseEntity<List<AbstractSync>> getData() {
-        List<AbstractSync> syncs = pcWorker.getFileRelativePaths();
-        return new ResponseEntity<>(syncs, HttpStatus.OK);
+    public ResponseEntity<List<FolderSync>> getData() {
+//        List<FolderSync> mergedList = directOperationsService.getMergedList();
+        List<FolderSync> mergedList = fileService.createFileEntities();
+        return new ResponseEntity<>(mergedList, HttpStatus.OK);
     }
 
 }

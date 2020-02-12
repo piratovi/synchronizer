@@ -1,5 +1,6 @@
 package com.kolosov.synchronizer.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kolosov.synchronizer.enums.Location;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -10,6 +11,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotBlank;
 
 @Data
@@ -39,10 +41,15 @@ public abstract class AbstractSync {
     @Column
     public Boolean existOnPhone;
 
-    public AbstractSync(String relativePath, String name, Location location) {
+    @ManyToOne
+    @JsonIgnore
+    public FolderSync parent;
+
+    public AbstractSync(String relativePath, String name, Location location, FolderSync parent) {
         this.relativePath = relativePath;
         this.name = name;
         this.existOnPC = Location.PC.equals(location);
         this.existOnPhone = Location.PHONE.equals(location);
+        this.parent = parent;
     }
 }

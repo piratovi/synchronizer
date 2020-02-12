@@ -1,6 +1,7 @@
 package com.kolosov.synchronizer.service;
 
 import com.kolosov.synchronizer.domain.AbstractSync;
+import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.repository.FolderSyncRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +20,10 @@ public class FileService {
     private final DirectOperationsService directOperations;
     private final FolderSyncRepository repository;
 
-    private void createFileEntities(Location location) {
-        List<AbstractSync> fileEntities = directOperations.getFileEntitiesByLocation(location);
-//        fileEntities.forEach(repository::save);
+    public List<FolderSync> createFileEntities() {
+        List<FolderSync> mergedList = directOperations.getMergedList();
+        mergedList.forEach(repository::save);
+        return mergedList;
     }
 
     public Set<String> getExtensions(Location location) {

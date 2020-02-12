@@ -5,17 +5,12 @@ import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.utils.LocationUtils;
-import lombok.NonNull;
 import lombok.SneakyThrows;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,7 +22,7 @@ import static com.kolosov.synchronizer.utils.LocationUtils.PATH;
 public class PcWorker implements LowLevelWorker {
 
     @Override
-    public List<AbstractSync> getFileRelativePaths() {
+    public List<FolderSync> getFileRelativePaths() {
 //        Path path = Paths.get(LocationUtils.getPcRootPath());
 //        List<String> absolutePaths = findFiles(path);
 //        return absolutePaths.stream()
@@ -37,29 +32,30 @@ public class PcWorker implements LowLevelWorker {
 //                    return Pair.of(relativePath, file.isFile());
 //                })
 //                .collect(Collectors.toList());
-        List<AbstractSync> syncList = new ArrayList<>();
+        List<FolderSync> syncList = new ArrayList<>();
         File root = new File(LocationUtils.getPcRootPath());
         listDirectory(root, syncList, null);
-        syncList.forEach(s -> s.relativePath = s.relativePath.substring(1));
         return syncList;
     }
 
     //TODO проверка на null
-    public void listDirectory(File parentDir, List<AbstractSync> result, FolderSync parentFolderSync) {
+    public void listDirectory(File parentDir, List<FolderSync> result, FolderSync parentFolderSync) {
         for (final File file : parentDir.listFiles()) {
             String relativePath = PATH.relativize(file.toPath()).toString();
             String name = file.getName();
             if (file.isDirectory()) {
-                FolderSync current = new FolderSync(relativePath, name, Location.PC);
+                FolderSync current;
                 if (parentFolderSync == null) {
+                    current = new FolderSync(relativePath, name, Location.PC, null);
                     result.add(current);
                 } else {
+                    current = new FolderSync(relativePath, name, Location.PC, parentFolderSync);
                     parentFolderSync.list.add(current);
                 }
                 listDirectory(file, result, current);
             }
             if (file.isFile()) {
-                FileSync current = new FileSync(relativePath, name, Location.PC);
+                FileSync current = new FileSync(relativePath, name, Location.PC, parentFolderSync);
                 parentFolderSync.list.add(current);
             }
         }
