@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface LowLevelWorker {
 
-    List<FolderSync> getFileRelativePaths();
+    List<FolderSync> collectSyncs();
 
     void deleteFile(AbstractSync abstractSync);
 

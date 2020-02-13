@@ -83,7 +83,7 @@ public class FtpWorker implements LowLevelWorker {
     //TODO Rename
     @Override
     @SneakyThrows
-    public List<FolderSync> getFileRelativePaths() {
+    public List<FolderSync> collectSyncs() {
         ftpConnect();
         List<FolderSync> syncList = new ArrayList<>();
         listDirectory(ftpClient, LocationUtils.getPhoneRootPath(), "", syncList, "", null);

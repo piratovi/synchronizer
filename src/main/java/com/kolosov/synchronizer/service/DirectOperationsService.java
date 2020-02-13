@@ -25,9 +25,9 @@ public class DirectOperationsService {
 
     public List<FolderSync> getFileEntitiesByLocation(Location location) {
         if (location.equals(Location.PC)) {
-            return getFileEntities(pcWorker.getFileRelativePaths(), Location.PC);
+            return getFileEntities(pcWorker.collectSyncs(), Location.PC);
         } else {
-            return getFileEntities(ftpWorker.getFileRelativePaths(), Location.PHONE);
+            return getFileEntities(ftpWorker.collectSyncs(), Location.PHONE);
         }
     }
 
@@ -85,8 +85,8 @@ public class DirectOperationsService {
     }
 
     public List<FolderSync> getMergedList() {
-        List<FolderSync> pcFiles = pcWorker.getFileRelativePaths();
-        List<FolderSync> ftpFiles = ftpWorker.getFileRelativePaths();
+        List<FolderSync> pcFiles = pcWorker.collectSyncs();
+        List<FolderSync> ftpFiles = ftpWorker.collectSyncs();
         List<FolderSync> result = new ArrayList<>(pcFiles);
 
         List<AbstractSync> flatList = getFlatList(ftpFiles);
@@ -120,11 +120,11 @@ public class DirectOperationsService {
                 .findFirst();
 
         root.ifPresentOrElse(folderSync -> {
-                    Optional<AbstractSync> desiredOpt = findSyncInFolder(folderSync, sync);
+                    Optional<AbstractSync> desiredOpt = findSyncInFolderBranch(folderSync, sync);
                     desiredOpt.ifPresentOrElse(
                             desired -> desired.setExistOnPhone(true)
                             , () -> {
-                                Optional<AbstractSync> parentOpt = findSyncInFolder(folderSync, sync.parent);
+                                Optional<AbstractSync> parentOpt = findSyncInFolderBranch(folderSync, sync.parent);
                                 parentOpt.ifPresentOrElse(parent -> {
                                             FolderSync parentAsFolder = (FolderSync) parent;
                                             parentAsFolder.list.add(sync);
@@ -146,7 +146,7 @@ public class DirectOperationsService {
 
     }
 
-    private Optional<AbstractSync> findSyncInFolder(FolderSync syncInTree, AbstractSync desiredSync) {
+    private Optional<AbstractSync> findSyncInFolderBranch(FolderSync syncInTree, AbstractSync desiredSync) {
         if (syncInTree.equals(desiredSync)) {
             return Optional.of(syncInTree);
         }
@@ -155,7 +155,7 @@ public class DirectOperationsService {
                 return Optional.of(sync);
             }
             if (sync instanceof FolderSync) {
-                Optional<AbstractSync> syncInFolder = findSyncInFolder((FolderSync) sync, desiredSync);
+                Optional<AbstractSync> syncInFolder = findSyncInFolderBranch((FolderSync) sync, desiredSync);
                 if (syncInFolder.isPresent()) {
                     return syncInFolder;
                 }

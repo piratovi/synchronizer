@@ -22,16 +22,7 @@ import static com.kolosov.synchronizer.utils.LocationUtils.PATH;
 public class PcWorker implements LowLevelWorker {
 
     @Override
-    public List<FolderSync> getFileRelativePaths() {
-//        Path path = Paths.get(LocationUtils.getPcRootPath());
-//        List<String> absolutePaths = findFiles(path);
-//        return absolutePaths.stream()
-//                .map(s -> {
-//                    File file = new File(s);
-//                    String relativePath = path.relativize(Path.of(s)).toString();
-//                    return Pair.of(relativePath, file.isFile());
-//                })
-//                .collect(Collectors.toList());
+    public List<FolderSync> collectSyncs() {
         List<FolderSync> syncList = new ArrayList<>();
         File root = new File(LocationUtils.getPcRootPath());
         listDirectory(root, syncList, null);
@@ -59,20 +50,6 @@ public class PcWorker implements LowLevelWorker {
                 parentFolderSync.list.add(current);
             }
         }
-    }
-
-    //TODO Sneaky?
-    private List<String> findFiles(Path pathToMusic) {
-        List<String> fileEntities;
-        try (Stream<Path> stream = Files.walk(pathToMusic)) {
-            fileEntities = stream
-                    .skip(1)
-                    .map(Path::toString)
-                    .collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new RuntimeException("Error while reading from " + pathToMusic);
-        }
-        return fileEntities;
     }
 
     @Override
