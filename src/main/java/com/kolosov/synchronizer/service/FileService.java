@@ -3,6 +3,7 @@ package com.kolosov.synchronizer.service;
 import com.kolosov.synchronizer.domain.AbstractSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.TreeSync;
+import com.kolosov.synchronizer.repository.FileSyncRepository;
 import com.kolosov.synchronizer.repository.FolderSyncRepository;
 import com.kolosov.synchronizer.repository.TreeSyncRepository;
 import com.kolosov.synchronizer.utils.SyncUtils;
@@ -21,6 +22,7 @@ public class FileService {
 
     private final DirectOperationsService directOperations;
     private final FolderSyncRepository folderSyncRepository;
+    private final FileSyncRepository fileSyncRepository;
     private final TreeSyncRepository treeSyncRepository;
 
     /*
@@ -51,23 +53,35 @@ public class FileService {
      }*/
     public void deleteById(Long id) {
         //TODO Создать свой эксепшен?
-        AbstractSync abstractSyncToDelete = folderSyncRepository.findById(id).orElseThrow(RuntimeException::new);
-        deleteSync(abstractSyncToDelete);
+        Optional<FolderSync> folderSyncOpt = folderSyncRepository.findById(id);
+        folderSyncOpt.ifPresentOrElse(
+                this::deleteSync,
+                () -> fileSyncRepository.findById(id).ifPresentOrElse(
+                        this::deleteSync,
+                        () -> {
+                            throw new RuntimeException();
+                        }));
     }
 
-    private void deleteSync(AbstractSync abstractSync) {
-        directOperations.deleteFile(abstractSync);
-        TreeSync treeSync = getTreeSync();
-        Optional<AbstractSync> syncFromDB = SyncUtils.getAbstractSyncFromTree(abstractSync, treeSync);
-        syncFromDB.ifPresentOrElse(sync -> {
-                    sync.parent.list.remove(sync);
-                    directOperations.deleteFile(sync);
-                },
-                () -> {
-                    throw new RuntimeException("Not Found In Tree");
-                }
-        );
-        treeSyncRepository.save(treeSync);
+    private void deleteSync(AbstractSync syncToDelete) {
+        directOperations.deleteFile(syncToDelete);
+        cleanTree(syncToDelete);
+    }
+
+    private void cleanTree(AbstractSync syncToDelete) {
+        FolderSync parentSync = syncToDelete.parent;
+        if (parentSync != null) {
+            parentSync.list.remove(syncToDelete);
+            folderSyncRepository.save(parentSync);
+        } else {
+            TreeSync treeSync = getTreeSync();
+            boolean remove = treeSync.folderSyncs.remove(syncToDelete);
+            if (!remove) {
+                throw new RuntimeException("Error With deleting");
+            }
+            treeSyncRepository.save(treeSync);
+            //TODO удалять и AbstractSync
+        }
     }
 
     public List<FolderSync> getEmptyFolders() {
@@ -82,8 +96,6 @@ public class FileService {
         for (AbstractSync sync : syncs) {
             deleteSync(sync);
         }
-
-        //TODO clean the tree
     }
 
     public void refresh() {

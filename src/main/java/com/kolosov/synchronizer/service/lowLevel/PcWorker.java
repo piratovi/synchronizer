@@ -54,11 +54,7 @@ public class PcWorker implements LowLevelWorker {
     @Override
     @SneakyThrows
     public void deleteFile(AbstractSync sync) {
-//        if (sync instanceof FolderSync) {
-            FileSystemUtils.deleteRecursively(Path.of(Utils.getAbsolutePath(sync)));
-//        } else {
-//            Files.delete(Path.of(Utils.getAbsolutePath(sync)));
-//        }
+        FileSystemUtils.deleteRecursively(Path.of(Utils.getAbsolutePath(sync)));
     }
 
     @Override

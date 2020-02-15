@@ -9,9 +9,4 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 public interface FolderSyncRepository extends JpaRepository<FolderSync, Long> {
-
-//    List<FolderSync> findAllByLocation(Location location);
-
-//    @Transactional
-//    void deleteAllByLocation(Location location);
 }
