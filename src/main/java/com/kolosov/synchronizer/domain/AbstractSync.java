@@ -1,14 +1,21 @@
 package com.kolosov.synchronizer.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.kolosov.synchronizer.enums.Location;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import org.hibernate.annotations.LazyToOne;
+import org.hibernate.annotations.LazyToOneOption;
+
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -18,6 +25,14 @@ import javax.validation.constraints.NotBlank;
 @Entity
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type",
+        visible = true)
+@JsonSubTypes({
+        @Type(value = FolderSync.class, name = "folder"),
+        @Type(value = FileSync.class, name = "file")})
 public abstract class AbstractSync {
 
     @Id
@@ -41,7 +56,7 @@ public abstract class AbstractSync {
     @Column
     public Boolean existOnPhone;
 
-    @ManyToOne
+    @ManyToOne()
     @JsonIgnore
     public FolderSync parent;
 

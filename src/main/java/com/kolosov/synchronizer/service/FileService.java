@@ -2,8 +2,10 @@ package com.kolosov.synchronizer.service;
 
 import com.kolosov.synchronizer.domain.AbstractSync;
 import com.kolosov.synchronizer.domain.FolderSync;
-import com.kolosov.synchronizer.enums.Location;
+import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.repository.FolderSyncRepository;
+import com.kolosov.synchronizer.repository.TreeSyncRepository;
+import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,84 +20,91 @@ import java.util.stream.Collectors;
 public class FileService {
 
     private final DirectOperationsService directOperations;
-    private final FolderSyncRepository repository;
+    private final FolderSyncRepository folderSyncRepository;
+    private final TreeSyncRepository treeSyncRepository;
 
-    public List<FolderSync> createFileEntities() {
-        List<FolderSync> mergedList = directOperations.getMergedList();
-        mergedList.forEach(repository::save);
-        return mergedList;
-    }
+    /*
+         Работа с расширениями файлов
+     public Set<String> getExtensions(Location location) {
+         List<AbstractSync> fileEntities = getFileEntitiesByLocation(location);
+         Map<String, List<AbstractSync>> fileEntitiesSeparatedByExtensions = separateFileEntitiesByExtensions(fileEntities);
+         return fileEntitiesSeparatedByExtensions.keySet();
+     }
 
-    public Set<String> getExtensions(Location location) {
-        List<AbstractSync> fileEntities = getFileEntitiesByLocation(location);
-        Map<String, List<AbstractSync>> fileEntitiesSeparatedByExtensions = separateFileEntitiesByExtensions(fileEntities);
-        return fileEntitiesSeparatedByExtensions.keySet();
-    }
+     public List<AbstractSync> getFileEntitiesWithExt(Location location, String ext) {
+         List<AbstractSync> fileEntities = getFileEntitiesByLocation(location);
+         Map<String, List<AbstractSync>> fileEntitiesSeparatedByExtensions = separateFileEntitiesByExtensions(fileEntities);
+         return fileEntitiesSeparatedByExtensions.get(ext);
 
-    public List<AbstractSync> getFileEntitiesWithExt(Location location, String ext) {
-        List<AbstractSync> fileEntities = getFileEntitiesByLocation(location);
-        Map<String, List<AbstractSync>> fileEntitiesSeparatedByExtensions = separateFileEntitiesByExtensions(fileEntities);
-        return fileEntitiesSeparatedByExtensions.get(ext);
+     }
 
-    }
+     private Map<String, List<AbstractSync>> separateFileEntitiesByExtensions(List<AbstractSync> fileEntities) {
+         return fileEntities.stream()
+                 .filter(AbstractSync::getIsFile)
+                 .collect(Collectors.groupingBy(AbstractSync::getExt, Collectors.toList()));
+         throw new RuntimeException("not implemented");
+     }
 
-    private Map<String, List<AbstractSync>> separateFileEntitiesByExtensions(List<AbstractSync> fileEntities) {
-//        return fileEntities.stream()
-//                .filter(AbstractSync::getIsFile)
-//                .collect(Collectors.groupingBy(AbstractSync::getExt, Collectors.toList()));
-        throw new RuntimeException("not implemented");
-    }
-
+     public void deleteExtAll(Location location, String ext) {
+         List<AbstractSync> fileEntitiesWithExt = getFileEntitiesWithExt(location, ext);
+         deleteFileEntities(fileEntitiesWithExt);
+     }*/
     public void deleteById(Long id) {
         //TODO Создать свой эксепшен?
-        AbstractSync abstractSyncToDelete = repository.findById(id).orElseThrow(RuntimeException::new);
-        deleteFileEntity(abstractSyncToDelete);
+        AbstractSync abstractSyncToDelete = folderSyncRepository.findById(id).orElseThrow(RuntimeException::new);
+        deleteSync(abstractSyncToDelete);
     }
 
-    public void deleteExtAll(Location location, String ext) {
-        List<AbstractSync> fileEntitiesWithExt = getFileEntitiesWithExt(location, ext);
-        deleteFileEntities(fileEntitiesWithExt);
-    }
-
-    private void deleteFileEntity(AbstractSync abstractSync) {
+    private void deleteSync(AbstractSync abstractSync) {
         directOperations.deleteFile(abstractSync);
-//        repository.delete(abstractSync);
+        TreeSync treeSync = getTreeSync();
+        Optional<AbstractSync> syncFromDB = SyncUtils.getAbstractSyncFromTree(abstractSync, treeSync);
+        syncFromDB.ifPresentOrElse(sync -> {
+                    sync.parent.list.remove(sync);
+                    directOperations.deleteFile(sync);
+                },
+                () -> {
+                    throw new RuntimeException("Not Found In Tree");
+                }
+        );
+        treeSyncRepository.save(treeSync);
     }
 
-    public List<AbstractSync> getEmptyFolders(Location location) {
-//        return repository.findAllByLocation(location).stream()
-//                .filter(fileEntity -> !fileEntity.isFile)
-//                .filter(fileEntity -> {
-//                    File file = new File(fileEntity.relativePath);
-//                    return Objects.requireNonNull(file.listFiles()).length == 0;
-//                })
-//                .collect(Collectors.toList());
-        throw new RuntimeException("not implemented");
+    public List<FolderSync> getEmptyFolders() {
+        return SyncUtils.getEmptyFolders(getTreeSync());
     }
 
-    public void deleteEmptyFolders(Location location) {
-        deleteFileEntities(getEmptyFolders(location));
+    public void deleteEmptyFolders() {
+        deleteSyncs(getEmptyFolders());
     }
 
-    private void deleteFileEntities(List<AbstractSync> fileEntities) {
-        for (AbstractSync abstractSync : fileEntities) {
-            deleteFileEntity(abstractSync);
+    private void deleteSyncs(List<? extends AbstractSync> syncs) {
+        for (AbstractSync sync : syncs) {
+            deleteSync(sync);
         }
+
+        //TODO clean the tree
     }
 
-    public void refresh(Location location) {
-//        log.info("refresh " + location + " start");
-//        repository.deleteAllByLocation(location);
-//        createFileEntities(location);
-//        log.info("refresh " + location + " done");
+    public void refresh() {
+        log.info("refresh start");
+        treeSyncRepository.deleteAll();
+        createTreeSync();
+        log.info("refresh done");
     }
 
-    public List<AbstractSync> onlyOnLocation(Location location) {
+    private void createTreeSync() {
+        List<FolderSync> mergedList = directOperations.getMergedList();
+        TreeSync treeSync = new TreeSync(mergedList);
+        treeSyncRepository.save(treeSync);
+    }
+
+    /*public List<AbstractSync> onlyOnLocation(Location location) {
         List<Location> locations = new ArrayList<>(Arrays.asList(Location.values()));
         locations.remove(location);
         Location anotherLocation = locations.get(0);
-        return subtract(getFileEntitiesByLocation(location), getFileEntitiesByLocation(anotherLocation));
-    }
+        return subtract(getSyncs(location), getSyncs(anotherLocation));
+    }*/
 
     private static List<AbstractSync> subtract(List<AbstractSync> list1, List<AbstractSync> list2) {
         List<AbstractSync> diff = new ArrayList<>(list1);
@@ -104,9 +113,8 @@ public class FileService {
                 .collect(Collectors.toList());
     }
 
-    public List<AbstractSync> getFileEntitiesByLocation(Location location) {
-//        return repository.findAllByLocation(location);
-        return null;
+    public TreeSync getTreeSync() {
+        return treeSyncRepository.findAll().get(0);
     }
 
     public void transferFileEntity(Long id) {

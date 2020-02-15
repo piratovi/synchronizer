@@ -52,6 +52,7 @@ public class FtpWorker implements LowLevelWorker {
         }
     }
 
+    //TODO обработка не подключенного фтп
     @SneakyThrows
     private void ftpConnect() {
         if (!connected) {
@@ -80,7 +81,6 @@ public class FtpWorker implements LowLevelWorker {
         ftpClient.disconnect();
     }
 
-    //TODO Rename
     @Override
     @SneakyThrows
     public List<FolderSync> collectSyncs() {
@@ -126,11 +126,15 @@ public class FtpWorker implements LowLevelWorker {
 
     @Override
     @SneakyThrows
-    public void deleteFile(AbstractSync abstractSync) {
+    public void deleteFile(AbstractSync sync) {
         ftpConnect();
-        String pathToDelete = Utils.convertPathForFTP(abstractSync.relativePath);
+        String pathToDelete = LocationUtils.getPhoneRootPath() + "/" + Utils.convertPathForFTP(sync.relativePath);
         pathToDelete = new String(pathToDelete.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
-        ftpClient.deleteFile(pathToDelete);
+        if (sync instanceof FolderSync) {
+            removeDirectory(pathToDelete, "");
+        } else {
+            ftpClient.deleteFile(pathToDelete);
+        }
 
     }
 
@@ -168,5 +172,52 @@ public class FtpWorker implements LowLevelWorker {
     @SneakyThrows
     public void closeStream() {
         ftpClient.completePendingCommand();
+    }
+
+
+    public void removeDirectory(String parentDir, String currentDir) throws IOException {
+        String dirToList = parentDir;
+        if (!currentDir.equals("")) {
+            dirToList += "/" + currentDir;
+        }
+
+        FTPFile[] subFiles = ftpClient.listFiles(dirToList);
+
+        if (subFiles != null && subFiles.length > 0) {
+            for (FTPFile aFile : subFiles) {
+                String currentFileName = aFile.getName();
+                if (currentFileName.equals(".") || currentFileName.equals("..")) {
+                    // skip parent directory and the directory itself
+                    continue;
+                }
+                String filePath = parentDir + "/" + currentDir + "/"
+                        + currentFileName;
+                if (currentDir.equals("")) {
+                    filePath = parentDir + "/" + currentFileName;
+                }
+
+                if (aFile.isDirectory()) {
+                    // remove the sub directory
+                    removeDirectory(dirToList, currentFileName);
+                } else {
+                    // delete the file
+                    boolean deleted = ftpClient.deleteFile(filePath);
+                    if (deleted) {
+                        System.out.println("DELETED the file: " + filePath);
+                    } else {
+                        System.out.println("CANNOT delete the file: "
+                                + filePath);
+                    }
+                }
+            }
+
+            // finally, remove the directory itself
+            boolean removed = ftpClient.removeDirectory(dirToList);
+            if (removed) {
+                System.out.println("REMOVED the directory: " + dirToList);
+            } else {
+                System.out.println("CANNOT remove the directory: " + dirToList);
+            }
+        }
     }
 }

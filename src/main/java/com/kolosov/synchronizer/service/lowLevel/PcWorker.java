@@ -7,14 +7,13 @@ import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.utils.LocationUtils;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileSystemUtils;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.kolosov.synchronizer.utils.LocationUtils.PATH;
 
@@ -25,12 +24,12 @@ public class PcWorker implements LowLevelWorker {
     public List<FolderSync> collectSyncs() {
         List<FolderSync> syncList = new ArrayList<>();
         File root = new File(LocationUtils.getPcRootPath());
-        listDirectory(root, syncList, null);
+        processDirectoryRecursively(root, syncList, null);
         return syncList;
     }
 
     //TODO проверка на null
-    public void listDirectory(File parentDir, List<FolderSync> result, FolderSync parentFolderSync) {
+    public void processDirectoryRecursively(File parentDir, List<FolderSync> result, FolderSync parentFolderSync) {
         for (final File file : parentDir.listFiles()) {
             String relativePath = PATH.relativize(file.toPath()).toString();
             String name = file.getName();
@@ -43,7 +42,7 @@ public class PcWorker implements LowLevelWorker {
                     current = new FolderSync(relativePath, name, Location.PC, parentFolderSync);
                     parentFolderSync.list.add(current);
                 }
-                listDirectory(file, result, current);
+                processDirectoryRecursively(file, result, current);
             }
             if (file.isFile()) {
                 FileSync current = new FileSync(relativePath, name, Location.PC, parentFolderSync);
@@ -54,8 +53,12 @@ public class PcWorker implements LowLevelWorker {
 
     @Override
     @SneakyThrows
-    public void deleteFile(AbstractSync abstractSync) {
-        Files.delete(Path.of(LocationUtils.getPcRootPath() + abstractSync.relativePath));
+    public void deleteFile(AbstractSync sync) {
+//        if (sync instanceof FolderSync) {
+            FileSystemUtils.deleteRecursively(Path.of(Utils.getAbsolutePath(sync)));
+//        } else {
+//            Files.delete(Path.of(Utils.getAbsolutePath(sync)));
+//        }
     }
 
     @Override
@@ -67,7 +70,6 @@ public class PcWorker implements LowLevelWorker {
     }
 
     @Override
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @SneakyThrows
     public OutputStream getOutputStreamToFile(AbstractSync abstractSync) {
         FileOutputStream outputStream;

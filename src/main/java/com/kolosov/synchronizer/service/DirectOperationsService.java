@@ -1,12 +1,16 @@
 package com.kolosov.synchronizer.service;
 
 import com.kolosov.synchronizer.domain.AbstractSync;
+import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.enums.Location;
+import com.kolosov.synchronizer.exceptions.FileNotFoundException;
 import com.kolosov.synchronizer.service.lowLevel.FtpWorker;
 import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
 import com.kolosov.synchronizer.service.lowLevel.PcWorker;
+import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -22,34 +26,16 @@ public class DirectOperationsService {
     private final FtpWorker ftpWorker;
     private final PcWorker pcWorker;
 
-
-    public List<FolderSync> getFileEntitiesByLocation(Location location) {
-        if (location.equals(Location.PC)) {
-            return getFileEntities(pcWorker.collectSyncs(), Location.PC);
-        } else {
-            return getFileEntities(ftpWorker.collectSyncs(), Location.PHONE);
+    public void deleteFile(AbstractSync sync) {
+//        if (sync.existOnPhone) {
+//            ftpWorker.deleteFile(sync);
+//        }
+        if (sync.existOnPC) {
+            pcWorker.deleteFile(sync);
         }
-    }
-
-    private List<FolderSync> getFileEntities(List<FolderSync> fileRelativePaths, Location location) {
-//        return fileRelativePaths.stream()
-//                .map(s -> {
-//                    String relativePath = s.getFirst();
-//                    Boolean isFile = s.getSecond();
-//                    String ext = null;
-//                    if (isFile) {
-//                        ext = FilenameUtils.getExtension(relativePath).toLowerCase();
-//                    }
-//                    return new AbstractSync(relativePath, ext, location);
-//                })
-//                .collect(Collectors.toList());
-        return null;
-    }
-
-    public void deleteFile(AbstractSync abstractSync) {
-//        LowLevelWorker worker = getWorkerByLocation(abstractSync.location);
-//        worker.deleteFile(abstractSync);
-        return;
+        if (!sync.existOnPhone && !sync.existOnPC) {
+            throw new FileNotFoundException("File already deleted " + sync.relativePath);
+        }
     }
 
     private LowLevelWorker getWorkerByLocation(Location location) {
@@ -89,29 +75,12 @@ public class DirectOperationsService {
         List<FolderSync> ftpFiles = ftpWorker.collectSyncs();
         List<FolderSync> result = new ArrayList<>(pcFiles);
 
-        List<AbstractSync> flatList = getFlatList(ftpFiles);
+        List<AbstractSync> flatList = SyncUtils.getFlatSyncs(ftpFiles);
         for (AbstractSync sync : flatList) {
             mergeFileWithTree(result, sync);
         }
+        SyncUtils.processExtensions(result);
         return result;
-    }
-
-    private List<AbstractSync> getFlatList(List<FolderSync> ftpFiles) {
-        List<AbstractSync> result = new ArrayList<>();
-        ftpFiles.forEach(sync -> {
-            result.add(sync);
-            getListFromFileRecursively(sync, result);
-        });
-        return result;
-    }
-
-    private void getListFromFileRecursively(FolderSync sync, List<AbstractSync> result) {
-        sync.list.forEach(syncChild -> {
-            result.add(syncChild);
-            if (syncChild instanceof FolderSync) {
-                getListFromFileRecursively((FolderSync) syncChild, result);
-            }
-        });
     }
 
     private void mergeFileWithTree(List<FolderSync> result, AbstractSync sync) {
@@ -163,6 +132,7 @@ public class DirectOperationsService {
         }
         return Optional.empty();
     }
+
 }
 
 
