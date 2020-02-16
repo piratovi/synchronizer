@@ -27,22 +27,15 @@ public class DirectOperationsService {
     private final PcWorker pcWorker;
 
     public void deleteFile(AbstractSync sync) {
-//        if (sync.existOnPhone) {
-//            ftpWorker.deleteFile(sync);
-//        }
-        if (sync.existOnPC) {
-            pcWorker.deleteFile(sync);
-        }
         if (!sync.existOnPhone && !sync.existOnPC) {
             throw new FileNotFoundException("File already deleted " + sync.relativePath);
         }
-    }
-
-    private LowLevelWorker getWorkerByLocation(Location location) {
-        if (Location.PC.equals(location)) {
-            return pcWorker;
+        if (sync.existOnPhone) {
+            ftpWorker.deleteFile(sync);
         }
-        return ftpWorker;
+        if (sync.existOnPC) {
+            pcWorker.deleteFile(sync);
+        }
     }
 
     public void copyFileFromPhoneToPc(AbstractSync abstractSync) {

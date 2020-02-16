@@ -5,6 +5,7 @@ import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.utils.LocationUtils;
+import com.kolosov.synchronizer.utils.LowLevelUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.net.ftp.FTP;
@@ -128,7 +129,7 @@ public class FtpWorker implements LowLevelWorker {
     @SneakyThrows
     public void deleteFile(AbstractSync sync) {
         ftpConnect();
-        String pathToDelete = LocationUtils.getPhoneRootPath() + "/" + Utils.convertPathForFTP(sync.relativePath);
+        String pathToDelete = LocationUtils.getPhoneRootPath() + "/" + LowLevelUtils.convertPathForFTP(sync.relativePath);
         pathToDelete = new String(pathToDelete.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
         if (sync instanceof FolderSync) {
             removeDirectory(pathToDelete, "");
@@ -142,7 +143,7 @@ public class FtpWorker implements LowLevelWorker {
     @Override
     public InputStream getInputStreamFromFile(AbstractSync abstractSync) {
         String relativePath = abstractSync.relativePath;
-        relativePath = Utils.convertPathForFTP(relativePath);
+        relativePath = LowLevelUtils.convertPathForFTP(relativePath);
         return ftpClient.retrieveFileStream(relativePath);
     }
 
@@ -150,7 +151,7 @@ public class FtpWorker implements LowLevelWorker {
     @Override
     public OutputStream getOutputStreamToFile(AbstractSync abstractSync) {
         String relativePath = abstractSync.relativePath;
-        relativePath = Utils.convertPathForFTP(relativePath);
+        relativePath = LowLevelUtils.convertPathForFTP(relativePath);
         prepareCatalogs(relativePath);
         return ftpClient.storeFileStream(relativePath);
     }

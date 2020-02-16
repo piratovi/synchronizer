@@ -1,17 +1,8 @@
 package com.kolosov.synchronizer.controller;
 
-import com.kolosov.synchronizer.domain.AbstractSync;
-import com.kolosov.synchronizer.enums.Location;
-import com.kolosov.synchronizer.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.util.List;
-import java.util.Set;
 
 @Controller
 @RequestMapping("files")

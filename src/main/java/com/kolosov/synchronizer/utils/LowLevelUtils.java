@@ -1,17 +1,17 @@
-package com.kolosov.synchronizer.service.lowLevel;
+package com.kolosov.synchronizer.utils;
 
 import com.kolosov.synchronizer.domain.AbstractSync;
 import com.kolosov.synchronizer.utils.LocationUtils;
 
 import java.io.File;
 
-public class Utils {
+public class LowLevelUtils {
 
     public static String convertPathForFTP(String relativePath) {
         return relativePath.replaceAll("\\\\", "/");
     }
 
-    static String getAbsolutePath(AbstractSync abstractSync) {
+    public static String getAbsolutePath(AbstractSync abstractSync) {
         return LocationUtils.getPcRootPath() + File.separator + abstractSync.relativePath;
     }
 }

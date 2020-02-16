@@ -5,12 +5,12 @@ import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.utils.LocationUtils;
+import com.kolosov.synchronizer.utils.LowLevelUtils;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,14 +54,14 @@ public class PcWorker implements LowLevelWorker {
     @Override
     @SneakyThrows
     public void deleteFile(AbstractSync sync) {
-        FileSystemUtils.deleteRecursively(Path.of(Utils.getAbsolutePath(sync)));
+        FileSystemUtils.deleteRecursively(Path.of(LowLevelUtils.getAbsolutePath(sync)));
     }
 
     @Override
     @SneakyThrows
     public InputStream getInputStreamFromFile(AbstractSync abstractSync) {
         FileInputStream fileInputStream;
-        fileInputStream = new FileInputStream(Utils.getAbsolutePath(abstractSync));
+        fileInputStream = new FileInputStream(LowLevelUtils.getAbsolutePath(abstractSync));
         return fileInputStream;
     }
 
@@ -69,7 +69,7 @@ public class PcWorker implements LowLevelWorker {
     @SneakyThrows
     public OutputStream getOutputStreamToFile(AbstractSync abstractSync) {
         FileOutputStream outputStream;
-        String absolutePath = Utils.getAbsolutePath(abstractSync);
+        String absolutePath = LowLevelUtils.getAbsolutePath(abstractSync);
         File file = new File(absolutePath);
         file.getParentFile().mkdirs();
         outputStream = new FileOutputStream(file);
