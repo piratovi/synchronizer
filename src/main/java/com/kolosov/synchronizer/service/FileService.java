@@ -3,8 +3,7 @@ package com.kolosov.synchronizer.service;
 import com.kolosov.synchronizer.domain.AbstractSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.TreeSync;
-import com.kolosov.synchronizer.repository.FileSyncRepository;
-import com.kolosov.synchronizer.repository.FolderSyncRepository;
+import com.kolosov.synchronizer.repository.SyncRepository;
 import com.kolosov.synchronizer.repository.TreeSyncRepository;
 import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +20,8 @@ import java.util.stream.Collectors;
 public class FileService {
 
     private final DirectOperationsService directOperations;
-    private final FolderSyncRepository folderSyncRepository;
-    private final FileSyncRepository fileSyncRepository;
     private final TreeSyncRepository treeSyncRepository;
+    private final SyncRepository syncRepository;
 
     /*
          Работа с расширениями файлов
@@ -53,14 +51,12 @@ public class FileService {
      }*/
     public void deleteById(Long id) {
         //TODO Создать свой эксепшен?
-        Optional<FolderSync> folderSyncOpt = folderSyncRepository.findById(id);
-        folderSyncOpt.ifPresentOrElse(
+        Optional<AbstractSync> syncOpt = syncRepository.findById(id);
+        syncOpt.ifPresentOrElse(
                 this::deleteSync,
-                () -> fileSyncRepository.findById(id).ifPresentOrElse(
-                        this::deleteSync,
-                        () -> {
-                            throw new RuntimeException();
-                        }));
+                () -> {
+                    throw new RuntimeException();
+                });
     }
 
     private void deleteSync(AbstractSync syncToDelete) {
@@ -72,7 +68,7 @@ public class FileService {
         FolderSync parentSync = syncToDelete.parent;
         if (parentSync != null) {
             parentSync.list.remove(syncToDelete);
-            folderSyncRepository.save(parentSync);
+            syncRepository.save(parentSync);
         } else {
             TreeSync treeSync = getTreeSync();
             boolean remove = treeSync.folderSyncs.remove(syncToDelete);
@@ -101,6 +97,7 @@ public class FileService {
     public void refresh() {
         log.info("refresh start");
         treeSyncRepository.deleteAll();
+        syncRepository.deleteAll();
         createTreeSync();
         log.info("refresh done");
     }
@@ -129,18 +126,16 @@ public class FileService {
         return treeSyncRepository.findAll().get(0);
     }
 
-    public void transferFileEntity(Long id) {
-//        AbstractSync abstractSync = repository.findById(id).orElseThrow(RuntimeException::new);
-//        AbstractSync transferredEntity;
-//        if (Location.PC.equals(abstractSync.location)) {
-//            directOperations.copyFileFromPcToPhone(abstractSync);
-//            transferredEntity = new AbstractSync(abstractSync.relativePath, abstractSync.ext, Location.PHONE);
-//        } else {
-//            directOperations.copyFileFromPhoneToPc(abstractSync);
-//            transferredEntity = new AbstractSync(abstractSync.relativePath, abstractSync.ext, Location.PC);
-//        }
-//        repository.save(transferredEntity);
-        throw new RuntimeException("not implemented");
+    public void transferSync(Long id) {
+        AbstractSync sync = syncRepository.findById(id).orElseThrow();
+        if (sync.existOnPC && sync.existOnPhone || !sync.existOnPC && !sync.existOnPhone) {
+            throw new RuntimeException();
+        }
+        if (sync.existOnPC) {
+            directOperations.copyFileFromPcToPhone(sync);
+        } else {
+            directOperations.copyFileFromPhoneToPc(sync);
+        }
     }
 
 }
