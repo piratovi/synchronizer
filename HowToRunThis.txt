@@ -10,3 +10,11 @@ http://localhost:8080/
 Пути к рутовым папкам с музыкой меняются в application.properties
 location.path.pc = E:\\Music
 location.path.phone = /Music
+
+Front:
+
+Должен быть установлен node.js npm
+
+В папке проекта сделать npm install
+
+Затем запустить локальный сервер вию npm run serve
