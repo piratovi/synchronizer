@@ -23,7 +23,6 @@ import javax.validation.constraints.NotBlank;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
         property = "type",
         visible = true)
 @JsonSubTypes({
@@ -46,10 +45,10 @@ public abstract class AbstractSync {
     @NonNull
     public String name;
 
-    @Column
+    @Column(nullable = false)
     public Boolean existOnPC;
 
-    @Column
+    @Column(nullable = false)
     public Boolean existOnPhone;
 
     @ManyToOne()

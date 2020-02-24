@@ -1,11 +1,14 @@
 package com.kolosov.synchronizer.service;
 
 import com.kolosov.synchronizer.ExtensionStat;
+import com.kolosov.synchronizer.HistorySync;
 import com.kolosov.synchronizer.domain.AbstractSync;
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.TreeSync;
+import com.kolosov.synchronizer.enums.ProposedAction;
 import com.kolosov.synchronizer.exceptions.SyncNotFoundException;
+import com.kolosov.synchronizer.repository.HistorySyncRepository;
 import com.kolosov.synchronizer.repository.SyncRepository;
 import com.kolosov.synchronizer.repository.TreeSyncRepository;
 import com.kolosov.synchronizer.utils.SyncUtils;
@@ -16,6 +19,9 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.kolosov.synchronizer.enums.ProposedAction.DELETE;
+import static com.kolosov.synchronizer.enums.ProposedAction.TRANSFER;
+
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +31,7 @@ public class SyncService {
     private final DirectOperationsService directOperations;
     private final TreeSyncRepository treeSyncRepository;
     private final SyncRepository syncRepository;
+    private final HistorySyncRepository historySyncRepository;
 
     public void deleteById(Long id) {
         //TODO Создать свой эксепшен?
@@ -73,16 +80,56 @@ public class SyncService {
 
     public void refresh() {
         log.info("refresh start");
+        TreeSync treeSyncOld = getTreeSync();
         treeSyncRepository.deleteAll();
         syncRepository.deleteAll();
-        createTreeSync();
+        historySyncRepository.deleteAll();
+        List<FolderSync> mergedList = directOperations.getMergedList();
+        TreeSync treeSyncNew = new TreeSync(mergedList);
+//        createHistorySyncs(treeSyncOld, treeSyncNew);
+        treeSyncRepository.save(treeSyncNew);
         log.info("refresh done");
     }
 
-    private void createTreeSync() {
-        List<FolderSync> mergedList = directOperations.getMergedList();
-        TreeSync treeSync = new TreeSync(mergedList);
-        treeSyncRepository.save(treeSync);
+    private void createHistorySyncs(TreeSync oldTreeSync, TreeSync newTreeSync) {
+        Map<String, AbstractSync> oldSyncs = SyncUtils.getFlatSyncs(oldTreeSync.folderSyncs).stream()
+                .collect(Collectors.toMap(sync -> sync.relativePath, sync -> sync));
+
+        List<HistorySync> oldHistorySyncs = oldTreeSync.getHistorySyncs();
+
+        SyncUtils.getFlatSyncs(newTreeSync.folderSyncs).forEach(newSync -> {
+            if (oldSyncs.containsKey(newSync.relativePath)) {
+                AbstractSync oldSync = oldSyncs.get(newSync.relativePath);
+
+                Optional<HistorySync> oldHistorySync = getOldHistorySync(oldHistorySyncs, newSync);
+
+                if (syncTransferred(oldSync) && syncNotTransferred(newSync)) {
+                    ProposedAction newAction = DELETE;
+                    if (oldHistorySync.isPresent()) {
+                        if (oldHistorySync.get().action.equals(newAction)) {
+                            newTreeSync.historySyncs.add(new HistorySync(newSync, newAction));
+                        }
+                    } else {
+                        newTreeSync.historySyncs.add(new HistorySync(newSync, newAction));
+                    }
+                }
+            } else {
+                newTreeSync.historySyncs.add(new HistorySync(newSync, TRANSFER));
+            }
+        });
+    }
+
+    private Optional<HistorySync> getOldHistorySync(List<HistorySync> oldHistorySyncs, AbstractSync newSync) {
+        return oldHistorySyncs.stream()
+                .filter(historySync -> historySync.getSync().equals(newSync)).findFirst();
+    }
+
+    private boolean syncNotTransferred(AbstractSync newSync) {
+        return newSync.existOnPhone != newSync.existOnPC;
+    }
+
+    private boolean syncTransferred(AbstractSync oldSync) {
+        return oldSync.existOnPhone && oldSync.existOnPC;
     }
 
     private static List<AbstractSync> subtract(List<AbstractSync> list1, List<AbstractSync> list2) {
@@ -93,7 +140,11 @@ public class SyncService {
     }
 
     public TreeSync getTreeSync() {
-        return treeSyncRepository.findAll().get(0);
+        List<TreeSync> trees = treeSyncRepository.findAll();
+        if (!trees.isEmpty()) {
+            return trees.get(0);
+        }
+        return new TreeSync();
     }
 
     public void transferSync(Long id) {

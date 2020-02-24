@@ -16,10 +16,10 @@ public class SyncUtils {
 
     public static List<AbstractSync> getFlatSyncs(List<FolderSync> folderSyncs) {
         List<AbstractSync> result = new ArrayList<>();
-        folderSyncs.forEach(sync -> {
-            result.add(sync);
-            getNestedSyncsRecursively(sync, result);
-        });
+            folderSyncs.forEach(sync -> {
+                result.add(sync);
+                getNestedSyncsRecursively(sync, result);
+            });
         return result;
     }
 

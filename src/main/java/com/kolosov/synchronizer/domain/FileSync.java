@@ -12,17 +12,11 @@ import javax.persistence.Entity;
 @NoArgsConstructor
 public class FileSync extends AbstractSync {
 
-    @Column
+    @Column(nullable = false)
     public String ext;
 
     public FileSync(String relativePath, String name, Location location, FolderSync folder) {
         super(relativePath, name, location, folder);
     }
 
-    @Override
-    public String toString() {
-        return "FileItem{" +
-                relativePath + '\'' +
-                '}';
-    }
 }
