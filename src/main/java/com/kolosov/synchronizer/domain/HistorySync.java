@@ -1,16 +1,10 @@
-package com.kolosov.synchronizer;
+package com.kolosov.synchronizer.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.kolosov.synchronizer.domain.AbstractSync;
 import com.kolosov.synchronizer.enums.ProposedAction;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;

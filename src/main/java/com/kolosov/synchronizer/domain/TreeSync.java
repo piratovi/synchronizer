@@ -1,7 +1,6 @@
 package com.kolosov.synchronizer.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.kolosov.synchronizer.HistorySync;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

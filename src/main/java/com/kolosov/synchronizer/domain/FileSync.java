@@ -19,4 +19,10 @@ public class FileSync extends AbstractSync {
         super(relativePath, name, location, folder);
     }
 
+    @Override
+    public String toString() {
+        return "FileSync{" +
+                "relativePath='" + relativePath + '\'' +
+                '}';
+    }
 }

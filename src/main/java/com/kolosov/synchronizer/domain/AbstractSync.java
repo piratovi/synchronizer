@@ -34,7 +34,7 @@ public abstract class AbstractSync {
     @GeneratedValue
     public Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     @NotBlank
     @EqualsAndHashCode.Include
     @NonNull

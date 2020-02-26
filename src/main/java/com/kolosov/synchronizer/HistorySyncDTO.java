@@ -1,5 +1,6 @@
 package com.kolosov.synchronizer;
 
+import com.kolosov.synchronizer.domain.HistorySync;
 import com.kolosov.synchronizer.enums.ProposedAction;
 
 public class HistorySyncDTO {

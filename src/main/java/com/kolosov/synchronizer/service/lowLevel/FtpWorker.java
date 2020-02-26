@@ -56,6 +56,9 @@ public class FtpWorker implements LowLevelWorker {
     //TODO обработка не подключенного фтп
     @SneakyThrows
     private void ftpConnect() {
+        if (ftpClient.isConnected()) {
+            connected = false;
+        }
         if (!connected) {
             ftpClient.connect(ftpServerUrl, ftpServerPort);
             ftpClient.login(username, password);

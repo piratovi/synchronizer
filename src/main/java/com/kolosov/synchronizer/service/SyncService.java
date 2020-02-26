@@ -1,7 +1,7 @@
 package com.kolosov.synchronizer.service;
 
 import com.kolosov.synchronizer.ExtensionStat;
-import com.kolosov.synchronizer.HistorySync;
+import com.kolosov.synchronizer.domain.HistorySync;
 import com.kolosov.synchronizer.domain.AbstractSync;
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.kolosov.synchronizer.enums.ProposedAction.DELETE;
@@ -81,19 +82,20 @@ public class SyncService {
     public void refresh() {
         log.info("refresh start");
         TreeSync treeSyncOld = getTreeSync();
+        List<FolderSync> mergedList = directOperations.getMergedList();
+        TreeSync treeSyncNew = new TreeSync(mergedList);
+        createHistorySyncs(treeSyncOld, treeSyncNew);
         treeSyncRepository.deleteAll();
         syncRepository.deleteAll();
         historySyncRepository.deleteAll();
-        List<FolderSync> mergedList = directOperations.getMergedList();
-        TreeSync treeSyncNew = new TreeSync(mergedList);
-//        createHistorySyncs(treeSyncOld, treeSyncNew);
         treeSyncRepository.save(treeSyncNew);
         log.info("refresh done");
     }
 
     private void createHistorySyncs(TreeSync oldTreeSync, TreeSync newTreeSync) {
+        //TODO посмотреть че там с мерджконфликтом
         Map<String, AbstractSync> oldSyncs = SyncUtils.getFlatSyncs(oldTreeSync.folderSyncs).stream()
-                .collect(Collectors.toMap(sync -> sync.relativePath, sync -> sync));
+                .collect(Collectors.toMap(sync -> sync.relativePath, Function.identity(), (abstractSync1, abstractSync2) -> abstractSync1));
 
         List<HistorySync> oldHistorySyncs = oldTreeSync.getHistorySyncs();
 
