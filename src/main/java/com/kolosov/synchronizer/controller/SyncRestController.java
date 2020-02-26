@@ -49,10 +49,17 @@ public class SyncRestController {
     }
 
     @GetMapping("/refresh")
-    public ResponseEntity<Void> refresh() {
+    public ResponseEntity<String> refresh() {
         syncService.refresh();
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>("refresh", HttpStatus.OK);
     }
+
+    @GetMapping("/clear")
+    public ResponseEntity<String> clear() {
+        syncService.clear();
+        return new ResponseEntity<>("clear", HttpStatus.OK);
+    }
+
 
     @GetMapping("/emptyFolders")
     public ResponseEntity<List<FolderSync>> emptyFolders() {

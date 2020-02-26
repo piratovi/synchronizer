@@ -172,5 +172,9 @@ public class SyncService {
                 .map(entry -> new ExtensionStat(entry.getKey(), entry.getValue().size(), entry.getValue()))
                 .collect(Collectors.toList());
     }
+
+    public void clear() {
+        treeSyncRepository.deleteAll();
+    }
 }
 
