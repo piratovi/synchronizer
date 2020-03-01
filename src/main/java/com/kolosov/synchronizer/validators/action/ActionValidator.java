@@ -7,6 +7,7 @@ import com.kolosov.synchronizer.enums.ProposedAction;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.kolosov.synchronizer.enums.ProposedAction.NOTHING;
 import static com.kolosov.synchronizer.enums.ProposedAction.TRANSFER;
 
 public class ActionValidator {
@@ -16,7 +17,10 @@ public class ActionValidator {
         if (oldSync != null) {
             return OldSyncValidator.validate(newSync, oldHistorySyncOpt, oldFlatSyncs, oldSync);
         }
-        return TRANSFER;
+        if (newSync.existOnPC != newSync.existOnPhone) {
+            return TRANSFER;
+        }
+        return NOTHING;
     }
 
 }
