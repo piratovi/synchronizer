@@ -9,7 +9,7 @@
           </span>
         </label>
       </div>
-      <div class="title">{{name}}<span class="titlePath" :title="path">!</span></div>
+      <div class="title">{{names}}<span class="titlePath" :title="path">!</span></div>
     </div>
     <div class="actionBlocks">
       <div class="actionBlock"><a href="#" class="action action-delete">Удалить</a></div>
@@ -21,7 +21,7 @@
 <script>
   export default {
     props: {
-        name: String,
+        names: String,
         sync: Boolean,
         path: String,
         id: Number

@@ -1,7 +1,7 @@
 <template>
   <li class="item directory">
     <div class="itemWrapper">
-      <dir-info :name="name" :id="id" :sync="sync" :path="path"></dir-info>
+      <dir-info :names="names" :id="id" :sync="sync" :path="path"></dir-info>
       <list-music :list="list"></list-music>
     </div>
   </li>
@@ -18,7 +18,7 @@
           dirInfo
       },
       props: {
-          name: String,
+          names: String,
           sync: Boolean,
           path: String,
           id: Number,
