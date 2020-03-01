@@ -98,8 +98,4 @@ public class SyncRestController {
         return new ResponseEntity<>(extensionStat, HttpStatus.OK);
     }
 
-    @PostMapping("/transfertest")
-    public ResponseEntity<List<Long>> transfertest(@RequestBody List<Long> ids) {
-        return new ResponseEntity<>(ids, HttpStatus.OK);
-    }
 }
