@@ -12,6 +12,7 @@ import com.kolosov.synchronizer.repository.HistorySyncRepository;
 import com.kolosov.synchronizer.repository.SyncRepository;
 import com.kolosov.synchronizer.repository.TreeSyncRepository;
 import com.kolosov.synchronizer.utils.SyncUtils;
+import com.kolosov.synchronizer.validators.action.ActionValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,8 +21,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.kolosov.synchronizer.enums.ProposedAction.DELETE;
-import static com.kolosov.synchronizer.enums.ProposedAction.TRANSFER;
+import static com.kolosov.synchronizer.enums.ProposedAction.NOTHING;
 
 
 @Service
@@ -33,6 +33,11 @@ public class SyncService {
     private final TreeSyncRepository treeSyncRepository;
     private final SyncRepository syncRepository;
     private final HistorySyncRepository historySyncRepository;
+
+    public static Optional<HistorySync> getOldHistorySync(List<HistorySync> oldHistorySyncs, AbstractSync newSync) {
+        return oldHistorySyncs.stream()
+                .filter(historySync -> newSync.equals(historySync.getSync())).findFirst();
+    }
 
     public void deleteById(Long id) {
         //TODO Создать свой эксепшен?
@@ -94,45 +99,23 @@ public class SyncService {
 
     private void createHistorySyncs(TreeSync oldTreeSync, TreeSync newTreeSync) {
         //TODO посмотреть че там с мерджконфликтом
-        Map<String, AbstractSync> oldSyncs = SyncUtils.getFlatSyncs(oldTreeSync.folderSyncs).stream()
-                .collect(Collectors.toMap(sync -> sync.relativePath, Function.identity(), (abstractSync1, abstractSync2) -> abstractSync1));
 
+        Map<String, AbstractSync> oldFlatSyncs = SyncUtils.getFlatSyncs(oldTreeSync.folderSyncs).stream()
+                .collect(Collectors.toMap(sync -> sync.relativePath, Function.identity(), (abstractSync1, abstractSync2) -> abstractSync1));
         List<HistorySync> oldHistorySyncs = oldTreeSync.getHistorySyncs();
 
         SyncUtils.getFlatSyncs(newTreeSync.folderSyncs).forEach(newSync -> {
-            if (oldSyncs.containsKey(newSync.relativePath)) {
-                AbstractSync oldSync = oldSyncs.get(newSync.relativePath);
 
-                Optional<HistorySync> oldHistorySync = getOldHistorySync(oldHistorySyncs, newSync);
+            Optional<HistorySync> oldHistorySync = getOldHistorySync(oldHistorySyncs, newSync);
+            ProposedAction action = ActionValidator.validate(newSync, oldHistorySync, oldFlatSyncs);
 
-                if (syncTransferred(oldSync) && syncNotTransferred(newSync)) {
-                    ProposedAction newAction = DELETE;
-                    if (oldHistorySync.isPresent()) {
-                        if (oldHistorySync.get().action.equals(newAction)) {
-                            newTreeSync.historySyncs.add(new HistorySync(newSync, newAction));
-                        }
-                    } else {
-                        newTreeSync.historySyncs.add(new HistorySync(newSync, newAction));
-                    }
-                }
-            } else {
-                newTreeSync.historySyncs.add(new HistorySync(newSync, TRANSFER));
+            if (action != NOTHING) {
+                newTreeSync.historySyncs.add(new HistorySync(newSync, action));
             }
+
         });
     }
 
-    private Optional<HistorySync> getOldHistorySync(List<HistorySync> oldHistorySyncs, AbstractSync newSync) {
-        return oldHistorySyncs.stream()
-                .filter(historySync -> historySync.getSync().equals(newSync)).findFirst();
-    }
-
-    private boolean syncNotTransferred(AbstractSync newSync) {
-        return newSync.existOnPhone != newSync.existOnPC;
-    }
-
-    private boolean syncTransferred(AbstractSync oldSync) {
-        return oldSync.existOnPhone && oldSync.existOnPC;
-    }
 
     private static List<AbstractSync> subtract(List<AbstractSync> list1, List<AbstractSync> list2) {
         List<AbstractSync> diff = new ArrayList<>(list1);

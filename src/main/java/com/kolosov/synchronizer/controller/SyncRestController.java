@@ -97,4 +97,9 @@ public class SyncRestController {
                 .orElse(null);
         return new ResponseEntity<>(extensionStat, HttpStatus.OK);
     }
+
+    @PostMapping("/transfertest")
+    public ResponseEntity<List<Long>> transfertest(@RequestBody List<Long> ids) {
+        return new ResponseEntity<>(ids, HttpStatus.OK);
+    }
 }
