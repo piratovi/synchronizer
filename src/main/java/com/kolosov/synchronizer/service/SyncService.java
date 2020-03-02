@@ -1,6 +1,6 @@
 package com.kolosov.synchronizer.service;
 
-import com.kolosov.synchronizer.ExtensionStat;
+import com.kolosov.synchronizer.dto.ExtensionStat;
 import com.kolosov.synchronizer.domain.HistorySync;
 import com.kolosov.synchronizer.domain.AbstractSync;
 import com.kolosov.synchronizer.domain.FileSync;
@@ -116,7 +116,6 @@ public class SyncService {
         });
     }
 
-
     private static List<AbstractSync> subtract(List<AbstractSync> list1, List<AbstractSync> list2) {
         List<AbstractSync> diff = new ArrayList<>(list1);
         return diff.stream()
@@ -158,6 +157,49 @@ public class SyncService {
 
     public void clear() {
         treeSyncRepository.deleteAll();
+    }
+
+    public List<FolderSync> getNotSynchronizedSyncs() {
+        TreeSync treeSync = getTreeSync();
+        List<FolderSync> rootFolders = treeSync.folderSyncs;
+        List<AbstractSync> flatSyncs = SyncUtils.getFlatSyncs(rootFolders);
+        flatSyncs.stream()
+                .filter(AbstractSync::isFile)
+                .map(AbstractSync::asFile)
+                .filter(FileSync::isSynchronized)
+                .forEach(FileSync::removeFromParent);
+
+        List<FolderSync> folders = flatSyncs.stream()
+                .filter(AbstractSync::isFolder)
+                .map(AbstractSync::asFolder)
+                .collect(Collectors.toList());
+
+        while (emptyFoldersExists(folders)) {
+            folders.stream()
+                    .filter(FolderSync::isEmpty)
+                    .forEach(folderSync -> {
+                        if (folderSync.hasParent()) {
+                            folderSync.removeFromParent();
+                        } else {
+                            rootFolders.remove(folderSync);
+                        }
+                    });
+            folders = getOnlyEmptyFolders(SyncUtils.getFlatSyncs(rootFolders));
+        }
+        return rootFolders;
+    }
+
+    private boolean emptyFoldersExists(List<FolderSync> flatSyncs) {
+        return flatSyncs.stream()
+                .anyMatch(FolderSync::isEmpty);
+    }
+
+    public static List<FolderSync> getOnlyEmptyFolders(List<? extends AbstractSync> syncs) {
+        return syncs.stream()
+                .filter(AbstractSync::isFolder)
+                .map(AbstractSync::asFolder)
+                .filter(FolderSync::isEmpty)
+                .collect(Collectors.toList());
     }
 }
 

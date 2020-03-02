@@ -1,7 +1,7 @@
 package com.kolosov.synchronizer.controller;
 
-import com.kolosov.synchronizer.ExtensionStat;
-import com.kolosov.synchronizer.HistorySyncDTO;
+import com.kolosov.synchronizer.dto.ExtensionStat;
+import com.kolosov.synchronizer.dto.HistorySyncDTO;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.service.SyncService;
@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,7 @@ public class SyncRestController {
     public String test() {
         return "test";
     }
-    @CrossOrigin
+
     @GetMapping("/syncs")
     public ResponseEntity<List<FolderSync>> getSyncs() {
         TreeSync treeSync = syncService.getTreeSync();
@@ -99,4 +98,9 @@ public class SyncRestController {
         return new ResponseEntity<>(extensionStat, HttpStatus.OK);
     }
 
+    @GetMapping("/syncsNotSynchronized")
+    public ResponseEntity<List<FolderSync>> getNotSynchronizedSyncs() {
+        List<FolderSync> syncs = syncService.getNotSynchronizedSyncs();
+        return new ResponseEntity<>(syncs, HttpStatus.OK);
+    }
 }

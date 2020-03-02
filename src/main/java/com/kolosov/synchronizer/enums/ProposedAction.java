@@ -3,5 +3,6 @@ package com.kolosov.synchronizer.enums;
 public enum ProposedAction {
     DELETE,
     TRANSFER,
-    NOTHING;
+    NOTHING,
+    DELETE_OR_TRANSFER;
 }

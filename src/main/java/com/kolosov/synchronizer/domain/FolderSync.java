@@ -1,5 +1,6 @@
 package com.kolosov.synchronizer.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kolosov.synchronizer.enums.Location;
 import lombok.NoArgsConstructor;
 
@@ -25,5 +26,22 @@ public class FolderSync extends AbstractSync {
         return "FolderSync{" +
                 "relativePath='" + relativePath + '\'' +
                 '}';
+    }
+
+    public void remove(AbstractSync sync) {
+        if (!list.remove(sync)) {
+            throw new RuntimeException("Child Not Found In List");
+        }
+        sync.parent = null;
+    }
+
+    @JsonIgnore
+    public boolean isEmpty() {
+        return list.isEmpty();
+    }
+
+    @JsonIgnore
+    public boolean hasFiles() {
+        return !list.isEmpty();
     }
 }

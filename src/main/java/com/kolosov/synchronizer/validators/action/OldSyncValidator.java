@@ -16,19 +16,11 @@ public class OldSyncValidator {
         if (oldHistorySyncOpt.isPresent()) {
             return oldHistorySyncOpt.get().action;
         } else {
-            if (syncTransferred(oldSync) && syncNotTransferred(newSync)) {
+            if ((oldSync.isSynchronized()) && (newSync.isNotSynchronized())) {
                 return DELETE;
             }
             return NOTHING;
         }
-    }
-
-    private static boolean syncNotTransferred(AbstractSync newSync) {
-        return newSync.existOnPhone != newSync.existOnPC;
-    }
-
-    private static boolean syncTransferred(AbstractSync oldSync) {
-        return oldSync.existOnPhone && oldSync.existOnPC;
     }
 
 }
