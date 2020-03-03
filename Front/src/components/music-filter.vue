@@ -7,11 +7,15 @@
       </div>
       <div class="filterSelect">
         <select name="pack" id="">
-          <option value="all" selected>.*</option>
-          <option value="mp3">.mp3</option>
-          <option value="avi">.avi</option>
+          <option value="all" selected>
+            .*
+          </option>
+          <option v-for="(val,index) in ext" :value="val" :key="val">
+            {{index}}
+          </option>
         </select>
       </div>
+      <div class="actionBlocks"><div class="actionBlock"><a href="#" class="action action-delete">Удалить</a></div><div class="actionBlock"><a href="#" title="SYNC" class="action action-sync">Синхронизировать</a></div></div>
     </div>
   </div>
 </template>
@@ -26,7 +30,7 @@
     state: {
     },
     computed: {
-      ...mapState('music', {items: "items"})
+      ...mapState('music', {ext: "ext"})
     },
     methods: {
       itemConsole() {console.log()},

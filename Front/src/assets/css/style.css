@@ -341,14 +341,17 @@ body {
   display: none;
 }
 .filterWrapper {
-  display: flex;
+  /*display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-between;*/
   padding: 30px 0;
   margin: 30px 0;
   box-sizing: border-box;
   border-top: 2px solid #2F394C;
   border-bottom: 2px solid #2F394C;
+}
+.filterWrapper .actionBlock {
+  margin-bottom: 20px;
 }
 
 .contentPage .actionsTitle {
@@ -500,6 +503,13 @@ body {
 .directoryMusic .dirInfo {
   display: flex;
   align-items: center;
+}
+
+.filterBlock {
+  position: fixed;
+  top: 20%;
+  left: 20px;
+  width: 250px;
 }
 
 /*# sourceMappingURL=style.css.map */

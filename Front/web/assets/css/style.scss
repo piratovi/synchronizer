@@ -128,15 +128,20 @@ $plus: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXd
 }
 
 .filterWrapper {
-  display: flex;
+  /*display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-between;*/
   padding: 30px 0;
   margin: 30px 0;
   box-sizing: border-box;
   border-top: 2px solid $content;
   border-bottom: 2px solid $content;
+  .actionBlock {
+    margin-bottom: 20px;
+  }
 }
+
+
 
 .contentPage {
   .actionsTitle {
@@ -300,3 +305,9 @@ $plus: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXd
 }
 
 
+.filterBlock {
+  position: fixed;
+  top: 20%;
+  left: 20px;
+  width: 250px;
+}
