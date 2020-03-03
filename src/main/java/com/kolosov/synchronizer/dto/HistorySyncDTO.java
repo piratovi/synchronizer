@@ -1,4 +1,4 @@
-package com.kolosov.synchronizer;
+package com.kolosov.synchronizer.dto;
 
 import com.kolosov.synchronizer.domain.HistorySync;
 import com.kolosov.synchronizer.enums.ProposedAction;

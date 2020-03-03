@@ -62,4 +62,41 @@ public abstract class AbstractSync {
         this.existOnPhone = Location.PHONE.equals(location);
         this.parent = parent;
     }
+
+    @JsonIgnore
+    public boolean isNotSynchronized() {
+        return this.existOnPhone != this.existOnPC;
+    }
+
+    @JsonIgnore
+    public boolean isSynchronized() {
+        return this.existOnPhone && this.existOnPC;
+    }
+
+    public void removeFromParent() {
+        this.parent.remove(this);
+    }
+
+    @JsonIgnore
+    public boolean isFile() {
+        return this instanceof FileSync;
+    }
+
+    @JsonIgnore
+    public boolean isFolder() {
+        return this instanceof FolderSync;
+    }
+
+    public FileSync asFile() {
+        return (FileSync) this;
+    }
+
+    public FolderSync asFolder() {
+        return (FolderSync) this;
+    }
+
+    @JsonIgnore
+    public boolean hasParent() {
+        return parent != null;
+    }
 }

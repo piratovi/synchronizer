@@ -44,14 +44,14 @@ public class FtpWorker implements LowLevelWorker {
     public final FTPClient ftpClient = new FTPClient();
     private boolean connected = false;
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void doSomethingAfterStartup() {
-        try {
-            ftpConnect();
-        } catch (Exception e) {
-            log.error("Can't connect to FTP " + e.getMessage());
-        }
-    }
+//    @EventListener(ApplicationReadyEvent.class)
+//    public void doSomethingAfterStartup() {
+//        try {
+//            ftpConnect();
+//        } catch (Exception e) {
+//            log.error("Can't connect to FTP " + e.getMessage());
+//        }
+//    }
 
     //TODO обработка не подключенного фтп
     @SneakyThrows
