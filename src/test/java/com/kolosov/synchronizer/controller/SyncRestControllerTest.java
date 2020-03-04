@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -50,6 +51,18 @@ class SyncRestControllerTest {
         byte[] bytes = jsonMapper.writeValueAsBytes(List.of(81245L));
 
         mockMvc.perform(post("/rest/transfer").contentType(MediaType.APPLICATION_JSON).content(bytes))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+    }
+
+    @Test
+    void deleteTest() throws Exception {
+
+        ObjectMapper jsonMapper = new ObjectMapper();
+        byte[] bytes = jsonMapper.writeValueAsBytes(List.of(218146));
+
+        mockMvc.perform(delete("/rest").contentType(MediaType.APPLICATION_JSON).content(bytes))
                 .andDo(print())
                 .andExpect(status().isOk());
 

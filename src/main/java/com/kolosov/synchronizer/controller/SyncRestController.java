@@ -36,8 +36,8 @@ public class SyncRestController {
 
     @GetMapping("/syncs")
     public ResponseEntity<List<FolderSync>> getSyncs() {
-        TreeSync treeSync = syncService.getTreeSync();
-        return new ResponseEntity<>(treeSync.folderSyncs, HttpStatus.OK);
+        List<FolderSync> syncs = syncService.getNotSynchronizedSyncs();
+        return new ResponseEntity<>(syncs, HttpStatus.OK);
     }
 
     @GetMapping("/actions")
@@ -98,9 +98,4 @@ public class SyncRestController {
         return new ResponseEntity<>(extensionStat, HttpStatus.OK);
     }
 
-    @GetMapping("/syncsNotSynchronized")
-    public ResponseEntity<List<FolderSync>> getNotSynchronizedSyncs() {
-        List<FolderSync> syncs = syncService.getNotSynchronizedSyncs();
-        return new ResponseEntity<>(syncs, HttpStatus.OK);
-    }
 }

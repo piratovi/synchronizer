@@ -12,7 +12,6 @@ import javax.persistence.Entity;
 @NoArgsConstructor
 public class FileSync extends AbstractSync {
 
-    @Column(nullable = false)
     public String ext;
 
     public FileSync(String relativePath, String name, Location location, FolderSync folder) {

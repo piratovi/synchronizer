@@ -65,8 +65,8 @@ public class SyncService {
             if (!remove) {
                 throw new RuntimeException("Error With deleting");
             }
-            treeSyncRepository.save(treeSync);
             syncRepository.delete(syncToDelete);
+            treeSyncRepository.save(treeSync);
         }
     }
 
@@ -90,9 +90,9 @@ public class SyncService {
         List<FolderSync> mergedList = directOperations.getMergedList();
         TreeSync treeSyncNew = new TreeSync(mergedList);
         createHistorySyncs(treeSyncOld, treeSyncNew);
-        treeSyncRepository.deleteAll();
         syncRepository.deleteAll();
         historySyncRepository.deleteAll();
+        treeSyncRepository.deleteAll();
         treeSyncRepository.save(treeSyncNew);
         log.info("refresh done");
     }
@@ -163,35 +163,25 @@ public class SyncService {
         TreeSync treeSync = getTreeSync();
         List<FolderSync> rootFolders = treeSync.folderSyncs;
         List<AbstractSync> flatSyncs = SyncUtils.getFlatSyncs(rootFolders);
+        removeSynchronizedFiles(flatSyncs);
+        removeEmptyFolders(rootFolders);
+        return rootFolders;
+    }
+
+    private void removeSynchronizedFiles(List<AbstractSync> flatSyncs) {
         flatSyncs.stream()
                 .filter(AbstractSync::isFile)
                 .map(AbstractSync::asFile)
                 .filter(FileSync::isSynchronized)
                 .forEach(FileSync::removeFromParent);
-
-        List<FolderSync> folders = flatSyncs.stream()
-                .filter(AbstractSync::isFolder)
-                .map(AbstractSync::asFolder)
-                .collect(Collectors.toList());
-
-        while (emptyFoldersExists(folders)) {
-            folders.stream()
-                    .filter(FolderSync::isEmpty)
-                    .forEach(folderSync -> {
-                        if (folderSync.hasParent()) {
-                            folderSync.removeFromParent();
-                        } else {
-                            rootFolders.remove(folderSync);
-                        }
-                    });
-            folders = getOnlyEmptyFolders(SyncUtils.getFlatSyncs(rootFolders));
-        }
-        return rootFolders;
     }
 
-    private boolean emptyFoldersExists(List<FolderSync> flatSyncs) {
-        return flatSyncs.stream()
-                .anyMatch(FolderSync::isEmpty);
+    private void removeEmptyFolders(List<FolderSync> rootFolders) {
+        List<FolderSync> folders = getOnlyEmptyFolders(SyncUtils.getFlatSyncs(rootFolders));
+        while (!folders.isEmpty()) {
+            removeEmptyFolders(rootFolders, folders);
+            folders = getOnlyEmptyFolders(SyncUtils.getFlatSyncs(rootFolders));
+        }
     }
 
     public static List<FolderSync> getOnlyEmptyFolders(List<? extends AbstractSync> syncs) {
@@ -200,6 +190,18 @@ public class SyncService {
                 .map(AbstractSync::asFolder)
                 .filter(FolderSync::isEmpty)
                 .collect(Collectors.toList());
+    }
+
+    private void removeEmptyFolders(List<FolderSync> rootFolders, List<FolderSync> folders) {
+        folders.stream()
+                .filter(FolderSync::isEmpty)
+                .forEach(folderSync -> {
+                    if (folderSync.hasParent()) {
+                        folderSync.removeFromParent();
+                    } else {
+                        rootFolders.remove(folderSync);
+                    }
+                });
     }
 }
 
