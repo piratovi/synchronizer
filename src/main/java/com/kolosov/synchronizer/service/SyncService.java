@@ -90,8 +90,6 @@ public class SyncService {
         List<FolderSync> mergedList = directOperations.getMergedList();
         TreeSync treeSyncNew = new TreeSync(mergedList);
         createHistorySyncs(treeSyncOld, treeSyncNew);
-        syncRepository.deleteAll();
-        historySyncRepository.deleteAll();
         treeSyncRepository.deleteAll();
         treeSyncRepository.save(treeSyncNew);
         log.info("refresh done");
@@ -101,7 +99,7 @@ public class SyncService {
         //TODO посмотреть че там с мерджконфликтом
 
         Map<String, AbstractSync> oldFlatSyncs = SyncUtils.getFlatSyncs(oldTreeSync.folderSyncs).stream()
-                .collect(Collectors.toMap(sync -> sync.relativePath, Function.identity(), (abstractSync1, abstractSync2) -> abstractSync1));
+                .collect(Collectors.toMap(sync -> sync.relativePath, Function.identity()));
         List<HistorySync> oldHistorySyncs = oldTreeSync.getHistorySyncs();
 
         SyncUtils.getFlatSyncs(newTreeSync.folderSyncs).forEach(newSync -> {

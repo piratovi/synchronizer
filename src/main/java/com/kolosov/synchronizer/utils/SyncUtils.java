@@ -76,4 +76,12 @@ public class SyncUtils {
         }
         return Optional.empty();
     }
+
+    public static FolderSync getRootFolder(AbstractSync sync) {
+        if (sync.parent == null) {
+            return (FolderSync) sync;
+        } else {
+            return getRootFolder(sync.parent);
+        }
+    }
 }

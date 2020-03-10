@@ -22,7 +22,7 @@ public class TreeSync {
     @JsonIgnore
     public Long id;
 
-    @OneToMany(cascade = {CascadeType.ALL})
+    @OneToMany(cascade = CascadeType.ALL)
     public List<FolderSync> folderSyncs = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL)

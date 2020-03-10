@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class FolderSync extends AbstractSync {
 
-    @OneToMany(cascade = {CascadeType.ALL})
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "parent")
     public List<AbstractSync> list = new ArrayList<>();
 
     public FolderSync(String relativePath, String name, Location location, FolderSync folder) {
@@ -43,5 +43,11 @@ public class FolderSync extends AbstractSync {
     @JsonIgnore
     public boolean hasFiles() {
         return !list.isEmpty();
+    }
+
+    @JsonIgnore
+    public void add(AbstractSync sync) {
+        list.add(sync);
+        sync.parent = this;
     }
 }
