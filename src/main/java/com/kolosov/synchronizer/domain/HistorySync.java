@@ -3,6 +3,8 @@ package com.kolosov.synchronizer.domain;
 import com.kolosov.synchronizer.enums.ProposedAction;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -19,6 +21,7 @@ public class HistorySync {
     public Long id;
 
     @OneToOne()
+    @OnDelete(action = OnDeleteAction.CASCADE)
     public AbstractSync sync;
 
     public ProposedAction action;
