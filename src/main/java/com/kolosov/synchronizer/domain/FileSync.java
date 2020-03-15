@@ -4,6 +4,7 @@ import com.kolosov.synchronizer.enums.Location;
 import lombok.NoArgsConstructor;
 import org.springframework.lang.NonNull;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 
 @Entity
@@ -11,6 +12,7 @@ import javax.persistence.Entity;
 public class FileSync extends AbstractSync {
 
     @NonNull
+    @Column(nullable = false)
     public String ext;
 
     public FileSync(String relativePath, String name, Location location, FolderSync folder) {
