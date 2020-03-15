@@ -5,12 +5,10 @@ import com.kolosov.synchronizer.domain.HistorySync;
 import com.kolosov.synchronizer.domain.AbstractSync;
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
-import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.enums.ProposedAction;
 import com.kolosov.synchronizer.exceptions.SyncNotFoundException;
 import com.kolosov.synchronizer.repository.HistorySyncRepository;
 import com.kolosov.synchronizer.repository.SyncRepository;
-import com.kolosov.synchronizer.repository.TreeSyncRepository;
 import com.kolosov.synchronizer.utils.SyncUtils;
 import com.kolosov.synchronizer.validators.action.ActionValidator;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +28,6 @@ import static com.kolosov.synchronizer.enums.ProposedAction.NOTHING;
 public class SyncService {
 
     private final DirectOperationsService directOperations;
-    private final TreeSyncRepository treeSyncRepository;
     private final SyncRepository syncRepository;
     private final HistorySyncRepository historySyncRepository;
 
@@ -51,28 +48,11 @@ public class SyncService {
 
     private void deleteSync(AbstractSync syncToDelete) {
         directOperations.deleteFile(syncToDelete);
-        cleanTree(syncToDelete);
-    }
-
-    private void cleanTree(AbstractSync syncToDelete) {
-        FolderSync parentSync = syncToDelete.parent;
-        if (parentSync != null) {
-            parentSync.list.remove(syncToDelete);
-            syncRepository.save(parentSync);
-        } else {
-            TreeSync treeSync = getTreeSync();
-            boolean remove = treeSync.folderSyncs.remove(syncToDelete);
-            if (!remove) {
-                throw new RuntimeException("Error With deleting");
-            }
-            //TODO check
-//            syncRepository.delete(syncToDelete);
-            treeSyncRepository.save(treeSync);
-        }
+        syncRepository.delete(syncToDelete);
     }
 
     public List<FolderSync> getEmptyFolders() {
-        return SyncUtils.getEmptyFolders(getTreeSync());
+        return SyncUtils.getEmptyFolders(syncRepository.findAllByParentNull());
     }
 
     public void deleteEmptyFolders() {
@@ -87,25 +67,23 @@ public class SyncService {
 
     public void refresh() {
         log.info("refresh start");
-        TreeSync treeSyncOld = getTreeSync();
         List<FolderSync> mergedList = directOperations.getMergedList();
-        TreeSync treeSyncNew = new TreeSync(mergedList);
-        List<HistorySync> newHistorySyncs = createHistorySyncs(treeSyncOld, treeSyncNew);
-        treeSyncRepository.deleteAll();
-        treeSyncRepository.save(treeSyncNew);
+        List<HistorySync> newHistorySyncs = createHistorySyncs(mergedList);
+        syncRepository.deleteAll();
+        syncRepository.saveAll(mergedList);
         historySyncRepository.deleteAll();
         historySyncRepository.saveAll(newHistorySyncs);
         log.info("refresh done");
     }
 
-    private List<HistorySync> createHistorySyncs(TreeSync oldTreeSync, TreeSync newTreeSync) {
+    private List<HistorySync> createHistorySyncs(List<FolderSync> mergedList) {
         //TODO посмотреть че там с мерджконфликтом
 
-        Map<String, AbstractSync> oldFlatSyncs = SyncUtils.getFlatSyncs(oldTreeSync.folderSyncs).stream()
+        Map<String, AbstractSync> oldFlatSyncs = SyncUtils.getFlatSyncs(syncRepository.findAllByParentNull()).stream()
                 .collect(Collectors.toMap(sync -> sync.relativePath, Function.identity()));
         List<HistorySync> oldHistorySyncs = historySyncRepository.findAll();
         List<HistorySync> newHistorySyncs = new ArrayList<>();
-        SyncUtils.getFlatSyncs(newTreeSync.folderSyncs).forEach(newSync -> {
+        SyncUtils.getFlatSyncs(mergedList).forEach(newSync -> {
 
             Optional<HistorySync> oldHistorySync = getOldHistorySync(oldHistorySyncs, newSync);
             ProposedAction action = ActionValidator.validate(newSync, oldHistorySync, oldFlatSyncs);
@@ -125,14 +103,6 @@ public class SyncService {
                 .collect(Collectors.toList());
     }
 
-    public TreeSync getTreeSync() {
-        List<TreeSync> trees = treeSyncRepository.findAll();
-        if (!trees.isEmpty()) {
-            return trees.get(0);
-        }
-        return new TreeSync();
-    }
-
     public void transferSync(Integer id) {
         AbstractSync sync = syncRepository.findById(id).orElseThrow();
         if (sync.existOnPC && sync.existOnPhone || !sync.existOnPC && !sync.existOnPhone) {
@@ -146,7 +116,7 @@ public class SyncService {
     }
 
     public List<ExtensionStat> getExtensionStats() {
-        List<AbstractSync> flatSyncs = SyncUtils.getFlatSyncs(getTreeSync().folderSyncs);
+        List<AbstractSync> flatSyncs = SyncUtils.getFlatSyncs(syncRepository.findAllByParentNull());
         return flatSyncs.stream()
                 .filter(sync -> sync instanceof FileSync)
                 .map(sync -> (FileSync) sync)
@@ -158,12 +128,12 @@ public class SyncService {
     }
 
     public void clear() {
-        treeSyncRepository.deleteAll();
+        syncRepository.deleteAll();
+        historySyncRepository.deleteAll();
     }
 
     public List<FolderSync> getNotSynchronizedSyncs() {
-        TreeSync treeSync = getTreeSync();
-        List<FolderSync> rootFolders = treeSync.folderSyncs;
+        List<FolderSync> rootFolders = syncRepository.findAllByParentNull();
         List<AbstractSync> flatSyncs = SyncUtils.getFlatSyncs(rootFolders);
         removeSynchronizedFiles(flatSyncs);
         removeEmptyFolders(rootFolders);

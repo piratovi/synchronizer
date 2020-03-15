@@ -3,7 +3,6 @@ package com.kolosov.synchronizer.utils;
 import com.kolosov.synchronizer.domain.AbstractSync;
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
-import com.kolosov.synchronizer.domain.TreeSync;
 import org.apache.commons.io.FilenameUtils;
 
 import java.util.ArrayList;
@@ -39,8 +38,8 @@ public class SyncUtils {
                 .forEach(sync -> ((FileSync) sync).ext = FilenameUtils.getExtension(sync.relativePath).toLowerCase());
     }
 
-    public static List<FolderSync> getEmptyFolders(TreeSync treeSync) {
-        List<AbstractSync> flatSyncs = getFlatSyncs(treeSync.folderSyncs);
+    public static List<FolderSync> getEmptyFolders(List<FolderSync> rootFolders) {
+        List<AbstractSync> flatSyncs = getFlatSyncs(rootFolders);
         return flatSyncs.stream()
                 .filter(sync -> sync instanceof FolderSync)
                 .map(sync -> ((FolderSync) sync))
@@ -49,15 +48,15 @@ public class SyncUtils {
     }
 
     //TODO сделать нормальный обход по дереву
-    public static Optional<AbstractSync> getAbstractSyncFromTree(AbstractSync desiredSync, TreeSync treeSync) {
-        for (FolderSync folderSync : treeSync.folderSyncs) {
-            Optional<AbstractSync> syncOpt = getAbstractSyncRecursively(folderSync, desiredSync);
-            if (syncOpt.isPresent()) {
-                return syncOpt;
-            }
-        }
-        return Optional.empty();
-    }
+//    public static Optional<AbstractSync> getAbstractSyncFromTree(AbstractSync desiredSync, TreeSync treeSync) {
+//        for (FolderSync folderSync : treeSync.folderSyncs) {
+//            Optional<AbstractSync> syncOpt = getAbstractSyncRecursively(folderSync, desiredSync);
+//            if (syncOpt.isPresent()) {
+//                return syncOpt;
+//            }
+//        }
+//        return Optional.empty();
+//    }
 
     private static Optional<AbstractSync> getAbstractSyncRecursively(FolderSync folderSync, AbstractSync desiredSync) {
         if (folderSync.equals(desiredSync)) {
