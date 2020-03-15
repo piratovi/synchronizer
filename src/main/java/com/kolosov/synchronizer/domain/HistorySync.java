@@ -18,7 +18,7 @@ public class HistorySync {
 
     @Id
     @GeneratedValue
-    public Long id;
+    public Integer id;
 
     @OneToOne()
     @OnDelete(action = OnDeleteAction.CASCADE)

@@ -5,7 +5,7 @@ import com.kolosov.synchronizer.enums.ProposedAction;
 
 public class HistorySyncDTO {
 
-    public Long syncId;
+    public Integer syncId;
     public ProposedAction action;
     public String relativePath;
 

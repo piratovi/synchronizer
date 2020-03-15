@@ -6,10 +6,7 @@ import com.kolosov.synchronizer.repository.HistorySyncRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class SyncServiceTest {
@@ -20,10 +17,10 @@ class SyncServiceTest {
     @Test
     @Transactional
     void dirtiesContextTest() {
-        HistorySync historySync = repository.findById(221270L).get();
+        HistorySync historySync = repository.findById(221270).get();
         System.out.println(historySync);
         historySync.action = ProposedAction.TRANSFER;
         repository.save(historySync);
-        System.out.println(repository.findById(221270L).get());
+        System.out.println(repository.findById(221270).get());
     }
 }

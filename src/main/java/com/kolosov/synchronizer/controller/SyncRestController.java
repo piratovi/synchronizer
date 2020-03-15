@@ -6,6 +6,7 @@ import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.service.SyncService;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 
 @RestController()
 @RequestMapping(value = "/rest")
-@Data
+@RequiredArgsConstructor
 @CrossOrigin
 public class SyncRestController {
 
@@ -42,8 +43,7 @@ public class SyncRestController {
 
     @GetMapping("/actions")
     public ResponseEntity<List<HistorySyncDTO>> getSyncsWithActions() {
-        TreeSync treeSync = syncService.getTreeSync();
-        List<HistorySyncDTO> historySyncsDTO = treeSync.historySyncs.stream()
+        List<HistorySyncDTO> historySyncsDTO = syncService.getHistorySyncs().stream()
                 .map(HistorySyncDTO::new)
                 .collect(Collectors.toList());
         return new ResponseEntity<>(historySyncsDTO, HttpStatus.OK);
@@ -61,7 +61,6 @@ public class SyncRestController {
         return new ResponseEntity<>("clear", HttpStatus.OK);
     }
 
-
     @GetMapping("/emptyFolders")
     public ResponseEntity<List<FolderSync>> emptyFolders() {
         List<FolderSync> emptyFolders = syncService.getEmptyFolders();
@@ -69,13 +68,13 @@ public class SyncRestController {
     }
 
     @DeleteMapping()
-    public ResponseEntity<Void> deleteSyncs(@RequestBody List<Long> ids) {
+    public ResponseEntity<Void> deleteSyncs(@RequestBody List<Integer> ids) {
         ids.forEach(syncService::deleteById);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/transfer")
-    public ResponseEntity<Void> transfer(@RequestBody List<Long> ids) {
+    public ResponseEntity<Void> transfer(@RequestBody List<Integer> ids) {
         ids.forEach(syncService::transferSync);
         return new ResponseEntity<>(HttpStatus.OK);
     }

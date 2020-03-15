@@ -3,6 +3,9 @@ package com.kolosov.synchronizer.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -20,13 +23,10 @@ public class TreeSync {
     @Id
     @GeneratedValue
     @JsonIgnore
-    public Long id;
+    public Integer id;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     public List<FolderSync> folderSyncs = new ArrayList<>();
-
-    @OneToMany(cascade = CascadeType.ALL)
-    public List<HistorySync> historySyncs = new ArrayList<>();
 
     public TreeSync(List<FolderSync> folderSyncs) {
         this.folderSyncs = folderSyncs;

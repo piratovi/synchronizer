@@ -37,7 +37,7 @@ public abstract class AbstractSync {
 
     @Id
     @GeneratedValue
-    public Long id;
+    public Integer id;
 
     @Column(nullable = false, unique = true)
     @NotBlank

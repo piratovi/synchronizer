@@ -39,7 +39,7 @@ public class SyncService {
                 .filter(historySync -> newSync.equals(historySync.getSync())).findFirst();
     }
 
-    public void deleteById(Long id) {
+    public void deleteById(Integer id) {
         //TODO Создать свой эксепшен?
         Optional<AbstractSync> syncOpt = syncRepository.findById(id);
         if (syncOpt.isPresent()) {
@@ -65,7 +65,8 @@ public class SyncService {
             if (!remove) {
                 throw new RuntimeException("Error With deleting");
             }
-            syncRepository.delete(syncToDelete);
+            //TODO check
+//            syncRepository.delete(syncToDelete);
             treeSyncRepository.save(treeSync);
         }
     }
@@ -89,29 +90,32 @@ public class SyncService {
         TreeSync treeSyncOld = getTreeSync();
         List<FolderSync> mergedList = directOperations.getMergedList();
         TreeSync treeSyncNew = new TreeSync(mergedList);
-        createHistorySyncs(treeSyncOld, treeSyncNew);
+        List<HistorySync> newHistorySyncs = createHistorySyncs(treeSyncOld, treeSyncNew);
         treeSyncRepository.deleteAll();
         treeSyncRepository.save(treeSyncNew);
+        historySyncRepository.deleteAll();
+        historySyncRepository.saveAll(newHistorySyncs);
         log.info("refresh done");
     }
 
-    private void createHistorySyncs(TreeSync oldTreeSync, TreeSync newTreeSync) {
+    private List<HistorySync> createHistorySyncs(TreeSync oldTreeSync, TreeSync newTreeSync) {
         //TODO посмотреть че там с мерджконфликтом
 
         Map<String, AbstractSync> oldFlatSyncs = SyncUtils.getFlatSyncs(oldTreeSync.folderSyncs).stream()
                 .collect(Collectors.toMap(sync -> sync.relativePath, Function.identity()));
-        List<HistorySync> oldHistorySyncs = oldTreeSync.getHistorySyncs();
-
+        List<HistorySync> oldHistorySyncs = historySyncRepository.findAll();
+        List<HistorySync> newHistorySyncs = new ArrayList<>();
         SyncUtils.getFlatSyncs(newTreeSync.folderSyncs).forEach(newSync -> {
 
             Optional<HistorySync> oldHistorySync = getOldHistorySync(oldHistorySyncs, newSync);
             ProposedAction action = ActionValidator.validate(newSync, oldHistorySync, oldFlatSyncs);
 
             if (action != NOTHING) {
-                newTreeSync.historySyncs.add(new HistorySync(newSync, action));
+                newHistorySyncs.add(new HistorySync(newSync, action));
             }
 
         });
+        return newHistorySyncs;
     }
 
     private static List<AbstractSync> subtract(List<AbstractSync> list1, List<AbstractSync> list2) {
@@ -129,7 +133,7 @@ public class SyncService {
         return new TreeSync();
     }
 
-    public void transferSync(Long id) {
+    public void transferSync(Integer id) {
         AbstractSync sync = syncRepository.findById(id).orElseThrow();
         if (sync.existOnPC && sync.existOnPhone || !sync.existOnPC && !sync.existOnPhone) {
             throw new RuntimeException();
@@ -200,6 +204,10 @@ public class SyncService {
                         rootFolders.remove(folderSync);
                     }
                 });
+    }
+
+    public List<HistorySync> getHistorySyncs() {
+        return historySyncRepository.findAll();
     }
 }
 
