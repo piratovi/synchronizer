@@ -46,6 +46,7 @@ export default {
         return mus;
       })
     },
+
     itemSync(oper, id) {
       console.log(oper);
       return new Promise(function (resolve, reject) {
@@ -66,7 +67,7 @@ export default {
         xhr.onerror = function () {
           reject(new Error("Network Error"));
         };
-
+        console.log((JSON.stringify(id)));
         xhr.send(JSON.stringify(id));
 
       }).then(response => {

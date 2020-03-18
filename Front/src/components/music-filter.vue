@@ -50,7 +50,7 @@
         if (arr.length >= 1) {
           arr = Array.from(arr);
           let idx = arr.map(function(e){return e.name});
-          idx = JSON.stringify(idx);
+          //idx = JSON.stringify(idx);
           console.log(idx);
           store.dispatch('music/itemSync', idx);
         }
