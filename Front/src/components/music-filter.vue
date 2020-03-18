@@ -15,12 +15,20 @@
           </option>
         </select>
       </div>
-      <div class="actionBlocks"><div class="actionBlock"><a href="#" class="action action-delete">Удалить</a></div><div class="actionBlock"><a href="#" title="SYNC" class="action action-sync">Синхронизировать</a></div></div>
+      <div class="actionBlocks">
+        <div class="actionBlock">
+          <a href="#"  @click="deleteItem" class="action action-delete">Удалить</a>
+        </div>
+        <div class="actionBlock">
+          <a href="#" @click="syncItem" title="SYNC" class="action action-sync">Синхронизировать</a>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+  import { store } from "../store/index.js";
   import {mapState} from "vuex";
 
   export default {
@@ -34,7 +42,28 @@
     },
     methods: {
       itemConsole() {console.log()},
-      sync(pc,Phone) { return  pc !== Phone}
+      sync(pc,Phone) {
+        return  pc !== Phone
+      },
+      syncItem() {
+        let arr = document.querySelectorAll("input:checked");
+        if (arr.length >= 1) {
+          arr = Array.from(arr);
+          let idx = arr.map(function(e){return e.name});
+          idx = JSON.stringify(idx);
+          console.log(idx);
+          store.dispatch('music/itemSync', idx);
+        }
+      },
+      deleteItem() {
+        let arr = document.querySelectorAll("input:checked");
+        if (arr.length >= 1) {
+          arr = Array.from(arr);
+          let idx = arr.map(function(e){return e.name});
+          console.log(idx);
+          store.dispatch('music/deleteItems', idx);
+        }
+      }
     },
     created() {
     },

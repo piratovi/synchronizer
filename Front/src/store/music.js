@@ -2,7 +2,7 @@ export default {
   namespaced: true,
   state: {
     items: [],
-    ext: []
+    ext: [],
   },
   getters: {
     all: state => state.items,
@@ -15,12 +15,8 @@ export default {
       console.log(e);
     },
     extLoad(state,arr) {
-      console.log(arr);
       return state.ext = arr;
     },
-    /*itemSync(state,arr) {
-      return state.items = arr;
-    }*/
   },
   actions: {
     itemsLoad({commit}) {
@@ -30,10 +26,7 @@ export default {
 
         xhr.onload = function () {
           if (this.status == 200) {
-
             resolve(this.response);
-            //commit('itemsLoad', this.response);
-
           } else {
             let error = new Error(this.statusText);
             error.code = this.status;
@@ -54,10 +47,10 @@ export default {
       })
     },
     itemSync(oper, id) {
-      console.log(id);
+      console.log(oper);
       return new Promise(function (resolve, reject) {
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', "http://localhost:8080/rest/transfertest", true);
+        xhr.open('POST', "http://localhost:8080/rest/transfer", true);
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.onload = function () {
           if (this.status == 200) {
@@ -77,7 +70,39 @@ export default {
         xhr.send(JSON.stringify(id));
 
       }).then(response => {
-        console.log(typeof(response));
+        console.log(response);
+        id.forEach(function(e) {
+          document.querySelectorAll('input[name="'+e+'"]')[0].closest('.item').remove();
+        })
+      })
+    },
+    deleteItems(oper, id) {
+      return new Promise(function (resolve, reject) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('DELETE', "http://localhost:8080/rest/", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onload = function () {
+          if (this.status == 200) {
+            resolve(this.response);
+            //commit('itemsLoad', this.response);
+          } else {
+            let error = new Error(this.statusText);
+            error.code = this.status;
+            reject(error);
+          }
+        };
+
+        xhr.onerror = function () {
+          reject(new Error("Network Error"));
+        };
+
+        xhr.send(JSON.stringify(id));
+
+      }).then(response => {
+        console.log(response);
+        id.forEach(function(e) {
+          document.querySelectorAll('input[name="'+e+'"]')[0].closest('.item').remove();
+        })
       })
     },
     extLoad({commit}) {

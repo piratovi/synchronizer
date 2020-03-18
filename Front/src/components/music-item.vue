@@ -14,7 +14,7 @@
         <div class="path">{{path}}</div>
       </div>
       <div class="actionBlocks">
-        <div class="actionBlock"><a href="#" class="action action-delete">Удалить</a></div>
+        <!--<div class="actionBlock"><a href="#" class="action action-delete">Удалить</a></div>-->
         <div class="actionBlock"><a href="#" v-if="sync" @click.prevent="itemSync(id)" title="SYNC" class="action action-sync">Синхронизировать</a></div>
       </div>
     </div>

@@ -275,7 +275,9 @@ $plus: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXd
           margin: 0;
           min-width: inherit;
           border: 0;
-          background-color: $blue;
+          &:hover {
+            background-color: transparent;
+          }
           &.action-delete {
             background-image: $delete;
             background-repeat: no-repeat;
