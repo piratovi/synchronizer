@@ -14,6 +14,6 @@ class SyncRepositoryTest {
 
     @Test
     void checkDelete() {
-        repository.deleteById(867);
+        repository.deleteById(1);
     }
 }

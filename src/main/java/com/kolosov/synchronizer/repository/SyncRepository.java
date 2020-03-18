@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface SyncRepository extends JpaRepository<AbstractSync, Integer> {
-    List<RootFolderSync> findAllRootFolderSyncs();
+//    List<RootFolderSync> findAllRootFolderSyncs();
     List<FolderSync> findAllByParentNull();
 
 }

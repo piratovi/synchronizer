@@ -47,7 +47,7 @@ public class SyncService {
     }
 
     private void deleteSync(AbstractSync syncToDelete) {
-        directOperations.deleteFile(syncToDelete);
+//        directOperations.deleteFile(syncToDelete);
         syncRepository.delete(syncToDelete);
     }
 
@@ -108,10 +108,13 @@ public class SyncService {
         if (sync.existOnPC && sync.existOnPhone || !sync.existOnPC && !sync.existOnPhone) {
             throw new RuntimeException();
         }
+        sync.existOnPC = true;
+        sync.existOnPhone = true;
+        syncRepository.save(sync);
         if (sync.existOnPC) {
-            directOperations.copyFileFromPcToPhone(sync);
+//            directOperations.copyFileFromPcToPhone(sync);
         } else {
-            directOperations.copyFileFromPhoneToPc(sync);
+//            directOperations.copyFileFromPhoneToPc(sync);
         }
     }
 
