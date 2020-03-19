@@ -42,7 +42,6 @@ public class FtpWorker implements LowLevelWorker {
     private String password;
 
     public final FTPClient ftpClient = new FTPClient();
-    private boolean connected = false;
 
 //    @EventListener(ApplicationReadyEvent.class)
 //    public void doSomethingAfterStartup() {
@@ -53,19 +52,16 @@ public class FtpWorker implements LowLevelWorker {
 //        }
 //    }
 
-    //TODO обработка не подключенного фтп
     @SneakyThrows
     private void ftpConnect() {
-        connected = ftpClient.isConnected() && ftpClient.isAvailable();
-        if (!connected) {
+        if (!(ftpClient.isConnected() && ftpClient.isAvailable())) {
             ftpClient.connect(ftpServerUrl, ftpServerPort);
             ftpClient.login(username, password);
             ftpClient.enterLocalPassiveMode();
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             String rootPath = LocationUtils.getPhoneRootPath();
             ftpClient.changeWorkingDirectory(rootPath);
-            connected = true;
-            log.info("Connect to FTP");
+            log.info("Connected to FTP");
         }
     }
 
