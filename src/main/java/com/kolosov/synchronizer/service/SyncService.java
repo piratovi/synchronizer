@@ -6,7 +6,7 @@ import com.kolosov.synchronizer.domain.AbstractSync;
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.enums.ProposedAction;
-import com.kolosov.synchronizer.exceptions.SyncNotFoundException;
+import com.kolosov.synchronizer.exceptions.ExceptionSupplier;
 import com.kolosov.synchronizer.repository.HistorySyncRepository;
 import com.kolosov.synchronizer.repository.SyncRepository;
 import com.kolosov.synchronizer.utils.SyncUtils;
@@ -37,17 +37,12 @@ public class SyncService {
     }
 
     public void deleteById(Integer id) {
-        //TODO Создать свой эксепшен?
-        Optional<AbstractSync> syncOpt = syncRepository.findById(id);
-        if (syncOpt.isPresent()) {
-            deleteSync(syncOpt.get());
-        } else {
-            throw new SyncNotFoundException("Sync not found");
-        }
+        AbstractSync sync = syncRepository.findById(id).orElseThrow(ExceptionSupplier.syncNotFound(id));
+        deleteSync(sync);
     }
 
     private void deleteSync(AbstractSync syncToDelete) {
-//        directOperations.deleteFile(syncToDelete);
+        directOperations.deleteFile(syncToDelete);
         syncRepository.delete(syncToDelete);
     }
 
@@ -112,9 +107,9 @@ public class SyncService {
         sync.existOnPhone = true;
         syncRepository.save(sync);
         if (sync.existOnPC) {
-//            directOperations.copyFileFromPcToPhone(sync);
+            directOperations.copyFileFromPcToPhone(sync);
         } else {
-//            directOperations.copyFileFromPhoneToPc(sync);
+            directOperations.copyFileFromPhoneToPc(sync);
         }
     }
 

@@ -72,9 +72,9 @@ public class SyncRestController {
     }
 
     @PostMapping("/transfer")
-    public ResponseEntity<Void> transfer(@RequestBody List<Integer> ids) {
+    public ResponseEntity<String> transfer(@RequestBody List<Integer> ids) {
         ids.forEach(syncService::transferSync);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>("successful", HttpStatus.OK);
     }
 
     @GetMapping("/ext")
