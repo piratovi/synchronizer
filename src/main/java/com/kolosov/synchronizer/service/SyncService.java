@@ -100,17 +100,14 @@ public class SyncService {
 
     public void transferSync(Integer id) {
         AbstractSync sync = syncRepository.findById(id).orElseThrow();
-        if (sync.existOnPC && sync.existOnPhone || !sync.existOnPC && !sync.existOnPhone) {
-            throw new RuntimeException();
-        }
-        sync.existOnPC = true;
-        sync.existOnPhone = true;
-        syncRepository.save(sync);
         if (sync.existOnPC) {
             directOperations.copyFileFromPcToPhone(sync);
+            sync.existOnPhone = true;
         } else {
             directOperations.copyFileFromPhoneToPc(sync);
+            sync.existOnPC = true;
         }
+        syncRepository.save(sync);
     }
 
     public List<ExtensionStat> getExtensionStats() {

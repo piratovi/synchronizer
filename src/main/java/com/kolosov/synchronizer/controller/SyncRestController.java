@@ -66,9 +66,9 @@ public class SyncRestController {
     }
 
     @DeleteMapping()
-    public ResponseEntity<Void> deleteSyncs(@RequestBody List<Integer> ids) {
+    public ResponseEntity<String> deleteSyncs(@RequestBody List<Integer> ids) {
         ids.forEach(syncService::deleteById);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>("successful", HttpStatus.OK);
     }
 
     @PostMapping("/transfer")
