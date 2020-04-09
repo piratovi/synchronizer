@@ -3,6 +3,7 @@ package com.kolosov.synchronizer.service.lowLevel;
 import com.kolosov.synchronizer.domain.AbstractSync;
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
+import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.utils.LocationUtils;
 import com.kolosov.synchronizer.utils.LowLevelUtils;
@@ -105,8 +106,7 @@ public class FtpWorker implements LowLevelWorker {
                 if (aFile.isDirectory()) {
                     FolderSync nextFolderSync;
                     if (parentFolderSync == null) {
-                        //Root Folder
-                        nextFolderSync = new FolderSync(relativePath, currentFileName, Location.PHONE, null);
+                        nextFolderSync = new RootFolderSync(relativePath, currentFileName, Location.PHONE);
                         result.add(nextFolderSync);
                     } else {
                         nextFolderSync = new FolderSync(relativePath, currentFileName, Location.PHONE, parentFolderSync);

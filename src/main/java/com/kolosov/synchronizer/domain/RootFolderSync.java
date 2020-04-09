@@ -9,7 +9,12 @@ import javax.persistence.Entity;
 @NoArgsConstructor
 public class RootFolderSync extends FolderSync {
 
-    public RootFolderSync(String relativePath, String name, Location location, FolderSync folder) {
-        super(relativePath, name, location, folder);
+    public RootFolderSync(String relativePath, String name, Location location) {
+        super(relativePath, name, location, null);
+    }
+
+    @Override
+    public void removeFromParent() {
+        
     }
 }
