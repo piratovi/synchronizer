@@ -10,7 +10,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -61,7 +65,7 @@ public abstract class Sync {
     @JsonIgnore
     public FolderSync parent;
 
-    @OneToOne(mappedBy = "sync", optional = false)
+    @OneToOne(cascade = {CascadeType.ALL}, mappedBy = "sync")
     @JsonIgnore
     private HistorySync historySync;
 

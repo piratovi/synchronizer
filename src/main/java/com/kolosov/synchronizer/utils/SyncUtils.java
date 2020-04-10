@@ -28,11 +28,11 @@ public class SyncUtils {
         return result;
     }
 
-    private static void getNestedSyncsRecursively(FolderSync sync, List<Sync> result) {
-        sync.list.forEach(syncChild -> {
-            result.add(syncChild);
-            if (syncChild instanceof FolderSync) {
-                getNestedSyncsRecursively((FolderSync) syncChild, result);
+    private static void getNestedSyncsRecursively(FolderSync parent, List<Sync> result) {
+        parent.list.forEach(child -> {
+            result.add(child);
+            if (child.isFolder()) {
+                getNestedSyncsRecursively(child.asFolder(), result);
             }
         });
     }
@@ -42,15 +42,6 @@ public class SyncUtils {
         flatSyncs.stream()
                 .filter(sync -> sync instanceof FileSync)
                 .forEach(sync -> ((FileSync) sync).ext = FilenameUtils.getExtension(sync.relativePath).toLowerCase());
-    }
-
-    public static List<FolderSync> getEmptyFolders(List<? extends FolderSync> rootFolders) {
-        List<Sync> flatSyncs = getFlatSyncs(rootFolders);
-        return flatSyncs.stream()
-                .filter(sync -> sync instanceof FolderSync)
-                .map(sync -> ((FolderSync) sync))
-                .filter(folderSync -> folderSync.list.isEmpty())
-                .collect(Collectors.toList());
     }
 
     //TODO сделать нормальный обход по дереву
@@ -88,5 +79,24 @@ public class SyncUtils {
         } else {
             return getRootFolder(sync.parent);
         }
+    }
+
+    public static List<FolderSync> getParents(Sync sync) {
+        List<FolderSync> parents = new ArrayList<>();
+        FolderSync parent = sync.parent;
+        while (parent != null) {
+            parents.add(0, parent);
+            parent = parent.parent;
+        }
+        return parents;
+    }
+
+    public static List<FolderSync> getEmptyFolders(List<? extends Sync> syncs) {
+        List<Sync> flatSyncs = getFlatSyncs(syncs);
+        return flatSyncs.stream()
+                .filter(Sync::isFolder)
+                .map(Sync::asFolder)
+                .filter(FolderSync::isEmpty)
+                .collect(Collectors.toList());
     }
 }
