@@ -14,7 +14,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class Scout {
 
     private final RootFolderSyncRepository rootFolderSyncRepository;

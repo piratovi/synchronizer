@@ -6,7 +6,6 @@ import com.kolosov.synchronizer.exceptions.ExceptionSupplier;
 import com.kolosov.synchronizer.repository.SyncRepository;
 import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +14,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class Transporter {
 
     private final DirectOperationsService directOperations;
