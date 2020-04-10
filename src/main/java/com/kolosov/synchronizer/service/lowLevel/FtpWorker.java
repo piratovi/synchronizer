@@ -1,6 +1,6 @@
 package com.kolosov.synchronizer.service.lowLevel;
 
-import com.kolosov.synchronizer.domain.AbstractSync;
+import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.RootFolderSync;
@@ -13,8 +13,6 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -124,7 +122,7 @@ public class FtpWorker implements LowLevelWorker {
 
     @Override
     @SneakyThrows
-    public void deleteFile(AbstractSync sync) {
+    public void deleteFile(Sync sync) {
         ftpConnect();
         String pathToDelete = LocationUtils.getPhoneRootPath() + "/" + LowLevelUtils.convertPathForFTP(sync.relativePath);
         pathToDelete = new String(pathToDelete.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
@@ -138,16 +136,16 @@ public class FtpWorker implements LowLevelWorker {
 
     @SneakyThrows
     @Override
-    public InputStream getInputStreamFromFile(AbstractSync abstractSync) {
-        String relativePath = abstractSync.relativePath;
+    public InputStream getInputStreamFromFile(Sync sync) {
+        String relativePath = sync.relativePath;
         relativePath = LowLevelUtils.convertPathForFTP(relativePath);
         return ftpClient.retrieveFileStream(relativePath);
     }
 
     @SneakyThrows
     @Override
-    public OutputStream getOutputStreamToFile(AbstractSync abstractSync) {
-        String relativePath = abstractSync.relativePath;
+    public OutputStream getOutputStreamToFile(Sync sync) {
+        String relativePath = sync.relativePath;
         relativePath = LowLevelUtils.convertPathForFTP(relativePath);
         prepareCatalogs(relativePath);
         return ftpClient.storeFileStream(relativePath);

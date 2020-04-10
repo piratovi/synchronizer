@@ -15,6 +15,6 @@ public class RootFolderSync extends FolderSync {
 
     @Override
     public void removeFromParent() {
-        
+        //Empty method
     }
 }

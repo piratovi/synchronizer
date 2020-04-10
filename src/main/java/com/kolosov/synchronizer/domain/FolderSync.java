@@ -12,10 +12,10 @@ import java.util.List;
 
 @Entity
 @NoArgsConstructor
-public class FolderSync extends AbstractSync {
+public class FolderSync extends Sync {
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "parent")
-    public List<AbstractSync> list = new ArrayList<>();
+    public List<Sync> list = new ArrayList<>();
 
     public FolderSync(String relativePath, String name, Location location, FolderSync folder) {
         super(relativePath, name, location, folder);
@@ -23,12 +23,10 @@ public class FolderSync extends AbstractSync {
 
     @Override
     public String toString() {
-        return "FolderSync{" +
-                "relativePath='" + relativePath + '\'' +
-                '}';
+        return "FolderSync. relativePath = " + relativePath;
     }
 
-    public void remove(AbstractSync sync) {
+    public void remove(Sync sync) {
         if (!list.remove(sync)) {
             throw new RuntimeException("Child Not Found In List");
         }
@@ -41,12 +39,12 @@ public class FolderSync extends AbstractSync {
     }
 
     @JsonIgnore
-    public boolean hasFiles() {
+    public boolean hasSyncs() {
         return !list.isEmpty();
     }
 
     @JsonIgnore
-    public void add(AbstractSync sync) {
+    public void add(Sync sync) {
         list.add(sync);
         sync.parent = this;
     }

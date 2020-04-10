@@ -1,6 +1,6 @@
 package com.kolosov.synchronizer.service;
 
-import com.kolosov.synchronizer.domain.AbstractSync;
+import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.exceptions.FileNotFoundException;
 import com.kolosov.synchronizer.service.lowLevel.FtpWorker;
@@ -22,7 +22,7 @@ public class DirectOperationsService {
     private final FtpWorker ftpWorker;
     private final PcWorker pcWorker;
 
-    public void deleteFile(AbstractSync sync) {
+    public void delete(Sync sync) {
         if (!sync.existOnPhone && !sync.existOnPC) {
             throw new FileNotFoundException("File already deleted " + sync.relativePath);
         }
@@ -34,10 +34,10 @@ public class DirectOperationsService {
         }
     }
 
-    public void copyFileFromPhoneToPc(AbstractSync abstractSync) {
+    public void copyFileFromPhoneToPc(Sync sync) {
         try (
-                InputStream inputStream = ftpWorker.getInputStreamFromFile(abstractSync);
-                OutputStream outputStream = pcWorker.getOutputStreamToFile(abstractSync)
+                InputStream inputStream = ftpWorker.getInputStreamFromFile(sync);
+                OutputStream outputStream = pcWorker.getOutputStreamToFile(sync)
         ) {
             inputStream.transferTo(outputStream);
         } catch (Exception e) {
@@ -47,10 +47,10 @@ public class DirectOperationsService {
 
     }
 
-    public void copyFileFromPcToPhone(AbstractSync abstractSync) {
+    public void copyFileFromPcToPhone(Sync sync) {
         try (
-                InputStream inputStream = pcWorker.getInputStreamFromFile(abstractSync);
-                OutputStream outputStream = ftpWorker.getOutputStreamToFile(abstractSync)
+                InputStream inputStream = pcWorker.getInputStreamFromFile(sync);
+                OutputStream outputStream = ftpWorker.getOutputStreamToFile(sync)
         ) {
             inputStream.transferTo(outputStream);
         } catch (Exception e) {

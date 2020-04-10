@@ -18,6 +18,7 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.validation.constraints.NotBlank;
 
 @Getter
@@ -33,7 +34,7 @@ import javax.validation.constraints.NotBlank;
 @JsonSubTypes({
         @Type(value = FolderSync.class, name = "folder"),
         @Type(value = FileSync.class, name = "file")})
-public abstract class AbstractSync {
+public abstract class Sync {
 
     @Id
     @GeneratedValue
@@ -60,7 +61,11 @@ public abstract class AbstractSync {
     @JsonIgnore
     public FolderSync parent;
 
-    public AbstractSync(String relativePath, String name, Location location, FolderSync parent) {
+    @OneToOne(mappedBy = "sync", optional = false)
+    @JsonIgnore
+    private HistorySync historySync;
+
+    public Sync(String relativePath, String name, Location location, FolderSync parent) {
         this.relativePath = relativePath;
         this.name = name;
         this.existOnPC = Location.PC.equals(location);
@@ -92,6 +97,11 @@ public abstract class AbstractSync {
         return this instanceof FolderSync;
     }
 
+    @JsonIgnore
+    public boolean isRootFolder() {
+        return this instanceof RootFolderSync;
+    }
+
     public FileSync asFile() {
         return (FileSync) this;
     }
@@ -104,4 +114,5 @@ public abstract class AbstractSync {
     public boolean hasParent() {
         return parent != null;
     }
+
 }

@@ -1,6 +1,7 @@
 package com.kolosov.synchronizer.service.lowLevel;
 
-import com.kolosov.synchronizer.domain.AbstractSync;
+import com.kolosov.synchronizer.domain.RootFolderSync;
+import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.enums.Location;
@@ -28,7 +29,6 @@ public class PcWorker implements LowLevelWorker {
         return syncList;
     }
 
-    //TODO проверка на null
     public void processDirectoryRecursively(File parentDir, List<FolderSync> result, FolderSync parentFolderSync) {
         for (final File file : parentDir.listFiles()) {
             String relativePath = PATH.relativize(file.toPath()).toString();
@@ -36,7 +36,7 @@ public class PcWorker implements LowLevelWorker {
             if (file.isDirectory()) {
                 FolderSync current;
                 if (parentFolderSync == null) {
-                    current = new FolderSync(relativePath, name, Location.PC, null);
+                    current = new RootFolderSync(relativePath, name, Location.PC);
                     result.add(current);
                 } else {
                     current = new FolderSync(relativePath, name, Location.PC, parentFolderSync);
@@ -53,23 +53,23 @@ public class PcWorker implements LowLevelWorker {
 
     @Override
     @SneakyThrows
-    public void deleteFile(AbstractSync sync) {
+    public void deleteFile(Sync sync) {
         FileSystemUtils.deleteRecursively(Path.of(LowLevelUtils.getAbsolutePath(sync)));
     }
 
     @Override
     @SneakyThrows
-    public InputStream getInputStreamFromFile(AbstractSync abstractSync) {
+    public InputStream getInputStreamFromFile(Sync sync) {
         FileInputStream fileInputStream;
-        fileInputStream = new FileInputStream(LowLevelUtils.getAbsolutePath(abstractSync));
+        fileInputStream = new FileInputStream(LowLevelUtils.getAbsolutePath(sync));
         return fileInputStream;
     }
 
     @Override
     @SneakyThrows
-    public OutputStream getOutputStreamToFile(AbstractSync abstractSync) {
+    public OutputStream getOutputStreamToFile(Sync sync) {
         FileOutputStream outputStream;
-        String absolutePath = LowLevelUtils.getAbsolutePath(abstractSync);
+        String absolutePath = LowLevelUtils.getAbsolutePath(sync);
         File file = new File(absolutePath);
         file.getParentFile().mkdirs();
         outputStream = new FileOutputStream(file);

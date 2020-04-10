@@ -1,13 +1,15 @@
 package com.kolosov.synchronizer.service;
 
+import com.kolosov.synchronizer.domain.RootFolderSync;
+import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.dto.ExtensionStat;
 import com.kolosov.synchronizer.domain.HistorySync;
-import com.kolosov.synchronizer.domain.AbstractSync;
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.enums.ProposedAction;
 import com.kolosov.synchronizer.exceptions.ExceptionSupplier;
 import com.kolosov.synchronizer.repository.HistorySyncRepository;
+import com.kolosov.synchronizer.repository.RootFolderSyncRepository;
 import com.kolosov.synchronizer.repository.SyncRepository;
 import com.kolosov.synchronizer.utils.SyncUtils;
 import com.kolosov.synchronizer.validators.action.ActionValidator;
@@ -29,34 +31,35 @@ public class SyncService {
 
     private final DirectOperationsService directOperations;
     private final SyncRepository syncRepository;
+    private final RootFolderSyncRepository rootFolderSyncRepository;
     private final HistorySyncRepository historySyncRepository;
 
-    public static Optional<HistorySync> getOldHistorySync(List<HistorySync> oldHistorySyncs, AbstractSync newSync) {
+    public static Optional<HistorySync> getOldHistorySync(List<HistorySync> oldHistorySyncs, Sync newSync) {
         return oldHistorySyncs.stream()
                 .filter(historySync -> newSync.equals(historySync.getSync())).findFirst();
     }
 
-    public void deleteById(Integer id) {
-        AbstractSync sync = syncRepository.findById(id).orElseThrow(ExceptionSupplier.syncNotFound(id));
-        deleteSync(sync);
+    public void delete(Integer id) {
+        Sync sync = syncRepository.findById(id).orElseThrow(ExceptionSupplier.syncNotFound(id));
+        delete(sync);
     }
 
-    private void deleteSync(AbstractSync syncToDelete) {
-        directOperations.deleteFile(syncToDelete);
+    private void delete(Sync syncToDelete) {
+        directOperations.delete(syncToDelete);
         syncRepository.delete(syncToDelete);
     }
 
     public List<FolderSync> getEmptyFolders() {
-        return SyncUtils.getEmptyFolders(syncRepository.findAllByParentNull());
+        return SyncUtils.getEmptyFolders(rootFolderSyncRepository.findAll());
     }
 
     public void deleteEmptyFolders() {
         deleteSyncs(getEmptyFolders());
     }
 
-    private void deleteSyncs(List<? extends AbstractSync> syncs) {
-        for (AbstractSync sync : syncs) {
-            deleteSync(sync);
+    private void deleteSyncs(List<? extends Sync> syncs) {
+        for (Sync sync : syncs) {
+            delete(sync);
         }
     }
 
@@ -72,9 +75,7 @@ public class SyncService {
     }
 
     private List<HistorySync> createHistorySyncs(List<FolderSync> mergedList) {
-        //TODO посмотреть че там с мерджконфликтом
-
-        Map<String, AbstractSync> oldFlatSyncs = SyncUtils.getFlatSyncs(syncRepository.findAllByParentNull()).stream()
+        Map<String, Sync> oldFlatSyncs = SyncUtils.getFlatSyncs(rootFolderSyncRepository.findAll()).stream()
                 .collect(Collectors.toMap(sync -> sync.relativePath, Function.identity()));
         List<HistorySync> oldHistorySyncs = historySyncRepository.findAll();
         List<HistorySync> newHistorySyncs = new ArrayList<>();
@@ -91,15 +92,15 @@ public class SyncService {
         return newHistorySyncs;
     }
 
-    private static List<AbstractSync> subtract(List<AbstractSync> list1, List<AbstractSync> list2) {
-        List<AbstractSync> diff = new ArrayList<>(list1);
+    private static List<Sync> subtract(List<Sync> list1, List<Sync> list2) {
+        List<Sync> diff = new ArrayList<>(list1);
         return diff.stream()
                 .filter(fileEntity -> !list2.contains(fileEntity))
                 .collect(Collectors.toList());
     }
 
     public void transferSync(Integer id) {
-        AbstractSync sync = syncRepository.findById(id).orElseThrow();
+        Sync sync = syncRepository.findById(id).orElseThrow();
         if (sync.existOnPC) {
             directOperations.copyFileFromPcToPhone(sync);
             sync.existOnPhone = true;
@@ -111,7 +112,7 @@ public class SyncService {
     }
 
     public List<ExtensionStat> getExtensionStats() {
-        List<AbstractSync> flatSyncs = SyncUtils.getFlatSyncs(syncRepository.findAllByParentNull());
+        List<Sync> flatSyncs = SyncUtils.getFlatSyncs(rootFolderSyncRepository.findAll());
         return flatSyncs.stream()
                 .filter(sync -> sync instanceof FileSync)
                 .map(sync -> (FileSync) sync)
@@ -127,52 +128,70 @@ public class SyncService {
         historySyncRepository.deleteAll();
     }
 
-    public List<FolderSync> getNotSynchronizedSyncs() {
-        List<FolderSync> rootFolders = syncRepository.findAllByParentNull();
-        List<AbstractSync> flatSyncs = SyncUtils.getFlatSyncs(rootFolders);
+    public List<RootFolderSync> getNotSynchronizedSyncs() {
+        List<RootFolderSync> rootFolders = rootFolderSyncRepository.findAll();
+        List<Sync> flatSyncs = SyncUtils.getFlatSyncs(rootFolders);
         removeSynchronizedFiles(flatSyncs);
-        removeEmptyFolders(rootFolders);
+        removeEmptyFoldersInList(rootFolders);
         return rootFolders;
     }
 
-    private void removeSynchronizedFiles(List<AbstractSync> flatSyncs) {
+    private void removeSynchronizedFiles(List<Sync> flatSyncs) {
         flatSyncs.stream()
-                .filter(AbstractSync::isFile)
-                .map(AbstractSync::asFile)
+                .filter(Sync::isFile)
+                .map(Sync::asFile)
                 .filter(FileSync::isSynchronized)
                 .forEach(FileSync::removeFromParent);
     }
 
-    private void removeEmptyFolders(List<FolderSync> rootFolders) {
-        List<FolderSync> folders = getOnlyEmptyFolders(SyncUtils.getFlatSyncs(rootFolders));
+    private void removeEmptyFoldersInList(List<RootFolderSync> rootFolders) {
+        List<FolderSync> folders = getEmptyFolders(SyncUtils.getFlatSyncs(rootFolders));
         while (!folders.isEmpty()) {
-            removeEmptyFolders(rootFolders, folders);
-            folders = getOnlyEmptyFolders(SyncUtils.getFlatSyncs(rootFolders));
+            removeEmptyFoldersInList(rootFolders, folders);
+            folders = getEmptyFolders(SyncUtils.getFlatSyncs(rootFolders));
         }
     }
 
-    public static List<FolderSync> getOnlyEmptyFolders(List<? extends AbstractSync> syncs) {
+    private void removeEmptyFoldersInLowLevelAndRepo() {
+        List<FolderSync> folders = getEmptyFolders(SyncUtils.getFlatSyncs(rootFolderSyncRepository.findAll()));
+        while (!folders.isEmpty()) {
+            folders.forEach(this::delete);
+            folders = getEmptyFolders(SyncUtils.getFlatSyncs(rootFolderSyncRepository.findAll()));
+        }
+    }
+
+    public static List<FolderSync> getEmptyFolders(List<? extends Sync> syncs) {
         return syncs.stream()
-                .filter(AbstractSync::isFolder)
-                .map(AbstractSync::asFolder)
+                .filter(Sync::isFolder)
+                .map(Sync::asFolder)
                 .filter(FolderSync::isEmpty)
                 .collect(Collectors.toList());
     }
 
-    private void removeEmptyFolders(List<FolderSync> rootFolders, List<FolderSync> folders) {
-        folders.stream()
-                .filter(FolderSync::isEmpty)
-                .forEach(folderSync -> {
-                    if (folderSync.hasParent()) {
-                        folderSync.removeFromParent();
-                    } else {
+    private void removeEmptyFoldersInList(List<RootFolderSync> rootFolders, List<FolderSync> folders) {
+        folders.forEach(folderSync -> {
+                    if (folderSync.isRootFolder()) {
                         rootFolders.remove(folderSync);
+                    } else {
+                        folderSync.removeFromParent();
                     }
                 });
     }
 
     public List<HistorySync> getHistorySyncs() {
         return historySyncRepository.findAll();
+    }
+
+    public void delete(List<Integer> ids) {
+        List<Sync> flatSyncs = ids.stream()
+                .map(id -> syncRepository.findById(id).orElseThrow(ExceptionSupplier.syncNotFound(id)))
+                .map(SyncUtils::getFlatSyncs)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+        for (int i = flatSyncs.size() - 1; i >= 0 ; i--) {
+            delete(flatSyncs.get(i));
+        }
+        removeEmptyFoldersInLowLevelAndRepo();
     }
 }
 

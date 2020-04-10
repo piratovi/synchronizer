@@ -1,6 +1,5 @@
 package com.kolosov.synchronizer.dto;
 
-import com.kolosov.synchronizer.domain.AbstractSync;
 import com.kolosov.synchronizer.domain.FileSync;
 import lombok.AllArgsConstructor;
 

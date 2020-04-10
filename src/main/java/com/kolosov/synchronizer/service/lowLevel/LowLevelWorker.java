@@ -1,6 +1,6 @@
 package com.kolosov.synchronizer.service.lowLevel;
 
-import com.kolosov.synchronizer.domain.AbstractSync;
+import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.FolderSync;
 
 import java.io.InputStream;
@@ -11,9 +11,9 @@ public interface LowLevelWorker {
 
     List<FolderSync> collectSyncs();
 
-    void deleteFile(AbstractSync abstractSync);
+    void deleteFile(Sync sync);
 
-    InputStream getInputStreamFromFile(AbstractSync abstractSync);
+    InputStream getInputStreamFromFile(Sync sync);
 
-    OutputStream getOutputStreamToFile(AbstractSync abstractSync);
+    OutputStream getOutputStreamToFile(Sync sync);
 }

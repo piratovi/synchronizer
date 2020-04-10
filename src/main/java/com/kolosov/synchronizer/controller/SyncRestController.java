@@ -1,5 +1,6 @@
 package com.kolosov.synchronizer.controller;
 
+import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.dto.ExtensionStat;
 import com.kolosov.synchronizer.dto.HistorySyncDTO;
 import com.kolosov.synchronizer.domain.FolderSync;
@@ -34,8 +35,8 @@ public class SyncRestController {
     }
 
     @GetMapping("/syncs")
-    public ResponseEntity<List<FolderSync>> getSyncs() {
-        List<FolderSync> syncs = syncService.getNotSynchronizedSyncs();
+    public ResponseEntity<List<RootFolderSync>> getSyncs() {
+        List<RootFolderSync> syncs = syncService.getNotSynchronizedSyncs();
         return new ResponseEntity<>(syncs, HttpStatus.OK);
     }
 
@@ -67,7 +68,7 @@ public class SyncRestController {
 
     @DeleteMapping()
     public ResponseEntity<String> deleteSyncs(@RequestBody List<Integer> ids) {
-        ids.forEach(syncService::deleteById);
+        syncService.delete(ids);
         return new ResponseEntity<>("successful", HttpStatus.OK);
     }
 

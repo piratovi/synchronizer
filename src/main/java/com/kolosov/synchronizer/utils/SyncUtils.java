@@ -1,6 +1,6 @@
 package com.kolosov.synchronizer.utils;
 
-import com.kolosov.synchronizer.domain.AbstractSync;
+import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import org.apache.commons.io.FilenameUtils;
@@ -13,16 +13,22 @@ import java.util.stream.Collectors;
 public class SyncUtils {
 
 
-    public static List<AbstractSync> getFlatSyncs(List<FolderSync> folderSyncs) {
-        List<AbstractSync> result = new ArrayList<>();
-            folderSyncs.forEach(sync -> {
-                result.add(sync);
-                getNestedSyncsRecursively(sync, result);
-            });
+    public static List<Sync> getFlatSyncs(List<? extends Sync> folderSyncs) {
+        List<Sync> result = new ArrayList<>();
+            folderSyncs.forEach(sync -> result.addAll(getFlatSyncs(sync)));
         return result;
     }
 
-    private static void getNestedSyncsRecursively(FolderSync sync, List<AbstractSync> result) {
+    public static List<Sync> getFlatSyncs(Sync sync) {
+        List<Sync> result = new ArrayList<>();
+            result.add(sync);
+            if (sync.isFolder()) {
+                getNestedSyncsRecursively(sync.asFolder(), result);
+            }
+        return result;
+    }
+
+    private static void getNestedSyncsRecursively(FolderSync sync, List<Sync> result) {
         sync.list.forEach(syncChild -> {
             result.add(syncChild);
             if (syncChild instanceof FolderSync) {
@@ -32,14 +38,14 @@ public class SyncUtils {
     }
 
     public static void processExtensions(List<FolderSync> folderSyncs) {
-        List<AbstractSync> flatSyncs = getFlatSyncs(folderSyncs);
+        List<Sync> flatSyncs = getFlatSyncs(folderSyncs);
         flatSyncs.stream()
                 .filter(sync -> sync instanceof FileSync)
                 .forEach(sync -> ((FileSync) sync).ext = FilenameUtils.getExtension(sync.relativePath).toLowerCase());
     }
 
-    public static List<FolderSync> getEmptyFolders(List<FolderSync> rootFolders) {
-        List<AbstractSync> flatSyncs = getFlatSyncs(rootFolders);
+    public static List<FolderSync> getEmptyFolders(List<? extends FolderSync> rootFolders) {
+        List<Sync> flatSyncs = getFlatSyncs(rootFolders);
         return flatSyncs.stream()
                 .filter(sync -> sync instanceof FolderSync)
                 .map(sync -> ((FolderSync) sync))
@@ -58,16 +64,16 @@ public class SyncUtils {
 //        return Optional.empty();
 //    }
 
-    private static Optional<AbstractSync> getAbstractSyncRecursively(FolderSync folderSync, AbstractSync desiredSync) {
+    private static Optional<Sync> getAbstractSyncRecursively(FolderSync folderSync, Sync desiredSync) {
         if (folderSync.equals(desiredSync)) {
             return Optional.of(folderSync);
         }
-        for (AbstractSync sync : folderSync.list) {
+        for (Sync sync : folderSync.list) {
             if (sync.equals(desiredSync)) {
                 return Optional.of(sync);
             }
             if (sync instanceof FolderSync) {
-                Optional<AbstractSync> syncOpt = getAbstractSyncRecursively((FolderSync) sync, desiredSync);
+                Optional<Sync> syncOpt = getAbstractSyncRecursively((FolderSync) sync, desiredSync);
                 if (syncOpt.isPresent()) {
                     return syncOpt;
                 }
@@ -76,7 +82,7 @@ public class SyncUtils {
         return Optional.empty();
     }
 
-    public static FolderSync getRootFolder(AbstractSync sync) {
+    public static FolderSync getRootFolder(Sync sync) {
         if (sync.parent == null) {
             return (FolderSync) sync;
         } else {

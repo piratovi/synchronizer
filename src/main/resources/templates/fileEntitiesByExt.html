@@ -13,11 +13,11 @@
 
             <a th:href="@{${#httpServletRequest.requestURI} +'/deleteAll'}">Delete ALL</a>
 
-            <tr th:each="abstractSync : ${fileEntitiesByExt}">
+            <tr th:each="sync : ${fileEntitiesByExt}">
 
-                <td th:text="${abstractSync.relativePath}"></td>
-                <td th:text="${abstractSync.id}"></td>
-                <td><a th:href="@{'/files/delete/' + ${abstractSync.id}}">Delete</a></td>
+                <td th:text="${sync.relativePath}"></td>
+                <td th:text="${sync.id}"></td>
+                <td><a th:href="@{'/files/delete/' + ${sync.id}}">Delete</a></td>
 
             </tr>
 

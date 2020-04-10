@@ -2,16 +2,14 @@ package com.kolosov.synchronizer.domain;
 
 import com.kolosov.synchronizer.enums.Location;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.NonNull;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
 @Entity
 @NoArgsConstructor
-public class FileSync extends AbstractSync {
+public class FileSync extends Sync {
 
-    @NonNull
     @Column(nullable = false)
     public String ext;
 
@@ -21,8 +19,6 @@ public class FileSync extends AbstractSync {
 
     @Override
     public String toString() {
-        return "FileSync{" +
-                "relativePath='" + relativePath + '\'' +
-                '}';
+        return "FileSync. relativePath = " + relativePath;
     }
 }

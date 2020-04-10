@@ -13,9 +13,9 @@
 
             <a th:href="${'/files/pc/empty/delete'}">Delete ALL</a>
 
-            <tr th:each="abstractSync : ${files}">
+            <tr th:each="sync : ${files}">
 
-                <td th:text="${abstractSync.absolutePath}"></td>
+                <td th:text="${sync.absolutePath}"></td>
 
             </tr>
 

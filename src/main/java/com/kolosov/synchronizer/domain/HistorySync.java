@@ -21,12 +21,11 @@ public class HistorySync {
     public Integer id;
 
     @OneToOne()
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    public AbstractSync sync;
+    public Sync sync;
 
     public ProposedAction action;
 
-    public HistorySync(AbstractSync sync, ProposedAction action) {
+    public HistorySync(Sync sync, ProposedAction action) {
         this.sync = sync;
         this.action = action;
     }

@@ -1,6 +1,6 @@
 package com.kolosov.synchronizer.utils;
 
-import com.kolosov.synchronizer.domain.AbstractSync;
+import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.FolderSync;
 
 import java.util.List;
@@ -9,54 +9,54 @@ import java.util.Optional;
 public class MergeSyncsUtils {
 
     public static void mergeSyncs(List<FolderSync> ftpFiles, List<FolderSync> result) {
-        List<AbstractSync> flatList = SyncUtils.getFlatSyncs(ftpFiles);
-        for (AbstractSync syncToMerge : flatList) {
+        List<Sync> flatList = SyncUtils.getFlatSyncs(ftpFiles);
+        for (Sync syncToMerge : flatList) {
             mergeOneSync(result, syncToMerge);
         }
     }
 
-    private static void mergeOneSync(List<FolderSync> result, AbstractSync syncToMerge) {
+    private static void mergeOneSync(List<FolderSync> result, Sync syncToMerge) {
         Optional<FolderSync> root = findRootFolder(result, syncToMerge);
         root.ifPresentOrElse(
                 rootFolder -> mergeSyncWithBranch(syncToMerge, rootFolder),
                 () -> createNewRootFolder(result, syncToMerge));
     }
 
-    private static Optional<FolderSync> findRootFolder(List<FolderSync> result, AbstractSync syncToMerge) {
+    private static Optional<FolderSync> findRootFolder(List<FolderSync> result, Sync syncToMerge) {
         String rootRelativePath = SyncUtils.getRootFolder(syncToMerge).relativePath;
         return result.stream()
                 .filter(folder -> rootRelativePath.equals(folder.relativePath))
                 .findFirst();
     }
 
-    private static void createNewRootFolder(List<FolderSync> result, AbstractSync syncToMerge) {
+    private static void createNewRootFolder(List<FolderSync> result, Sync syncToMerge) {
         result.add(syncToMerge.asFolder());
     }
 
-    private static void mergeSyncWithBranch(AbstractSync syncToMerge, FolderSync folderSync) {
-        Optional<AbstractSync> syncInTreeOpt = findSyncInBranch(folderSync, syncToMerge);
+    private static void mergeSyncWithBranch(Sync syncToMerge, FolderSync folderSync) {
+        Optional<Sync> syncInTreeOpt = findSyncInBranch(folderSync, syncToMerge);
         syncInTreeOpt.ifPresentOrElse(
                 syncInTree -> syncInTree.setExistOnPhone(true),
                 () -> createNewSyncInBranch(syncToMerge, folderSync)
         );
     }
 
-    private static void createNewSyncInBranch(AbstractSync syncToMerge, FolderSync folderSync) {
-        Optional<AbstractSync> parentOpt = findSyncInBranch(folderSync, syncToMerge.parent);
-        AbstractSync parent = parentOpt.orElseThrow(() -> new RuntimeException("Problems with merge Syncs"));
+    private static void createNewSyncInBranch(Sync syncToMerge, FolderSync folderSync) {
+        Optional<Sync> parentOpt = findSyncInBranch(folderSync, syncToMerge.parent);
+        Sync parent = parentOpt.orElseThrow(() -> new RuntimeException("Problems with merge Syncs"));
         parent.asFolder().add(syncToMerge);
     }
 
-    private static Optional<AbstractSync> findSyncInBranch(FolderSync syncInTree, AbstractSync desiredSync) {
+    private static Optional<Sync> findSyncInBranch(FolderSync syncInTree, Sync desiredSync) {
         if (syncInTree.equals(desiredSync)) {
             return Optional.of(syncInTree);
         }
-        for (AbstractSync sync : syncInTree.list) {
+        for (Sync sync : syncInTree.list) {
             if (sync.equals(desiredSync)) {
                 return Optional.of(sync);
             }
             if (sync.isFolder()) {
-                Optional<AbstractSync> syncInFolder = findSyncInBranch((FolderSync) sync, desiredSync);
+                Optional<Sync> syncInFolder = findSyncInBranch((FolderSync) sync, desiredSync);
                 if (syncInFolder.isPresent()) {
                     return syncInFolder;
                 }

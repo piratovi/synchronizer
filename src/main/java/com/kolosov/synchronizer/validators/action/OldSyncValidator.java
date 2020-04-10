@@ -1,6 +1,6 @@
 package com.kolosov.synchronizer.validators.action;
 
-import com.kolosov.synchronizer.domain.AbstractSync;
+import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.HistorySync;
 import com.kolosov.synchronizer.enums.ProposedAction;
 
@@ -12,7 +12,7 @@ import static com.kolosov.synchronizer.enums.ProposedAction.NOTHING;
 
 public class OldSyncValidator {
 
-    public static ProposedAction validate(AbstractSync newSync, Optional<HistorySync> oldHistorySyncOpt, Map<String, AbstractSync> oldFlatSyncs, AbstractSync oldSync) {
+    public static ProposedAction validate(Sync newSync, Optional<HistorySync> oldHistorySyncOpt, Map<String, Sync> oldFlatSyncs, Sync oldSync) {
         if (oldHistorySyncOpt.isPresent()) {
             return oldHistorySyncOpt.get().action;
         } else {
