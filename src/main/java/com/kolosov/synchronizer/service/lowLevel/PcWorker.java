@@ -53,13 +53,13 @@ public class PcWorker implements LowLevelWorker {
 
     @Override
     @SneakyThrows
-    public void deleteFile(Sync sync) {
+    public void delete(Sync sync) {
         FileSystemUtils.deleteRecursively(Path.of(LowLevelUtils.getAbsolutePath(sync)));
     }
 
     @Override
     @SneakyThrows
-    public InputStream getInputStreamFromFile(Sync sync) {
+    public InputStream getInputStreamFrom(Sync sync) {
         FileInputStream fileInputStream;
         fileInputStream = new FileInputStream(LowLevelUtils.getAbsolutePath(sync));
         return fileInputStream;
@@ -67,13 +67,18 @@ public class PcWorker implements LowLevelWorker {
 
     @Override
     @SneakyThrows
-    public OutputStream getOutputStreamToFile(Sync sync) {
+    public OutputStream getOutputStreamTo(Sync sync) {
         FileOutputStream outputStream;
         String absolutePath = LowLevelUtils.getAbsolutePath(sync);
         File file = new File(absolutePath);
         file.getParentFile().mkdirs();
         outputStream = new FileOutputStream(file);
         return outputStream;
+    }
+
+    @Override
+    public void createFolder(FolderSync folderSync) {
+        new File(LowLevelUtils.getAbsolutePath(folderSync)).mkdir();
     }
 
 }

@@ -122,10 +122,9 @@ public class FtpWorker implements LowLevelWorker {
 
     @Override
     @SneakyThrows
-    public void deleteFile(Sync sync) {
+    public void delete(Sync sync) {
         ftpConnect();
         String pathToDelete = LocationUtils.getPhoneRootPath() + "/" + LowLevelUtils.convertPathForFTP(sync.relativePath);
-        pathToDelete = new String(pathToDelete.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
         if (sync instanceof FolderSync) {
             removeDirectory(pathToDelete, "");
         } else {
@@ -136,7 +135,7 @@ public class FtpWorker implements LowLevelWorker {
 
     @SneakyThrows
     @Override
-    public InputStream getInputStreamFromFile(Sync sync) {
+    public InputStream getInputStreamFrom(Sync sync) {
         String relativePath = sync.relativePath;
         relativePath = LowLevelUtils.convertPathForFTP(relativePath);
         return ftpClient.retrieveFileStream(relativePath);
@@ -144,7 +143,7 @@ public class FtpWorker implements LowLevelWorker {
 
     @SneakyThrows
     @Override
-    public OutputStream getOutputStreamToFile(Sync sync) {
+    public OutputStream getOutputStreamTo(Sync sync) {
         String relativePath = sync.relativePath;
         relativePath = LowLevelUtils.convertPathForFTP(relativePath);
         prepareCatalogs(relativePath);
@@ -153,6 +152,7 @@ public class FtpWorker implements LowLevelWorker {
 
     @SneakyThrows
     private void prepareCatalogs(String relativePath) {
+        ftpConnect();
         List<String> dirs = new ArrayList<>(Arrays.asList(SPLIT.split(relativePath)));
         dirs.remove(dirs.size() - 1);
         String result = LocationUtils.getPhoneRootPath();
@@ -169,7 +169,6 @@ public class FtpWorker implements LowLevelWorker {
     public void closeStream() {
         ftpClient.completePendingCommand();
     }
-
 
     public void removeDirectory(String parentDir, String currentDir) throws IOException {
         String dirToList = parentDir;
@@ -206,14 +205,19 @@ public class FtpWorker implements LowLevelWorker {
                     }
                 }
             }
-
-            // finally, remove the directory itself
-            boolean removed = ftpClient.removeDirectory(dirToList);
-            if (removed) {
-                System.out.println("REMOVED the directory: " + dirToList);
-            } else {
-                System.out.println("CANNOT remove the directory: " + dirToList);
-            }
         }
+        // finally, remove the directory itself
+        boolean removed = ftpClient.removeDirectory(dirToList);
+        if (removed) {
+            System.out.println("REMOVED the directory: " + dirToList);
+        } else {
+            System.out.println("CANNOT remove the directory: " + dirToList);
+        }
+
+    }
+
+    @Override
+    public void createFolder(FolderSync folderSync) {
+        //empty
     }
 }

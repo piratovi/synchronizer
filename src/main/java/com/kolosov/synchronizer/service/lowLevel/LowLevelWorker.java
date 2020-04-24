@@ -11,9 +11,11 @@ public interface LowLevelWorker {
 
     List<FolderSync> collectSyncs();
 
-    void deleteFile(Sync sync);
+    void delete(Sync sync);
 
-    InputStream getInputStreamFromFile(Sync sync);
+    InputStream getInputStreamFrom(Sync sync);
 
-    OutputStream getOutputStreamToFile(Sync sync);
+    OutputStream getOutputStreamTo(Sync sync);
+
+    void createFolder(FolderSync folderSync);
 }

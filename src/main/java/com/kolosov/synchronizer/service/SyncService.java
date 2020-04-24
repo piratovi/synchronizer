@@ -41,15 +41,7 @@ public class SyncService {
     }
 
     public List<ExtensionStat> getExtensionStats() {
-        List<Sync> flatSyncs = SyncUtils.getFlatSyncs(rootFolderSyncRepository.findAll());
-        return flatSyncs.stream()
-                .filter(sync -> sync instanceof FileSync)
-                .map(sync -> (FileSync) sync)
-                .collect(Collectors.groupingBy(sync -> sync.ext, Collectors.toList()))
-                .entrySet()
-                .stream()
-                .map(entry -> new ExtensionStat(entry.getKey(), entry.getValue().size(), entry.getValue()))
-                .collect(Collectors.toList());
+        return scout.getExtensionStats();
     }
 
     public void clear() {

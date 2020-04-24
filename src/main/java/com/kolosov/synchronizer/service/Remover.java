@@ -7,10 +7,13 @@ import com.kolosov.synchronizer.repository.RootFolderSyncRepository;
 import com.kolosov.synchronizer.repository.SyncRepository;
 import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,16 +24,19 @@ public class Remover {
     private final DirectOperationsService directOperations;
     private final RootFolderSyncRepository rootFolderSyncRepository;
 
+    @Synchronized
     public void delete(List<Integer> ids) {
         log.info("Deleting start");
-        ids.forEach(this::delete);
+        List<Sync> syncsToDelete = ids.stream()
+                .map(id -> syncRepository.findById(id).orElseThrow(ExceptionSupplier.syncNotFound(id)))
+                .map(SyncUtils::getFlatSyncs)
+                .flatMap(Collection::stream)
+                .filter(Sync::isNotSynchronized)
+                .filter(Sync::isFile)
+                .collect(Collectors.toList());
+        syncsToDelete.forEach(this::delete);
         removeEmptyFoldersInLowLevelAndRepo();
         log.info("Deleting end");
-    }
-
-    private void delete(Integer id) {
-        Sync sync = syncRepository.findById(id).orElseThrow(ExceptionSupplier.syncNotFound(id));
-        delete(sync);
     }
 
     private void removeEmptyFoldersInLowLevelAndRepo() {

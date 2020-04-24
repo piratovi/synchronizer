@@ -1,5 +1,6 @@
 package com.kolosov.synchronizer.service;
 
+import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.exceptions.FileNotFoundException;
@@ -18,6 +19,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class DirectOperationsService {
+    //TODO make strategy and validator pattern
 
     private final FtpWorker ftpWorker;
     private final PcWorker pcWorker;
@@ -27,30 +29,45 @@ public class DirectOperationsService {
             throw new FileNotFoundException("File already deleted " + sync.relativePath);
         }
         if (sync.existOnPhone) {
-            ftpWorker.deleteFile(sync);
+            ftpWorker.delete(sync);
         }
         if (sync.existOnPC) {
-            pcWorker.deleteFile(sync);
+            pcWorker.delete(sync);
         }
     }
 
-    public void copyFileFromPhoneToPc(Sync sync) {
+    public void transferFromPhoneToPc(Sync sync) {
+        if (sync.isFolder()) {
+            pcWorker.createFolder(sync.asFolder());
+        } else {
+            transferFromPhoneToPc(sync.asFile());
+        }
+    }
+
+    public void transferFromPhoneToPc(FileSync fileSync) {
         try (
-                InputStream inputStream = ftpWorker.getInputStreamFromFile(sync);
-                OutputStream outputStream = pcWorker.getOutputStreamToFile(sync)
+                InputStream inputStream = ftpWorker.getInputStreamFrom(fileSync);
+                OutputStream outputStream = pcWorker.getOutputStreamTo(fileSync)
         ) {
             inputStream.transferTo(outputStream);
         } catch (Exception e) {
             e.printStackTrace();
         }
         ftpWorker.closeStream();
-
     }
 
-    public void copyFileFromPcToPhone(Sync sync) {
+    public void transferFromPcToPhone(Sync sync) {
+        if (sync.isFolder()) {
+            ftpWorker.createFolder(sync.asFolder());
+        } else {
+            transferFromPcToPhone(sync.asFile());
+        }
+    }
+
+    public void transferFromPcToPhone(FileSync fileSync) {
         try (
-                InputStream inputStream = pcWorker.getInputStreamFromFile(sync);
-                OutputStream outputStream = ftpWorker.getOutputStreamToFile(sync)
+                InputStream inputStream = pcWorker.getInputStreamFrom(fileSync);
+                OutputStream outputStream = ftpWorker.getOutputStreamTo(fileSync)
         ) {
             inputStream.transferTo(outputStream);
         } catch (Exception e) {

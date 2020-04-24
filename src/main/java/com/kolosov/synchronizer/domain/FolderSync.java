@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,10 @@ public class FolderSync extends Sync {
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "parent")
     public List<Sync> list = new ArrayList<>();
+
+    ////TODO переделать в трансферобжект
+    @Transient
+    public int rememberedChildQuantity;
 
     public FolderSync(String relativePath, String name, Location location, FolderSync folder) {
         super(relativePath, name, location, folder);
