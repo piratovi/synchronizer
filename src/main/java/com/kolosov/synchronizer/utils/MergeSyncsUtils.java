@@ -1,5 +1,6 @@
 package com.kolosov.synchronizer.utils;
 
+import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.FolderSync;
 
@@ -8,29 +9,29 @@ import java.util.Optional;
 
 public class MergeSyncsUtils {
 
-    public static void mergeSyncs(List<FolderSync> ftpFiles, List<FolderSync> result) {
+    public static void mergeSyncs(List<RootFolderSync> ftpFiles, List<RootFolderSync> result) {
         List<Sync> flatList = SyncUtils.getFlatSyncs(ftpFiles);
         for (Sync syncToMerge : flatList) {
             mergeOneSync(result, syncToMerge);
         }
     }
 
-    private static void mergeOneSync(List<FolderSync> result, Sync syncToMerge) {
-        Optional<FolderSync> root = findRootFolder(result, syncToMerge);
+    private static void mergeOneSync(List<RootFolderSync> result, Sync syncToMerge) {
+        Optional<? extends FolderSync> root = findRootFolder(result, syncToMerge);
         root.ifPresentOrElse(
                 rootFolder -> mergeSyncWithBranch(syncToMerge, rootFolder),
                 () -> createNewRootFolder(result, syncToMerge));
     }
 
-    private static Optional<FolderSync> findRootFolder(List<FolderSync> result, Sync syncToMerge) {
+    private static Optional<RootFolderSync> findRootFolder(List<RootFolderSync> result, Sync syncToMerge) {
         String rootRelativePath = SyncUtils.getRootFolder(syncToMerge).relativePath;
         return result.stream()
                 .filter(folder -> rootRelativePath.equals(folder.relativePath))
                 .findFirst();
     }
 
-    private static void createNewRootFolder(List<FolderSync> result, Sync syncToMerge) {
-        result.add(syncToMerge.asFolder());
+    private static void createNewRootFolder(List<RootFolderSync> result, Sync syncToMerge) {
+        result.add(syncToMerge.asRootFolder());
     }
 
     private static void mergeSyncWithBranch(Sync syncToMerge, FolderSync folderSync) {

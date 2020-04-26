@@ -114,6 +114,10 @@ public abstract class Sync {
         return (FolderSync) this;
     }
 
+    public RootFolderSync asRootFolder() {
+        return (RootFolderSync) this;
+    }
+
     @JsonIgnore
     public boolean hasParent() {
         return parent != null;

@@ -1,14 +1,17 @@
 package com.kolosov.synchronizer.service;
 
 import com.kolosov.synchronizer.domain.FileSync;
+import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.FolderSync;
+import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.exceptions.FileNotFoundException;
 import com.kolosov.synchronizer.service.lowLevel.FtpWorker;
 import com.kolosov.synchronizer.service.lowLevel.PcWorker;
 import com.kolosov.synchronizer.utils.MergeSyncsUtils;
 import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -18,6 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DirectOperationsService {
     //TODO make strategy and validator pattern
 
@@ -28,12 +32,16 @@ public class DirectOperationsService {
         if (!sync.existOnPhone && !sync.existOnPC) {
             throw new FileNotFoundException("File already deleted " + sync.relativePath);
         }
+        Location location = null;
         if (sync.existOnPhone) {
             ftpWorker.delete(sync);
+            location = Location.PHONE;
         }
         if (sync.existOnPC) {
             pcWorker.delete(sync);
+            location = Location.PC;
         }
+        log.info("{} deleted from {}", sync.relativePath, location);
     }
 
     public void transferFromPhoneToPc(Sync sync) {
@@ -76,10 +84,10 @@ public class DirectOperationsService {
         ftpWorker.closeStream();
     }
 
-    public List<FolderSync> getMergedList() {
-        List<FolderSync> pcFiles = pcWorker.collectSyncs();
-        List<FolderSync> ftpFiles = ftpWorker.collectSyncs();
-        List<FolderSync> result = new ArrayList<>(pcFiles);
+    public List<RootFolderSync> getMergedList() {
+        List<RootFolderSync> pcFiles = pcWorker.collectSyncs();
+        List<RootFolderSync> ftpFiles = ftpWorker.collectSyncs();
+        List<RootFolderSync> result = new ArrayList<>(pcFiles);
         MergeSyncsUtils.mergeSyncs(ftpFiles, result);
         SyncUtils.processExtensions(result);
         return result;

@@ -2,6 +2,7 @@ package com.kolosov.synchronizer.service;
 
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.Sync;
+import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.exceptions.ExceptionSupplier;
 import com.kolosov.synchronizer.repository.SyncRepository;
 import com.kolosov.synchronizer.utils.SyncUtils;
@@ -44,15 +45,18 @@ public class Transporter {
     }
 
     private void transfer(Sync sync) {
+        Location locationTo;
         if (sync.existOnPC) {
             directOperations.transferFromPcToPhone(sync);
             sync.existOnPhone = true;
+            locationTo = Location.PHONE;
         } else {
             directOperations.transferFromPhoneToPc(sync);
             sync.existOnPC = true;
+            locationTo = Location.PC;
         }
         syncRepository.save(sync);
-        log.info(sync.relativePath + " transferred");
+        log.info(sync.relativePath + " transferred to " + locationTo);
     }
 
 }

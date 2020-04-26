@@ -2,6 +2,7 @@ package com.kolosov.synchronizer.service;
 
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.HistorySync;
+import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.enums.ProposedAction;
 import com.kolosov.synchronizer.repository.HistorySyncRepository;
@@ -33,14 +34,14 @@ public class Refresher {
 
     public void refresh() {
         log.info("refresh start");
-        List<FolderSync> mergedList = directOperations.getMergedList();
+        List<RootFolderSync> mergedList = directOperations.getMergedList();
         createHistorySyncs(mergedList);
         syncRepository.deleteAll();
         syncRepository.saveAll(mergedList);
         log.info("refresh done");
     }
 
-    private void createHistorySyncs(List<FolderSync> mergedList) {
+    private void createHistorySyncs(List<? extends FolderSync> mergedList) {
         Map<String, Sync> oldFlatSyncs = SyncUtils.getFlatSyncs(rootFolderSyncRepository.findAll()).stream()
                 .collect(Collectors.toMap(sync -> sync.relativePath, Function.identity()));
         List<HistorySync> oldHistorySyncs = historySyncRepository.findAll();

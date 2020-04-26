@@ -80,14 +80,14 @@ public class FtpWorker implements LowLevelWorker {
 
     @Override
     @SneakyThrows
-    public List<FolderSync> collectSyncs() {
+    public List<RootFolderSync> collectSyncs() {
         ftpConnect();
-        List<FolderSync> syncList = new ArrayList<>();
+        List<RootFolderSync> syncList = new ArrayList<>();
         listDirectory(ftpClient, LocationUtils.getPhoneRootPath(), "", syncList, "", null);
         return syncList;
     }
 
-    private void listDirectory(FTPClient ftpClient, String parentDir, String currentDir, List<FolderSync> result, String fromRootDir, FolderSync parentFolderSync) throws IOException {
+    private void listDirectory(FTPClient ftpClient, String parentDir, String currentDir, List<RootFolderSync> result, String fromRootDir, FolderSync parentFolderSync) throws IOException {
         String dirToList = parentDir;
         if (!currentDir.equals("")) {
             dirToList += "/" + currentDir;
@@ -105,7 +105,7 @@ public class FtpWorker implements LowLevelWorker {
                     FolderSync nextFolderSync;
                     if (parentFolderSync == null) {
                         nextFolderSync = new RootFolderSync(relativePath, currentFileName, Location.PHONE);
-                        result.add(nextFolderSync);
+                        result.add(nextFolderSync.asRootFolder());
                     } else {
                         nextFolderSync = new FolderSync(relativePath, currentFileName, Location.PHONE, parentFolderSync);
                         parentFolderSync.list.add(nextFolderSync);

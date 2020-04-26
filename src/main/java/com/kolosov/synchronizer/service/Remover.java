@@ -51,7 +51,6 @@ public class Remover {
         directOperations.delete(sync);
         sync.removeFromParent();
         syncRepository.delete(sync);
-        log.info(sync.relativePath + " deleted");
     }
 
 }

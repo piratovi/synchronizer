@@ -1,5 +1,6 @@
 package com.kolosov.synchronizer.utils;
 
+import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
@@ -37,7 +38,7 @@ public class SyncUtils {
         });
     }
 
-    public static void processExtensions(List<FolderSync> folderSyncs) {
+    public static void processExtensions(List<RootFolderSync> folderSyncs) {
         List<Sync> flatSyncs = getFlatSyncs(folderSyncs);
         flatSyncs.stream()
                 .filter(sync -> sync instanceof FileSync)

@@ -1,5 +1,6 @@
 package com.kolosov.synchronizer.service.lowLevel;
 
+import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.FolderSync;
 
@@ -9,7 +10,7 @@ import java.util.List;
 
 public interface LowLevelWorker {
 
-    List<FolderSync> collectSyncs();
+    List<RootFolderSync> collectSyncs();
 
     void delete(Sync sync);
 

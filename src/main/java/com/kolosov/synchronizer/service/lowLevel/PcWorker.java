@@ -22,14 +22,14 @@ import static com.kolosov.synchronizer.utils.LocationUtils.PATH;
 public class PcWorker implements LowLevelWorker {
 
     @Override
-    public List<FolderSync> collectSyncs() {
-        List<FolderSync> syncList = new ArrayList<>();
+    public List<RootFolderSync> collectSyncs() {
+        List<RootFolderSync> syncList = new ArrayList<>();
         File root = new File(LocationUtils.getPcRootPath());
         processDirectoryRecursively(root, syncList, null);
         return syncList;
     }
 
-    public void processDirectoryRecursively(File parentDir, List<FolderSync> result, FolderSync parentFolderSync) {
+    public void processDirectoryRecursively(File parentDir, List<RootFolderSync> result, FolderSync parentFolderSync) {
         for (final File file : parentDir.listFiles()) {
             String relativePath = PATH.relativize(file.toPath()).toString();
             String name = file.getName();
@@ -37,7 +37,7 @@ public class PcWorker implements LowLevelWorker {
                 FolderSync current;
                 if (parentFolderSync == null) {
                     current = new RootFolderSync(relativePath, name, Location.PC);
-                    result.add(current);
+                    result.add(current.asRootFolder());
                 } else {
                     current = new FolderSync(relativePath, name, Location.PC, parentFolderSync);
                     parentFolderSync.list.add(current);
