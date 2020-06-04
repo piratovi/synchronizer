@@ -36,6 +36,7 @@ public class Remover {
                 .collect(Collectors.toList());
         syncsToDelete.forEach(this::delete);
         removeEmptyFoldersInLowLevelAndRepo();
+        directOperations.disconnect();
         log.info("Deleting end");
     }
 

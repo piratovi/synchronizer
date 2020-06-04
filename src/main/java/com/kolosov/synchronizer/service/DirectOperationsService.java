@@ -3,7 +3,6 @@ package com.kolosov.synchronizer.service;
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.domain.Sync;
-import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.exceptions.FileNotFoundException;
 import com.kolosov.synchronizer.service.lowLevel.FtpWorker;
@@ -59,7 +58,7 @@ public class DirectOperationsService {
         ) {
             inputStream.transferTo(outputStream);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(fileSync.toString(), e);
         }
         ftpWorker.closeStream();
     }
@@ -79,7 +78,7 @@ public class DirectOperationsService {
         ) {
             inputStream.transferTo(outputStream);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(fileSync.toString(), e);
         }
         ftpWorker.closeStream();
     }
@@ -93,6 +92,9 @@ public class DirectOperationsService {
         return result;
     }
 
+    public void disconnect() {
+        ftpWorker.disconnect();
+    }
 }
 
 

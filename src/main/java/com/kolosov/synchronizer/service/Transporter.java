@@ -41,6 +41,7 @@ public class Transporter {
             syncs.add(sync);
             syncs.forEach(this::transfer);
         });
+        directOperations.disconnect();
         log.info("Transferring end");
     }
 

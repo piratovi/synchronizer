@@ -42,15 +42,6 @@ public class FtpWorker implements LowLevelWorker {
 
     public final FTPClient ftpClient = new FTPClient();
 
-//    @EventListener(ApplicationReadyEvent.class)
-//    public void doSomethingAfterStartup() {
-//        try {
-//            ftpConnect();
-//        } catch (Exception e) {
-//            log.error("Can't connect to FTP " + e.getMessage());
-//        }
-//    }
-
     @SneakyThrows
     private void ftpConnect() {
         if (!(ftpClient.isConnected() && ftpClient.isAvailable())) {
@@ -66,14 +57,11 @@ public class FtpWorker implements LowLevelWorker {
 
     @PreDestroy
     private void tearDown() {
-        try {
-            ftpDisconnect();
-        } catch (IOException e) {
-            log.error("Can't disconnect from FTP" + e);
-        }
+        disconnect();
     }
 
-    private void ftpDisconnect() throws IOException {
+    @SneakyThrows
+    public void disconnect() {
         ftpClient.logout();
         ftpClient.disconnect();
     }
