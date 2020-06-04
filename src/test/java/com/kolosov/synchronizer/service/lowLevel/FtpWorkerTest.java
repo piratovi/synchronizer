@@ -6,8 +6,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class FtpWorkerTest {
 
-    @Autowired
-    FtpWorker ftpWorker;
+//    @Autowired
+//    FtpWorker ftpWorker;
 //
 //    @Test
 //    void getFileRelativePaths() {

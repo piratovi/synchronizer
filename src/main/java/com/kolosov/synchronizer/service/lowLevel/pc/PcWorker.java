@@ -1,10 +1,11 @@
-package com.kolosov.synchronizer.service.lowLevel;
+package com.kolosov.synchronizer.service.lowLevel.pc;
 
 import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.enums.Location;
+import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
 import com.kolosov.synchronizer.utils.LocationUtils;
 import com.kolosov.synchronizer.utils.LowLevelUtils;
 import lombok.SneakyThrows;

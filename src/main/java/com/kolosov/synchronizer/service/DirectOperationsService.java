@@ -5,8 +5,8 @@ import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.exceptions.FileNotFoundException;
-import com.kolosov.synchronizer.service.lowLevel.FtpWorker;
-import com.kolosov.synchronizer.service.lowLevel.PcWorker;
+import com.kolosov.synchronizer.service.lowLevel.PhoneWorker;
+import com.kolosov.synchronizer.service.lowLevel.pc.PcWorker;
 import com.kolosov.synchronizer.utils.MergeSyncsUtils;
 import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ import java.util.List;
 public class DirectOperationsService {
     //TODO make strategy and validator pattern
 
-    private final FtpWorker ftpWorker;
+    private final PhoneWorker phoneWorker;
     private final PcWorker pcWorker;
 
     public void delete(Sync sync) {
@@ -33,7 +33,7 @@ public class DirectOperationsService {
         }
         Location location = null;
         if (sync.existOnPhone) {
-            ftpWorker.delete(sync);
+            phoneWorker.delete(sync);
             location = Location.PHONE;
         }
         if (sync.existOnPC) {
@@ -53,39 +53,39 @@ public class DirectOperationsService {
 
     public void transferFromPhoneToPc(FileSync fileSync) {
         try (
-                InputStream inputStream = ftpWorker.getInputStreamFrom(fileSync);
+                InputStream inputStream = phoneWorker.getInputStreamFrom(fileSync);
                 OutputStream outputStream = pcWorker.getOutputStreamTo(fileSync)
         ) {
             inputStream.transferTo(outputStream);
         } catch (Exception e) {
             throw new RuntimeException(fileSync.toString(), e);
         }
-        ftpWorker.closeStream();
+        phoneWorker.closeStream();
     }
 
     public void transferFromPcToPhone(Sync sync) {
         if (sync.isFolder()) {
-            ftpWorker.createFolder(sync.asFolder());
+            phoneWorker.createFolder(sync.asFolder());
         } else {
             transferFromPcToPhone(sync.asFile());
         }
     }
 
-    public void transferFromPcToPhone(FileSync fileSync) {
+    private void transferFromPcToPhone(FileSync fileSync) {
         try (
                 InputStream inputStream = pcWorker.getInputStreamFrom(fileSync);
-                OutputStream outputStream = ftpWorker.getOutputStreamTo(fileSync)
+                OutputStream outputStream = phoneWorker.getOutputStreamTo(fileSync)
         ) {
             inputStream.transferTo(outputStream);
         } catch (Exception e) {
             throw new RuntimeException(fileSync.toString(), e);
         }
-        ftpWorker.closeStream();
+        phoneWorker.closeStream();
     }
 
     public List<RootFolderSync> getMergedList() {
         List<RootFolderSync> pcFiles = pcWorker.collectSyncs();
-        List<RootFolderSync> ftpFiles = ftpWorker.collectSyncs();
+        List<RootFolderSync> ftpFiles = phoneWorker.collectSyncs();
         List<RootFolderSync> result = new ArrayList<>(pcFiles);
         MergeSyncsUtils.mergeSyncs(ftpFiles, result);
         SyncUtils.processExtensions(result);
@@ -93,7 +93,7 @@ public class DirectOperationsService {
     }
 
     public void disconnect() {
-        ftpWorker.disconnect();
+        phoneWorker.disconnect();
     }
 }
 

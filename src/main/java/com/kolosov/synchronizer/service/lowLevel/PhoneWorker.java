@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 
 @Component
 @Slf4j
-public class FtpWorker implements LowLevelWorker {
+public class PhoneWorker implements LowLevelWorker {
 
     public static final Pattern SPLIT = Pattern.compile("/");
 
