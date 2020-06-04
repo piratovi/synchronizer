@@ -60,7 +60,7 @@ public class PcWorker implements LowLevelWorker {
 
     @Override
     @SneakyThrows
-    public InputStream getInputStreamFrom(Sync sync) {
+    public InputStream getInputStreamFrom(FileSync sync) {
         FileInputStream fileInputStream;
         fileInputStream = new FileInputStream(LowLevelUtils.getAbsolutePath(sync));
         return fileInputStream;
@@ -68,7 +68,7 @@ public class PcWorker implements LowLevelWorker {
 
     @Override
     @SneakyThrows
-    public OutputStream getOutputStreamTo(Sync sync) {
+    public OutputStream getOutputStreamTo(FileSync sync) {
         FileOutputStream outputStream;
         String absolutePath = LowLevelUtils.getAbsolutePath(sync);
         File file = new File(absolutePath);

@@ -1,10 +1,11 @@
-package com.kolosov.synchronizer.service.lowLevel;
+package com.kolosov.synchronizer.service.lowLevel.phone;
 
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.enums.Location;
+import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
 import com.kolosov.synchronizer.utils.LocationUtils;
 import com.kolosov.synchronizer.utils.LowLevelUtils;
 import lombok.SneakyThrows;
@@ -123,7 +124,7 @@ public class PhoneWorker implements LowLevelWorker {
 
     @SneakyThrows
     @Override
-    public InputStream getInputStreamFrom(Sync sync) {
+    public InputStream getInputStreamFrom(FileSync sync) {
         String relativePath = sync.relativePath;
         relativePath = LowLevelUtils.convertPathForFTP(relativePath);
         return ftpClient.retrieveFileStream(relativePath);
@@ -131,7 +132,7 @@ public class PhoneWorker implements LowLevelWorker {
 
     @SneakyThrows
     @Override
-    public OutputStream getOutputStreamTo(Sync sync) {
+    public OutputStream getOutputStreamTo(FileSync sync) {
         String relativePath = sync.relativePath;
         relativePath = LowLevelUtils.convertPathForFTP(relativePath);
         prepareCatalogs(relativePath);

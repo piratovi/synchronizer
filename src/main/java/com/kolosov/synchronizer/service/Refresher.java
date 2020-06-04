@@ -8,6 +8,7 @@ import com.kolosov.synchronizer.enums.ProposedAction;
 import com.kolosov.synchronizer.repository.HistorySyncRepository;
 import com.kolosov.synchronizer.repository.RootFolderSyncRepository;
 import com.kolosov.synchronizer.repository.SyncRepository;
+import com.kolosov.synchronizer.service.directOperations.DirectOperationsService;
 import com.kolosov.synchronizer.utils.SyncUtils;
 import com.kolosov.synchronizer.validators.action.ActionValidator;
 import lombok.RequiredArgsConstructor;

@@ -1,28 +1,18 @@
 package com.kolosov.synchronizer.service;
 
-import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.HistorySync;
 import com.kolosov.synchronizer.domain.RootFolderSync;
-import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.dto.ExtensionStat;
-import com.kolosov.synchronizer.enums.ProposedAction;
 import com.kolosov.synchronizer.repository.HistorySyncRepository;
 import com.kolosov.synchronizer.repository.RootFolderSyncRepository;
 import com.kolosov.synchronizer.repository.SyncRepository;
+import com.kolosov.synchronizer.service.transporter.Transporter;
 import com.kolosov.synchronizer.utils.SyncUtils;
-import com.kolosov.synchronizer.validators.action.ActionValidator;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static com.kolosov.synchronizer.enums.ProposedAction.NOTHING;
 
 @Service
 @RequiredArgsConstructor

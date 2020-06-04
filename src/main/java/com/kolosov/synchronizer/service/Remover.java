@@ -5,6 +5,7 @@ import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.exceptions.ExceptionSupplier;
 import com.kolosov.synchronizer.repository.RootFolderSyncRepository;
 import com.kolosov.synchronizer.repository.SyncRepository;
+import com.kolosov.synchronizer.service.directOperations.DirectOperationsService;
 import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.Synchronized;

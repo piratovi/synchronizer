@@ -1,5 +1,6 @@
 package com.kolosov.synchronizer.service.lowLevel;
 
+import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.FolderSync;
@@ -14,9 +15,9 @@ public interface LowLevelWorker {
 
     void delete(Sync sync);
 
-    InputStream getInputStreamFrom(Sync sync);
+    InputStream getInputStreamFrom(FileSync sync);
 
-    OutputStream getOutputStreamTo(Sync sync);
+    OutputStream getOutputStreamTo(FileSync sync);
 
     void createFolder(FolderSync folderSync);
 }

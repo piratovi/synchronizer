@@ -1,20 +1,23 @@
-package com.kolosov.synchronizer.service;
+package com.kolosov.synchronizer.service.directOperations;
 
-import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.exceptions.FileNotFoundException;
-import com.kolosov.synchronizer.service.lowLevel.PhoneWorker;
+import com.kolosov.synchronizer.service.directOperations.transferStrategy.FileFromPcToPhoneStrategy;
+import com.kolosov.synchronizer.service.directOperations.transferStrategy.FileFromPhoneToPcStrategy;
+import com.kolosov.synchronizer.service.directOperations.transferStrategy.FolderFromPcToPhoneStrategy;
+import com.kolosov.synchronizer.service.directOperations.transferStrategy.FolderFromPhoneToPcStrategy;
+import com.kolosov.synchronizer.service.directOperations.transferStrategy.TransferStrategy;
 import com.kolosov.synchronizer.service.lowLevel.pc.PcWorker;
+import com.kolosov.synchronizer.service.lowLevel.phone.PhoneWorker;
+import com.kolosov.synchronizer.service.transporter.validator.TransferType;
 import com.kolosov.synchronizer.utils.MergeSyncsUtils;
 import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +25,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class DirectOperationsService {
-    //TODO make strategy and validator pattern
 
     private final PhoneWorker phoneWorker;
     private final PcWorker pcWorker;
@@ -43,46 +45,6 @@ public class DirectOperationsService {
         log.info("{} deleted from {}", sync.relativePath, location);
     }
 
-    public void transferFromPhoneToPc(Sync sync) {
-        if (sync.isFolder()) {
-            pcWorker.createFolder(sync.asFolder());
-        } else {
-            transferFromPhoneToPc(sync.asFile());
-        }
-    }
-
-    public void transferFromPhoneToPc(FileSync fileSync) {
-        try (
-                InputStream inputStream = phoneWorker.getInputStreamFrom(fileSync);
-                OutputStream outputStream = pcWorker.getOutputStreamTo(fileSync)
-        ) {
-            inputStream.transferTo(outputStream);
-        } catch (Exception e) {
-            throw new RuntimeException(fileSync.toString(), e);
-        }
-        phoneWorker.closeStream();
-    }
-
-    public void transferFromPcToPhone(Sync sync) {
-        if (sync.isFolder()) {
-            phoneWorker.createFolder(sync.asFolder());
-        } else {
-            transferFromPcToPhone(sync.asFile());
-        }
-    }
-
-    private void transferFromPcToPhone(FileSync fileSync) {
-        try (
-                InputStream inputStream = pcWorker.getInputStreamFrom(fileSync);
-                OutputStream outputStream = phoneWorker.getOutputStreamTo(fileSync)
-        ) {
-            inputStream.transferTo(outputStream);
-        } catch (Exception e) {
-            throw new RuntimeException(fileSync.toString(), e);
-        }
-        phoneWorker.closeStream();
-    }
-
     public List<RootFolderSync> getMergedList() {
         List<RootFolderSync> pcFiles = pcWorker.collectSyncs();
         List<RootFolderSync> ftpFiles = phoneWorker.collectSyncs();
@@ -94,6 +56,26 @@ public class DirectOperationsService {
 
     public void disconnect() {
         phoneWorker.disconnect();
+    }
+
+    public void transfer(Sync sync, TransferType transferType) {
+        TransferStrategy transferStrategy = getTransferStrategy(sync, transferType);
+        transferStrategy.transfer();
+    }
+
+    private TransferStrategy getTransferStrategy(Sync sync, TransferType transferType) {
+        switch (transferType) {
+            case FOLDER_FROM_PC_TO_PHONE:
+                return new FolderFromPcToPhoneStrategy(sync, phoneWorker);
+            case FILE_FROM_PC_TO_PHONE:
+                return new FileFromPcToPhoneStrategy(sync, pcWorker, phoneWorker);
+            case FOLDER_FROM_PHONE_TO_PC:
+                return new FolderFromPhoneToPcStrategy(sync, pcWorker);
+            case FILE_FROM_PHONE_TO_PC:
+                return new FileFromPhoneToPcStrategy(sync, pcWorker, phoneWorker);
+            default:
+                throw new RuntimeException();
+        }
     }
 }
 
