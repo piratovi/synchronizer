@@ -24,9 +24,9 @@ public class LocationUtils {
 
     @PostConstruct
     public void setUp() {
-        pcRootPath = env.getProperty("location.path.pc");
-        phoneRootPath = env.getProperty("location.path.phone");
-        PATH = Paths.get(LocationUtils.getPcRootPath());
+        pcRootPath = env.getProperty("com.kolosov.synchronizer.location.path.pc");
+        phoneRootPath = env.getProperty("com.kolosov.synchronizer.location.path.phone");
+        PATH = Paths.get(pcRootPath);
     }
 
     public static String getRootPath(Location location) {

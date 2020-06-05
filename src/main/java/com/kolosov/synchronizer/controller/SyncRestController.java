@@ -96,4 +96,9 @@ public class SyncRestController {
         return new ResponseEntity<>(extensionStat, HttpStatus.OK);
     }
 
+    @GetMapping("/disconnect")
+    public ResponseEntity<String> disconnect() {
+        syncService.disconnect();
+        return new ResponseEntity<>("disconnect", HttpStatus.OK);
+    }
 }

@@ -54,10 +54,6 @@ public class DirectOperationsService {
         return result;
     }
 
-    public void disconnect() {
-        phoneWorker.disconnect();
-    }
-
     public void transfer(Sync sync, TransferType transferType) {
         TransferStrategy transferStrategy = getTransferStrategy(sync, transferType);
         transferStrategy.transfer();
@@ -76,6 +72,14 @@ public class DirectOperationsService {
             default:
                 throw new RuntimeException();
         }
+    }
+
+    public void connect() {
+        phoneWorker.connect();
+    }
+
+    public void disconnect() {
+        phoneWorker.disconnect();
     }
 }
 

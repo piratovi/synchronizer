@@ -35,6 +35,7 @@ public class Remover {
                 .filter(Sync::isNotSynchronized)
                 .filter(Sync::isFile)
                 .collect(Collectors.toList());
+        directOperations.connect();
         syncsToDelete.forEach(this::delete);
         removeEmptyFoldersInLowLevelAndRepo();
         directOperations.disconnect();

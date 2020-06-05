@@ -32,19 +32,19 @@ public class PhoneWorker implements LowLevelWorker {
 
     public static final Pattern SPLIT = Pattern.compile("/");
 
-    @Value("${com.kolosov.synchronizer.ftpServerUrl}")
+    @Value("${com.kolosov.synchronizer.ftp.url}")
     private String ftpServerUrl;
-    @Value("${com.kolosov.synchronizer.ftpServerPort}")
+    @Value("${com.kolosov.synchronizer.ftp.port}")
     private Integer ftpServerPort;
-    @Value("${com.kolosov.synchronizer.username}")
+    @Value("${com.kolosov.synchronizer.ftp.username}")
     private String username;
-    @Value("${com.kolosov.synchronizer.password}")
+    @Value("${com.kolosov.synchronizer.ftp.password}")
     private String password;
 
     public final FTPClient ftpClient = new FTPClient();
 
     @SneakyThrows
-    private void ftpConnect() {
+    public void connect() {
         if (!(ftpClient.isConnected() && ftpClient.isAvailable())) {
             ftpClient.connect(ftpServerUrl, ftpServerPort);
             ftpClient.login(username, password);
@@ -70,7 +70,6 @@ public class PhoneWorker implements LowLevelWorker {
     @Override
     @SneakyThrows
     public List<RootFolderSync> collectSyncs() {
-        ftpConnect();
         List<RootFolderSync> syncList = new ArrayList<>();
         listDirectory(ftpClient, LocationUtils.getPhoneRootPath(), "", syncList, "", null);
         return syncList;
@@ -112,7 +111,6 @@ public class PhoneWorker implements LowLevelWorker {
     @Override
     @SneakyThrows
     public void delete(Sync sync) {
-        ftpConnect();
         String pathToDelete = LocationUtils.getPhoneRootPath() + "/" + LowLevelUtils.convertPathForFTP(sync.relativePath);
         if (sync instanceof FolderSync) {
             removeDirectory(pathToDelete, "");
@@ -141,7 +139,6 @@ public class PhoneWorker implements LowLevelWorker {
 
     @SneakyThrows
     private void prepareCatalogs(String relativePath) {
-        ftpConnect();
         List<String> dirs = new ArrayList<>(Arrays.asList(SPLIT.split(relativePath)));
         dirs.remove(dirs.size() - 1);
         String result = LocationUtils.getPhoneRootPath();

@@ -1,0 +1,28 @@
+{
+  "properties": [
+    {
+      "name": "com.kolosov.synchronizer.ftp.url",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "com.kolosov.synchronizer.ftp.port",
+      "type": "java.lang.Integer"
+    },
+    {
+      "name": "com.kolosov.synchronizer.ftp.username",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "com.kolosov.synchronizer.ftp.password",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "com.kolosov.synchronizer.location.path.pc",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "com.kolosov.synchronizer.location.path.phone",
+      "type": "java.lang.String"
+    }
+  ]
+}

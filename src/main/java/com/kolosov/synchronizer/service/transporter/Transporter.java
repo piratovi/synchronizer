@@ -36,6 +36,7 @@ public class Transporter {
                 .flatMap(Collection::stream)
                 .filter(Sync::isNotSynchronized)
                 .collect(Collectors.toList());
+        directOperations.connect();
         syncsToTransfer.forEach(sync -> {
             List<FolderSync> parents = SyncUtils.getParents(sync);
             CollectionUtils.filter(parents, Sync::isNotSynchronized);

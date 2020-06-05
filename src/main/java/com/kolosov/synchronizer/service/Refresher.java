@@ -35,7 +35,9 @@ public class Refresher {
 
     public void refresh() {
         log.info("refresh start");
+        directOperations.connect();
         List<RootFolderSync> mergedList = directOperations.getMergedList();
+        directOperations.disconnect();
         createHistorySyncs(mergedList);
         syncRepository.deleteAll();
         syncRepository.saveAll(mergedList);
@@ -60,4 +62,7 @@ public class Refresher {
                 .filter(historySync -> newSync.equals(historySync.getSync())).findFirst();
     }
 
+    public void disconnect() {
+        directOperations.disconnect();
+    }
 }

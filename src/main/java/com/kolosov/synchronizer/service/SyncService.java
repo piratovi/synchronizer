@@ -58,5 +58,9 @@ public class SyncService {
     public void refresh() {
         refresher.refresh();
     }
+
+    public void disconnect() {
+        refresher.disconnect();
+    }
 }
 
