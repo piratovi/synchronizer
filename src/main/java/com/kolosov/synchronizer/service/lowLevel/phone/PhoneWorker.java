@@ -6,8 +6,8 @@ import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
-import com.kolosov.synchronizer.utils.LocationUtils;
-import com.kolosov.synchronizer.utils.LowLevelUtils;
+import com.kolosov.synchronizer.utils.LocationService;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.net.ftp.FTP;
@@ -28,8 +28,10 @@ import java.util.regex.Pattern;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class PhoneWorker implements LowLevelWorker {
 
+    private final LocationService locationService;
     public static final Pattern SPLIT = Pattern.compile("/");
 
     @Value("${com.kolosov.synchronizer.ftp.url}")
@@ -50,7 +52,7 @@ public class PhoneWorker implements LowLevelWorker {
             ftpClient.login(username, password);
             ftpClient.enterLocalPassiveMode();
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-            String rootPath = LocationUtils.getPhoneRootPath();
+            String rootPath = locationService.getPhoneRootPath();
             ftpClient.changeWorkingDirectory(rootPath);
             log.info("Connected to FTP");
         }
@@ -65,13 +67,14 @@ public class PhoneWorker implements LowLevelWorker {
     public void disconnect() {
         ftpClient.logout();
         ftpClient.disconnect();
+        log.info("Disconnected from FTP");
     }
 
     @Override
     @SneakyThrows
     public List<RootFolderSync> collectSyncs() {
         List<RootFolderSync> syncList = new ArrayList<>();
-        listDirectory(ftpClient, LocationUtils.getPhoneRootPath(), "", syncList, "", null);
+        listDirectory(ftpClient, locationService.getPhoneRootPath(), "", syncList, "", null);
         return syncList;
     }
 
@@ -111,7 +114,7 @@ public class PhoneWorker implements LowLevelWorker {
     @Override
     @SneakyThrows
     public void delete(Sync sync) {
-        String pathToDelete = LocationUtils.getPhoneRootPath() + "/" + LowLevelUtils.convertPathForFTP(sync.relativePath);
+        String pathToDelete = locationService.getPhoneRootPath() + "/" + locationService.convertPathForFtp(sync.relativePath);
         if (sync instanceof FolderSync) {
             removeDirectory(pathToDelete, "");
         } else {
@@ -124,7 +127,7 @@ public class PhoneWorker implements LowLevelWorker {
     @Override
     public InputStream getInputStreamFrom(FileSync sync) {
         String relativePath = sync.relativePath;
-        relativePath = LowLevelUtils.convertPathForFTP(relativePath);
+        relativePath = locationService.convertPathForFtp(relativePath);
         return ftpClient.retrieveFileStream(relativePath);
     }
 
@@ -132,7 +135,7 @@ public class PhoneWorker implements LowLevelWorker {
     @Override
     public OutputStream getOutputStreamTo(FileSync sync) {
         String relativePath = sync.relativePath;
-        relativePath = LowLevelUtils.convertPathForFTP(relativePath);
+        relativePath = locationService.convertPathForFtp(relativePath);
         prepareCatalogs(relativePath);
         return ftpClient.storeFileStream(relativePath);
     }
@@ -141,7 +144,7 @@ public class PhoneWorker implements LowLevelWorker {
     private void prepareCatalogs(String relativePath) {
         List<String> dirs = new ArrayList<>(Arrays.asList(SPLIT.split(relativePath)));
         dirs.remove(dirs.size() - 1);
-        String result = LocationUtils.getPhoneRootPath();
+        String result = locationService.getPhoneRootPath();
         for (String current : dirs) {
             List<String> names = Arrays.asList(ftpClient.listNames(result));
             result += "/" + current;

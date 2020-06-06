@@ -17,11 +17,11 @@
       "type": "java.lang.String"
     },
     {
-      "name": "com.kolosov.synchronizer.location.path.pc",
+      "name": "com.kolosov.synchronizer.location.dir.pc",
       "type": "java.lang.String"
     },
     {
-      "name": "com.kolosov.synchronizer.location.path.phone",
+      "name": "com.kolosov.synchronizer.location.dir.phone",
       "type": "java.lang.String"
     }
   ]
