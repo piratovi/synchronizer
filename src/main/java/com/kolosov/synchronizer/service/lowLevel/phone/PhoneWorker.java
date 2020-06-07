@@ -65,9 +65,11 @@ public class PhoneWorker implements LowLevelWorker {
 
     @SneakyThrows
     public void disconnect() {
-        ftpClient.logout();
-        ftpClient.disconnect();
-        log.info("Disconnected from FTP");
+        if (ftpClient.isConnected()) {
+            ftpClient.logout();
+            ftpClient.disconnect();
+            log.info("Disconnected from FTP");
+        }
     }
 
     @Override
