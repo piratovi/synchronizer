@@ -3,6 +3,7 @@ package com.kolosov.synchronizer.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kolosov.synchronizer.enums.Location;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -22,8 +23,12 @@ public class FolderSync extends Sync {
     @Transient
     public int rememberedChildQuantity;
 
-    public FolderSync(String relativePath, String name, Location location, FolderSync folder) {
-        super(relativePath, name, location, folder);
+    public FolderSync(@NonNull String relativePath, @NonNull String name, @NonNull Location location, @NonNull FolderSync parent) {
+        super(relativePath, name, location, parent);
+    }
+
+    protected FolderSync(@NonNull String relativePath, @NonNull String name, @NonNull Location location) {
+        super(relativePath, name, location, null);
     }
 
     @Override
