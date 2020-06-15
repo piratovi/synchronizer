@@ -1,27 +1,32 @@
 package com.kolosov.synchronizer.controller;
 
+import com.kolosov.synchronizer.domain.RootFolderSync;
+import com.kolosov.synchronizer.enums.Location;
+import com.kolosov.synchronizer.service.SyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@Controller
-@RequestMapping("files")
-@RequiredArgsConstructor
-public class FileEntitiesWebController {
+import java.util.List;
 
-//    public static final String REDIRECT_ROOT = "redirect:/";
-//
-//    private final FileService fileService;
-//
-//    @GetMapping(value = "all/{urlLocation}")
-//    public String getAllFileEntities(@PathVariable String urlLocation, Model model) {
-//        Location location = Location.valueOf(urlLocation.toUpperCase());
-//        List<AbstractSync> fileEntities = fileService.getFileEntitiesByLocation(location);
-//        model.addAttribute("files", fileEntities);
-//        //TODO Move to templates
-//        model.addAttribute("location", urlLocation);
-//        return "files-pc";
-//    }
+@Controller
+@RequestMapping("syncs")
+@RequiredArgsConstructor
+public class SyncWebController {
+
+    public static final String REDIRECT_ROOT = "redirect:/";
+
+    private final SyncService syncService;
+
+    @GetMapping()
+    public String getSyncs(Model model) {
+        List<RootFolderSync> syncs = syncService.getNotSynchronizedSyncs();
+        model.addAttribute("syncs", syncs);
+        return "syncs";
+    }
 //
 //    @GetMapping("ext/{urlLocation}")
 //    public String getFileExtensions(@PathVariable String urlLocation, Model model) {
