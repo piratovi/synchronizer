@@ -25,7 +25,7 @@ public class SyncWebController {
     public String getSyncs(Model model) {
         List<RootFolderSync> syncs = syncService.getNotSynchronizedSyncs();
         model.addAttribute("syncs", syncs);
-        return "syncs";
+        return "syncs-to-synchronize";
     }
 //
 //    @GetMapping("ext/{urlLocation}")
@@ -56,14 +56,13 @@ public class SyncWebController {
 //        fileService.deleteById(id);
 //        return REDIRECT_ROOT;
 //    }
-//
-//    @GetMapping("refresh/{urlLocation}")
-//    public String refresh(@PathVariable String urlLocation) {
-//        Location location = Location.valueOf(urlLocation.toUpperCase());
-//        fileService.refresh(location);
-//        return REDIRECT_ROOT;
-//    }
-//
+
+    @GetMapping("refresh")
+    public String refresh() {
+        syncService.refresh();
+        return REDIRECT_ROOT;
+    }
+
 //    @GetMapping("empty/{urlLocation}")
 //    public String getEmptyFolders(@PathVariable String urlLocation, Model model) {
 //        Location location = Location.valueOf(urlLocation.toUpperCase());

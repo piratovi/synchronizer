@@ -5,11 +5,19 @@
     <title>Syncs</title>
 </head>
 <body>
-
 <div>
-    <div th:each="folderSync : ${syncs}">
-    </div>
-</div>
+    <h1>Syncs</h1>
 
+    <br>
+
+    <div>
+        <table>
+            <tr th:each="sync : ${syncs}">
+                <td th:text="${sync.getRelativePath()}"></td>
+            </tr>
+        </table>
+    </div>
+
+</div>
 </body>
 </html>
