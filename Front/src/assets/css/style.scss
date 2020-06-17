@@ -208,6 +208,7 @@ $plus: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXd
     &.directory .directoryList {
       padding-left: 20px;
       border-left: 1px solid rgba(255,255,255,0.1);
+      border-right: 1px solid rgba(255,255,255,0.1);
     }
     &:first-child {
       border-top: 0;

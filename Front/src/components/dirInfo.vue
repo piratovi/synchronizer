@@ -9,11 +9,11 @@
           </span>
         </label>
       </div>
-      <div class="title">{{names}}<span class="titlePath" :title="path">!</span></div>
+      <div class="title">{{names}}<!--<span class="titlePath" :title="path">!</span>--></div>
     </div>
     <div class="actionBlocks">
       <!--<div class="actionBlock"><a href="#" class="action action-delete">Удалить</a></div>-->
-      <div class="actionBlock"><a href="#" class="action action-sync" v-if="sync">Синхронизировать</a></div>
+      <!--<div class="actionBlock"><a href="#" class="action action-sync" v-if="sync">Синхронизировать</a></div>-->
     </div>
   </div>
 </template>

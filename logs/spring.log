@@ -1,0 +1,4 @@
+2020-06-17 20:32:33.239  INFO 1816 --- [main] c.k.s.SynchronizerApplication            : Starting SynchronizerApplication on DESKTOP-RUGPDVV with PID 1816 (D:\Work\synchronizer\target\classes started by Maunsh in D:\Work\synchronizer)
+2020-06-17 20:32:33.243  INFO 1816 --- [main] c.k.s.SynchronizerApplication            : No active profile set, falling back to default profiles: default
+2020-06-17 20:32:35.484  WARN 1816 --- [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2020-06-17 20:32:35.728  INFO 1816 --- [main] c.k.s.SynchronizerApplication            : Started SynchronizerApplication in 3.052 seconds (JVM running for 3.453)

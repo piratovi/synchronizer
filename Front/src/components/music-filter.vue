@@ -1,7 +1,7 @@
 <template>
   <div class="filterBlock">
     <div class="filterWrapper">
-      <div class="actionBlocks">
+      <!--<div class="actionBlocks">
         <div class="actionBlock"><a href="#" @click="itemConsole" class="action">onlyPC</a></div>
         <div class="actionBlock"><a href="#" class="action active">Directory</a></div>
       </div>
@@ -14,7 +14,7 @@
             {{index}}
           </option>
         </select>
-      </div>
+      </div>-->
       <div class="actionBlocks">
         <div class="actionBlock">
           <a href="#"  @click="deleteItem" class="action action-delete">Удалить</a>

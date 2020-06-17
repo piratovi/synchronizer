@@ -1,12 +1,12 @@
 <template>
   <div id="app" class="page">
-    <header class="header">
+    <!--<header class="header">
       <div class="headerWrapper wrapper">
         <div class="headerContent">
           <div class="logoBlock"><img src="assets/vis/logo.svg" alt="" class="logo"></div>
           <nav class="navigation">
             <ul class="navList">
-              <li class="item">
+              &lt;!&ndash;<li class="item">
                 <div class="itemWrapper">
                   <router-link :to="{name: 'About'}">О сайте</router-link>
                 </div>
@@ -15,17 +15,17 @@
                 <div class="itemWrapper">
                   <router-link :to="{name: 'Enter'}">Войти</router-link>
                 </div>
-              </li>
+              </li>&ndash;&gt;
               <li class="item">
                 <div class="itemWrapper">
                   <router-link :to="{name: 'Music'}">Музыка</router-link>
                 </div>
               </li>
-              <li class="item">
+              &lt;!&ndash;<li class="item">
                 <div class="itemWrapper">
                   <router-link :to="{name: 'Contact'}">Контакты</router-link>
                 </div>
-              </li>
+              </li>&ndash;&gt;
             </ul>
           </nav>
           <div class="userBlock">
@@ -36,7 +36,7 @@
           </div>
         </div>
       </div>
-    </header>
+    </header>-->
     <router-view/>
   </div>
 <!--  <div id="app">-->

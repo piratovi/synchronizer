@@ -23,7 +23,7 @@ config/
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
-/dist/
+
 /nbdist/
 /.nb-gradle/
 build/
@@ -31,7 +31,7 @@ build/
 ### FRONT ###
 
 # compiled output
-/dist
+
 /tmp
 /out-tsc
 # Only exists if Bazel was run
