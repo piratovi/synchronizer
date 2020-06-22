@@ -1,25 +1,9 @@
-Перейти в папку проекта, и выполнить команду в консоли:
 mvnw.cmd clean install -Dmaven.test.skip=true spring-boot:run
+./mvnw.cmd clean install -Dmaven.test.skip=true spring-boot:run
 
-//  в баше
-//    ./mvnw.cmd clean install -Dmaven.test.skip=true spring-boot:run
-
-появился батник
-run.bat
-
-
-Проверить работоспособность можно по url
-http://localhost:8080/
-
-поменять порт можно в файле application.properties
-строка : server.port=8080
-
-Пути к рутовым папкам с музыкой меняются в application.properties
-location.path.pc = E:\\Music
-location.path.phone = /Music
+батник run.bat
 
 Front:
-+++Должен быть установлен node.js npm
-+++В папке проекта во папке Front сделать npm install
-
+Должен быть установлен node.js npm
+В папке проекта во папке Front сделать npm install
 Затем запустить локальный сервер вию npm run serve
