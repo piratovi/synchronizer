@@ -14,6 +14,9 @@ class SyncServiceTest {
     @Autowired
     HistorySyncRepository repository;
 
+    @Autowired
+    LocationService locationService;
+
     @Test
     @Transactional
     void dirtiesContextTest() {
@@ -22,5 +25,10 @@ class SyncServiceTest {
         historySync.action = ProposedAction.TRANSFER;
         repository.save(historySync);
         System.out.println(repository.findById(221270).get());
+    }
+
+    @Test
+    void checkLocationConfig() {
+        System.out.println(locationService);
     }
 }

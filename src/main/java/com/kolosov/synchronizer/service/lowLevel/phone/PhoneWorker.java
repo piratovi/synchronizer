@@ -6,7 +6,7 @@ import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
-import com.kolosov.synchronizer.utils.LocationService;
+import com.kolosov.synchronizer.service.LocationService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +52,7 @@ public class PhoneWorker implements LowLevelWorker {
             ftpClient.login(username, password);
             ftpClient.enterLocalPassiveMode();
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-            String rootPath = locationService.getPhoneRootPath();
+            String rootPath = locationService.getRootPhone();
             ftpClient.changeWorkingDirectory(rootPath);
             log.info("Connected to FTP");
         }
@@ -76,7 +76,7 @@ public class PhoneWorker implements LowLevelWorker {
     @SneakyThrows
     public List<RootFolderSync> collectSyncs() {
         List<RootFolderSync> syncList = new ArrayList<>();
-        listDirectory(ftpClient, locationService.getPhoneRootPath(), "", syncList, "", null);
+        listDirectory(ftpClient, locationService.getRootPhone(), "", syncList, "", null);
         return syncList;
     }
 
@@ -116,7 +116,7 @@ public class PhoneWorker implements LowLevelWorker {
     @Override
     @SneakyThrows
     public void delete(Sync sync) {
-        String pathToDelete = locationService.getPhoneRootPath() + "/" + locationService.convertPathForFtp(sync.relativePath);
+        String pathToDelete = locationService.getRootPhone() + "/" + locationService.convertPathForFtp(sync.relativePath);
         if (sync instanceof FolderSync) {
             removeDirectory(pathToDelete, "");
         } else {
@@ -146,7 +146,7 @@ public class PhoneWorker implements LowLevelWorker {
     private void prepareCatalogs(String relativePath) {
         List<String> dirs = new ArrayList<>(Arrays.asList(SPLIT.split(relativePath)));
         dirs.remove(dirs.size() - 1);
-        String result = locationService.getPhoneRootPath();
+        String result = locationService.getRootPhone();
         for (String current : dirs) {
             List<String> names = Arrays.asList(ftpClient.listNames(result));
             result += "/" + current;

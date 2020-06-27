@@ -1,0 +1,38 @@
+package com.kolosov.synchronizer.service;
+
+import com.kolosov.synchronizer.domain.Sync;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+
+@Service
+@ConfigurationProperties("com.kolosov.synchronizer.location")
+@Data
+public class LocationService {
+
+    private String rootPc;
+
+    private String rootPhone;
+
+    private List<String> folders;
+
+    public String relativizePcPath(File file) {
+        Path path = Paths.get(rootPc);
+        return path.relativize(file.toPath()).toString();
+    }
+
+    public String convertPathForFtp(String relativePath) {
+        String replaced = relativePath.replaceAll("\\\\", "/");
+        return new String(replaced.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
+    }
+
+    public String getAbsolutePathForPc(Sync sync) {
+        return rootPc + File.separator + sync.relativePath;
+    }
+}

@@ -6,7 +6,7 @@ import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
-import com.kolosov.synchronizer.utils.LocationService;
+import com.kolosov.synchronizer.service.LocationService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ public class PcWorker implements LowLevelWorker {
     @Override
     public List<RootFolderSync> collectSyncs() {
         List<RootFolderSync> syncList = new ArrayList<>();
-        File root = new File(locationService.getPcRootPath());
+        File root = new File(locationService.getRootPc());
         processDirectoryRecursively(root, syncList, null);
         return syncList;
     }
