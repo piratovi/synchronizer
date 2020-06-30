@@ -1,9 +1,12 @@
 package com.kolosov.synchronizer.service;
 
+import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.service.directOperations.DirectOperationsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
 
 
 @SpringBootTest
@@ -44,7 +47,10 @@ public class DirectOperationsServiceTest {
 
         @Test
     public void merge() {
-        directOperationsService.getMergedList();
+            directOperationsService.connect();
+            List<RootFolderSync> mergedList = directOperationsService.getMergedList();
+            directOperationsService.disconnect();
+            System.out.println(mergedList.size());
     }
 
 }

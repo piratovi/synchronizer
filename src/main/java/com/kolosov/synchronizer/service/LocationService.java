@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @ConfigurationProperties("com.kolosov.synchronizer.location")
@@ -34,5 +35,19 @@ public class LocationService {
 
     public String getAbsolutePathForPc(Sync sync) {
         return rootPc + File.separator + sync.relativePath;
+    }
+
+    public List<String> getAbsolutePathsForPcFolders() {
+        return combineRootAndFolders(rootPc);
+    }
+
+    public List<String> getAbsolutePathsForPhoneFolders() {
+        return combineRootAndFolders(rootPhone);
+    }
+
+    private List<String> combineRootAndFolders(String root) {
+        return folders.stream()
+                .map(folderPath -> root + folderPath)
+                .collect(Collectors.toList());
     }
 }

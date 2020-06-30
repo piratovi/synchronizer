@@ -30,8 +30,11 @@ public class PcWorker implements LowLevelWorker {
     @Override
     public List<RootFolderSync> collectSyncs() {
         List<RootFolderSync> syncList = new ArrayList<>();
-        File root = new File(locationService.getRootPc());
-        processDirectoryRecursively(root, syncList, null);
+        List<String> folders = locationService.getAbsolutePathsForPcFolders();
+        for (String folder : folders) {
+            File root = new File(folder);
+            processDirectoryRecursively(root, syncList, null);
+        }
         return syncList;
     }
 

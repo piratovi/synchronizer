@@ -5,9 +5,12 @@ import com.kolosov.synchronizer.service.lowLevel.pc.PcWorker;
 import com.kolosov.synchronizer.service.lowLevel.phone.PhoneWorker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.time.LocalTime;
+import java.util.concurrent.TimeUnit;
 
 import static com.kolosov.synchronizer.enums.Location.PHONE;
 
@@ -20,18 +23,30 @@ public class FileFromPcToPhoneStrategy implements TransferStrategy {
     private final PhoneWorker phoneWorker;
 
     @Override
-    public void transfer()
-    {
+    public void transfer() {
+        float speed;
         try (
                 InputStream inputStream = pcWorker.getInputStreamFrom(sync.asFile());
                 OutputStream outputStream = phoneWorker.getOutputStreamTo(sync.asFile())
         ) {
-            inputStream.transferTo(outputStream);
+            StopWatch watch = new StopWatch();
+            watch.start();
+            float bytes = inputStream.transferTo(outputStream);
+            watch.stop();
+            float milliseconds = watch.getTime(TimeUnit.MILLISECONDS);
+            speed = calculateSpeed(bytes, milliseconds);
         } catch (Exception e) {
             throw new RuntimeException(sync.toString(), e);
         }
         phoneWorker.closeStream();
         sync.existOnPhone = true;
-        log.info(sync.relativePath + " transferred to " + PHONE);
+        String formattedOutput = String.format("%s transferred to %s. Speed = %.2f Mbytes/second", sync.relativePath, PHONE, speed);
+        log.info(formattedOutput);
+    }
+
+    private float calculateSpeed(float bytes, float milliseconds) {
+        float speed;
+        speed = (bytes / (1024 * 1024)) / (milliseconds / 1000);
+        return speed;
     }
 }

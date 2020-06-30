@@ -1,9 +1,9 @@
 package com.kolosov.synchronizer.controller;
 
+import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.dto.ExtensionStat;
 import com.kolosov.synchronizer.dto.HistorySyncDTO;
-import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.service.SyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

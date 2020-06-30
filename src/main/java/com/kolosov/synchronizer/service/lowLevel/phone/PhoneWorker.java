@@ -65,22 +65,29 @@ public class PhoneWorker implements LowLevelWorker {
 
     @SneakyThrows
     public void disconnect() {
-        if (ftpClient.isConnected()) {
-            ftpClient.logout();
+        try {
+            if (ftpClient.isConnected()) {
+                ftpClient.logout();
+                ftpClient.disconnect();
+                log.info("Disconnected from FTP");
+            }
+        } catch (IOException e) {
             ftpClient.disconnect();
-            log.info("Disconnected from FTP");
         }
     }
 
     @Override
-    @SneakyThrows
     public List<RootFolderSync> collectSyncs() {
         List<RootFolderSync> syncList = new ArrayList<>();
-        listDirectory(ftpClient, locationService.getRootPhone(), "", syncList, "", null);
+        List<String> folders = locationService.getAbsolutePathsForPhoneFolders();
+        for (String folder : folders) {
+            listDirectory(folder, "", syncList, folder, null);
+        }
         return syncList;
     }
 
-    private void listDirectory(FTPClient ftpClient, String parentDir, String currentDir, List<RootFolderSync> result, String fromRootDir, FolderSync parentFolderSync) throws IOException {
+    @SneakyThrows
+    private void listDirectory(String parentDir, String currentDir, List<RootFolderSync> result, String fromRootDir, FolderSync parentFolderSync) {
         String dirToList = parentDir;
         if (!currentDir.equals("")) {
             dirToList += "/" + currentDir;
@@ -103,7 +110,7 @@ public class PhoneWorker implements LowLevelWorker {
                         nextFolderSync = new FolderSync(relativePath, currentFileName, Location.PHONE, parentFolderSync);
                         parentFolderSync.list.add(nextFolderSync);
                     }
-                    listDirectory(ftpClient, dirToList, currentFileName, result, fromRootDir + "\\" + currentFileName, nextFolderSync);
+                    listDirectory(dirToList, currentFileName, result, fromRootDir + "\\" + currentFileName, nextFolderSync);
                 } else {
                     if (parentFolderSync != null) {
                         parentFolderSync.list.add(new FileSync(relativePath, currentFileName, Location.PHONE, parentFolderSync));

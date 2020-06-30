@@ -20,8 +20,7 @@ public class FileFromPhoneToPcStrategy implements TransferStrategy {
     private final PhoneWorker phoneWorker;
 
     @Override
-    public void transfer()
-    {
+    public void transfer() {
         try (
                 InputStream inputStream = phoneWorker.getInputStreamFrom(sync.asFile());
                 OutputStream outputStream = pcWorker.getOutputStreamTo(sync.asFile())

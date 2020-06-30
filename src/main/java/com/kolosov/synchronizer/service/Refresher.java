@@ -64,5 +64,6 @@ public class Refresher {
 
     public void disconnect() {
         directOperations.disconnect();
+        log.info("disconnected");
     }
 }
