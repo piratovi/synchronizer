@@ -28,11 +28,6 @@ public class LocationService {
         return path.relativize(file.toPath()).toString();
     }
 
-    public String convertPathForFtp(String relativePath) {
-        String replaced = relativePath.replaceAll("\\\\", "/");
-        return new String(replaced.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
-    }
-
     public String getAbsolutePathForPc(Sync sync) {
         return rootPc + File.separator + sync.relativePath;
     }

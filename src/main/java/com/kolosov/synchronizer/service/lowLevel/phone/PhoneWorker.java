@@ -10,6 +10,7 @@ import com.kolosov.synchronizer.service.LocationService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -95,48 +96,76 @@ public class PhoneWorker implements LowLevelWorker {
         FTPFile[] subFiles = ftpClient.listFiles(dirToList);
         if (subFiles != null && subFiles.length > 0) {
             for (FTPFile aFile : subFiles) {
-                String currentFileName = aFile.getName();
+                String currentFileName = convertEncodingForWeakFtp(aFile.getName());
                 if (currentFileName.equals(".") || currentFileName.equals("..")) {
                     continue;
                 }
-                String relativePath = new String((fromRootDir + "\\" + currentFileName).getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
-                relativePath = relativePath.substring(1);
+                String relativePath = createRelativePath(fromRootDir, currentFileName);
+                relativePath = removeFirstSlash(relativePath);
                 if (aFile.isDirectory()) {
-                    FolderSync nextFolderSync;
+                    FolderSync currentFolderSync;
                     if (parentFolderSync == null) {
-                        nextFolderSync = new RootFolderSync(relativePath, currentFileName, Location.PHONE);
-                        result.add(nextFolderSync.asRootFolder());
+                        currentFolderSync = createRootFolderSync(result, currentFileName, relativePath);
                     } else {
-                        nextFolderSync = new FolderSync(relativePath, currentFileName, Location.PHONE, parentFolderSync);
-                        parentFolderSync.list.add(nextFolderSync);
+                        currentFolderSync = createFolderSync(parentFolderSync, currentFileName, relativePath);
                     }
-                    listDirectory(dirToList, currentFileName, result, fromRootDir + "\\" + currentFileName, nextFolderSync);
+                    listDirectory(dirToList, currentFileName, result, createRelativePath(fromRootDir, currentFileName), currentFolderSync);
                 } else {
-                    if (parentFolderSync != null) {
-                        parentFolderSync.list.add(new FileSync(relativePath, currentFileName, Location.PHONE, parentFolderSync));
-                    }
+                    createFileSync(parentFolderSync, currentFileName, relativePath);
                 }
             }
         }
     }
 
+    private void createFileSync(FolderSync parentFolderSync, String currentFileName, String relativePath) {
+        if (parentFolderSync == null) {
+            throw new RuntimeException("fileSync without parent");
+        } else {
+            FileSync fileSync = new FileSync(relativePath, currentFileName, Location.PHONE, parentFolderSync);
+            parentFolderSync.list.add(fileSync);
+        }
+    }
+
+    private FolderSync createFolderSync(FolderSync parentFolderSync, String currentFileName, String relativePath) {
+        FolderSync folderSync = new FolderSync(relativePath, currentFileName, Location.PHONE, parentFolderSync);
+        parentFolderSync.list.add(folderSync);
+        return folderSync;
+    }
+
+    private FolderSync createRootFolderSync(List<RootFolderSync> result, String currentFileName, String relativePath) {
+        FolderSync folderSync = new RootFolderSync(relativePath, currentFileName, Location.PHONE);
+        result.add(folderSync.asRootFolder());
+        return folderSync;
+    }
+
+    private String createRelativePath(String fromRootDir, String currentFileName) {
+        return fromRootDir + "\\" + currentFileName;
+    }
+
+    private String removeFirstSlash(String relativePath) {
+        return relativePath.substring(1);
+    }
+
+    private String convertEncodingForWeakFtp(String fileName) {
+        return new String(fileName.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+    }
+
     @Override
     @SneakyThrows
     public void delete(Sync sync) {
-        String pathToDelete = locationService.getRootPhone() + "/" + locationService.convertPathForFtp(sync.relativePath);
+        String pathToDelete = locationService.getRootPhone() + "/" + convertPathForFtp(sync.relativePath);
         if (sync instanceof FolderSync) {
             removeDirectory(pathToDelete, "");
         } else {
             ftpClient.deleteFile(pathToDelete);
         }
-
     }
 
     @SneakyThrows
     @Override
     public InputStream getInputStreamFrom(FileSync sync) {
         String relativePath = sync.relativePath;
-        relativePath = locationService.convertPathForFtp(relativePath);
+        relativePath = convertPathForFtp(relativePath);
         return ftpClient.retrieveFileStream(relativePath);
     }
 
@@ -144,9 +173,17 @@ public class PhoneWorker implements LowLevelWorker {
     @Override
     public OutputStream getOutputStreamTo(FileSync sync) {
         String relativePath = sync.relativePath;
-        relativePath = locationService.convertPathForFtp(relativePath);
+//        relativePath = removeProblemSymbols(relativePath);
+        relativePath = convertPathForFtp(relativePath);
         prepareCatalogs(relativePath);
         return ftpClient.storeFileStream(relativePath);
+    }
+
+    private String removeProblemSymbols(String relativePath) {
+        String[] blackChars = {"«", "»", "й", "[", "]", "."};
+        String[] arrayWithEmptyChars = new String[blackChars.length];
+        Arrays.fill(arrayWithEmptyChars, "");
+        return StringUtils.replaceEach(relativePath, blackChars, arrayWithEmptyChars);
     }
 
     @SneakyThrows
@@ -218,4 +255,10 @@ public class PhoneWorker implements LowLevelWorker {
     public void createFolder(FolderSync folderSync) {
         //empty
     }
+
+    private String convertPathForFtp(String relativePath) {
+        String replaced = relativePath.replaceAll("\\\\", "/");
+        return new String(replaced.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
+    }
+
 }
