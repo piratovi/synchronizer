@@ -40,13 +40,11 @@ public class FileFromPcToPhoneStrategy implements TransferStrategy {
         }
         phoneWorker.closeStream();
         sync.existOnPhone = true;
-        String formattedOutput = String.format("%s transferred to %s. Speed = %.2f Mbytes/second", sync.relativePath, PHONE, speed);
+        String formattedOutput = String.format("%s transferred to %s. Speed = %.2f Mbytes/sec", sync.relativePath, PHONE, speed);
         log.info(formattedOutput);
     }
 
     private float calculateSpeed(float bytes, float milliseconds) {
-        float speed;
-        speed = (bytes / (1024 * 1024)) / (milliseconds / 1000);
-        return speed;
+        return (bytes / (1024 * 1024)) / (milliseconds / 1000);
     }
 }

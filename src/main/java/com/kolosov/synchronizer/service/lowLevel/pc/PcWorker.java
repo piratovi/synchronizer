@@ -45,19 +45,33 @@ public class PcWorker implements LowLevelWorker {
             if (file.isDirectory()) {
                 FolderSync current;
                 if (parentFolderSync == null) {
-                    current = new RootFolderSync(relativePath, name, Location.PC);
-                    result.add(current.asRootFolder());
+                    current = createRootFolderSync(result, relativePath, name);
                 } else {
-                    current = new FolderSync(relativePath, name, Location.PC, parentFolderSync);
-                    parentFolderSync.list.add(current);
+                    current = createFolderSync(parentFolderSync, relativePath, name);
                 }
                 processDirectoryRecursively(file, result, current);
             }
             if (file.isFile()) {
-                FileSync current = new FileSync(relativePath, name, Location.PC, parentFolderSync);
-                parentFolderSync.list.add(current);
+                createFileSync(parentFolderSync, relativePath, name);
             }
         }
+    }
+
+    private FolderSync createFolderSync(FolderSync parentFolderSync, String relativePath, String name) {
+        FolderSync current = new FolderSync(relativePath, name, Location.PC, parentFolderSync);
+        parentFolderSync.list.add(current);
+        return current;
+    }
+
+    private FolderSync createRootFolderSync(List<RootFolderSync> result, String relativePath, String name) {
+        FolderSync current = new RootFolderSync(relativePath, name, Location.PC);
+        result.add(current.asRootFolder());
+        return current;
+    }
+
+    private void createFileSync(FolderSync parentFolderSync, String relativePath, String name) {
+        FileSync current = new FileSync(relativePath, name, Location.PC, parentFolderSync);
+        parentFolderSync.list.add(current);
     }
 
     @Override
