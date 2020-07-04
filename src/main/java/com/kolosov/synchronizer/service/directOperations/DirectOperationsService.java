@@ -10,6 +10,7 @@ import com.kolosov.synchronizer.service.directOperations.transferStrategy.Folder
 import com.kolosov.synchronizer.service.directOperations.transferStrategy.FolderFromPhoneToPcStrategy;
 import com.kolosov.synchronizer.service.directOperations.transferStrategy.TransferStrategy;
 import com.kolosov.synchronizer.service.lowLevel.pc.PcWorker;
+import com.kolosov.synchronizer.service.lowLevel.phone.EsPhoneWorker;
 import com.kolosov.synchronizer.service.lowLevel.phone.PhoneWorker;
 import com.kolosov.synchronizer.service.transporter.validator.TransferType;
 import com.kolosov.synchronizer.utils.MergeSyncsUtils;

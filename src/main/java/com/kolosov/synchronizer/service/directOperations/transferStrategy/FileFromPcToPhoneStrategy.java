@@ -2,6 +2,7 @@ package com.kolosov.synchronizer.service.directOperations.transferStrategy;
 
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.service.lowLevel.pc.PcWorker;
+import com.kolosov.synchronizer.service.lowLevel.phone.EsPhoneWorker;
 import com.kolosov.synchronizer.service.lowLevel.phone.PhoneWorker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +10,6 @@ import org.apache.commons.lang3.time.StopWatch;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.time.LocalTime;
 import java.util.concurrent.TimeUnit;
 
 import static com.kolosov.synchronizer.enums.Location.PHONE;

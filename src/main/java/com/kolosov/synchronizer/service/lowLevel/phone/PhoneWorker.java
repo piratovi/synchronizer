@@ -1,50 +1,52 @@
 package com.kolosov.synchronizer.service.lowLevel.phone;
 
-import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.RootFolderSync;
+import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.enums.Location;
-import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
 import com.kolosov.synchronizer.service.LocationService;
-import lombok.RequiredArgsConstructor;
+import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
-@Component
 @Slf4j
-@RequiredArgsConstructor
-public class PhoneWorker implements LowLevelWorker {
+public abstract class PhoneWorker implements LowLevelWorker {
 
-    private final LocationService locationService;
+    @Autowired
+    @Setter
+    protected LocationService locationService;
+
+    public final FTPClient ftpClient = new FTPClient();
+
     public static final Pattern SPLIT = Pattern.compile("/");
 
     @Value("${com.kolosov.synchronizer.ftp.url}")
-    private String ftpServerUrl;
-    @Value("${com.kolosov.synchronizer.ftp.port}")
-    private Integer ftpServerPort;
-    @Value("${com.kolosov.synchronizer.ftp.username}")
-    private String username;
-    @Value("${com.kolosov.synchronizer.ftp.password}")
-    private String password;
+    protected String ftpServerUrl;
 
-    public final FTPClient ftpClient = new FTPClient();
+    @Value("${com.kolosov.synchronizer.ftp.port}")
+    protected Integer ftpServerPort;
+
+    @Value("${com.kolosov.synchronizer.ftp.username}")
+    protected String username;
+
+    @Value("${com.kolosov.synchronizer.ftp.password}")
+    protected String password;
 
     @SneakyThrows
     public void connect() {
@@ -59,66 +61,37 @@ public class PhoneWorker implements LowLevelWorker {
         }
     }
 
-    @PreDestroy
-    private void tearDown() {
-        disconnect();
-    }
-
-    @SneakyThrows
-    public void disconnect() {
-        try {
-            if (ftpClient.isConnected()) {
-                ftpClient.logout();
-                ftpClient.disconnect();
-                log.info("Disconnected from FTP");
-            }
-        } catch (IOException e) {
-            ftpClient.disconnect();
-        }
-    }
-
     @Override
     public List<RootFolderSync> collectSyncs() {
+        connect();
         List<RootFolderSync> syncList = new ArrayList<>();
         List<String> folders = locationService.getAbsolutePathsForPhoneFolders();
         for (String folder : folders) {
             listDirectory(folder, "", syncList, folder, null);
         }
+        disconnect();
         return syncList;
     }
 
-    @SneakyThrows
-    private void listDirectory(String parentDir, String currentDir, List<RootFolderSync> result, String fromRootDir, FolderSync parentFolderSync) {
-        String dirToList = parentDir;
-        if (!currentDir.equals("")) {
-            dirToList += "/" + currentDir;
-        }
-        FTPFile[] subFiles = ftpClient.listFiles(dirToList);
-        if (subFiles != null && subFiles.length > 0) {
-            for (FTPFile aFile : subFiles) {
-                String currentFileName = aFile.getName();
-                if (currentFileName.equals(".") || currentFileName.equals("..")) {
-                    continue;
-                }
-                String rightEncodingCurrentFileName = convertEncodingForWeakFtp(currentFileName);
-                String relativePathForSyncCreation = convertEncodingForWeakFtp(createRelativePath(fromRootDir, rightEncodingCurrentFileName));
-                relativePathForSyncCreation = removeFirstSlash(relativePathForSyncCreation);
-                if (aFile.isDirectory()) {
-                    FolderSync currentFolderSync;
-                    if (parentFolderSync == null) {
-                        currentFolderSync = createRootFolderSync(result, rightEncodingCurrentFileName, relativePathForSyncCreation);
-                    } else {
-                        currentFolderSync = createFolderSync(parentFolderSync, rightEncodingCurrentFileName, relativePathForSyncCreation);
-                    }
-                    listDirectory(dirToList, currentFileName, result, createRelativePath(fromRootDir, currentFileName), currentFolderSync);
-                } else {
-                    createFileSync(parentFolderSync, rightEncodingCurrentFileName, relativePathForSyncCreation);
-                }
-            }
-        }
+    protected abstract void listDirectory(String parentDir, String currentDir, List<RootFolderSync> result, String fromRootDir, FolderSync parentFolderSync);
+
+    protected FolderSync createFolderSync(FolderSync parentFolderSync, String currentFileName, String relativePath) {
+        FolderSync folderSync = new FolderSync(relativePath, currentFileName, Location.PHONE, parentFolderSync);
+        parentFolderSync.list.add(folderSync);
+        return folderSync;
     }
 
-    private void createFileSync(FolderSync parentFolderSync, String currentFileName, String relativePath) {
+    protected FolderSync createRootFolderSync(List<RootFolderSync> result, String currentFileName, String relativePath) {
+        FolderSync folderSync = new RootFolderSync(relativePath, currentFileName, Location.PHONE);
+        result.add(folderSync.asRootFolder());
+        return folderSync;
+    }
+
+    protected String createRelativePath(String fromRootDir, String currentFileName) {
+        return fromRootDir + "\\" + currentFileName;
+    }
+
+    protected void createFileSync(FolderSync parentFolderSync, String currentFileName, String relativePath) {
         if (parentFolderSync == null) {
             throw new RuntimeException("fileSync without parent");
         } else {
@@ -127,68 +100,8 @@ public class PhoneWorker implements LowLevelWorker {
         }
     }
 
-    private FolderSync createFolderSync(FolderSync parentFolderSync, String currentFileName, String relativePath) {
-        FolderSync folderSync = new FolderSync(relativePath, currentFileName, Location.PHONE, parentFolderSync);
-        parentFolderSync.list.add(folderSync);
-        return folderSync;
-    }
-
-    private FolderSync createRootFolderSync(List<RootFolderSync> result, String currentFileName, String relativePath) {
-        FolderSync folderSync = new RootFolderSync(relativePath, currentFileName, Location.PHONE);
-        result.add(folderSync.asRootFolder());
-        return folderSync;
-    }
-
-    private String createRelativePath(String fromRootDir, String currentFileName) {
-        return fromRootDir + "\\" + currentFileName;
-    }
-
-    private String removeFirstSlash(String relativePath) {
-        return relativePath.substring(1);
-    }
-
-    private String convertEncodingForWeakFtp(String fileName) {
-        return new String(fileName.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
-    }
-
-    @Override
     @SneakyThrows
-    public void delete(Sync sync) {
-        String pathToDelete = locationService.getRootPhone() + "/" + convertPathForFtp(sync.relativePath);
-        if (sync instanceof FolderSync) {
-            removeDirectory(pathToDelete, "");
-        } else {
-            ftpClient.deleteFile(pathToDelete);
-        }
-    }
-
-    @SneakyThrows
-    @Override
-    public InputStream getInputStreamFrom(FileSync sync) {
-        String relativePath = sync.relativePath;
-        relativePath = convertPathForFtp(relativePath);
-        return ftpClient.retrieveFileStream(relativePath);
-    }
-
-    @SneakyThrows
-    @Override
-    public OutputStream getOutputStreamTo(FileSync sync) {
-        String relativePath = sync.relativePath;
-//        relativePath = removeProblemSymbols(relativePath);
-        relativePath = convertPathForFtp(relativePath);
-        prepareCatalogs(relativePath);
-        return ftpClient.storeFileStream(relativePath);
-    }
-
-    private String removeProblemSymbols(String relativePath) {
-        String[] blackChars = {"«", "»", "й", "[", "]", "."};
-        String[] arrayWithEmptyChars = new String[blackChars.length];
-        Arrays.fill(arrayWithEmptyChars, "");
-        return StringUtils.replaceEach(relativePath, blackChars, arrayWithEmptyChars);
-    }
-
-    @SneakyThrows
-    private void prepareCatalogs(String relativePath) {
+    protected void prepareCatalogs(String relativePath) {
         List<String> dirs = new ArrayList<>(Arrays.asList(SPLIT.split(relativePath)));
         dirs.remove(dirs.size() - 1);
         String result = locationService.getRootPhone();
@@ -204,6 +117,30 @@ public class PhoneWorker implements LowLevelWorker {
     @SneakyThrows
     public void closeStream() {
         ftpClient.completePendingCommand();
+    }
+
+    @SneakyThrows
+    public void disconnect() {
+        try {
+            if (ftpClient.isConnected()) {
+                ftpClient.logout();
+                ftpClient.disconnect();
+                log.info("Disconnected from FTP");
+            }
+        } catch (IOException e) {
+            ftpClient.disconnect();
+        }
+    }
+
+    @PreDestroy
+    private void tearDown() {
+        disconnect();
+        log.info("tearDown");
+    }
+
+    @Override
+    public void createFolder(FolderSync folderSync) {
+        //empty
     }
 
     public void removeDirectory(String parentDir, String currentDir) throws IOException {
@@ -252,14 +189,33 @@ public class PhoneWorker implements LowLevelWorker {
 
     }
 
+    @SneakyThrows
     @Override
-    public void createFolder(FolderSync folderSync) {
-        //empty
+    public OutputStream getOutputStreamTo(FileSync sync) {
+        String relativePath = sync.relativePath;
+        relativePath = convertPathForFtp(relativePath);
+        prepareCatalogs(relativePath);
+        return ftpClient.storeFileStream(relativePath);
     }
 
-    private String convertPathForFtp(String relativePath) {
-        String replaced = relativePath.replaceAll("\\\\", "/");
-        return new String(replaced.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
+    @SneakyThrows
+    @Override
+    public InputStream getInputStreamFrom(FileSync sync) {
+        String relativePath = sync.relativePath;
+        relativePath = convertPathForFtp(relativePath);
+        return ftpClient.retrieveFileStream(relativePath);
     }
 
+    @SneakyThrows
+    @Override
+    public void delete(Sync sync) {
+        String pathToDelete = locationService.getRootPhone() + "/" + convertPathForFtp(sync.relativePath);
+        if (sync instanceof FolderSync) {
+            removeDirectory(pathToDelete, "");
+        } else {
+            ftpClient.deleteFile(pathToDelete);
+        }
+    }
+
+    protected abstract String convertPathForFtp(String relativePath);
 }
