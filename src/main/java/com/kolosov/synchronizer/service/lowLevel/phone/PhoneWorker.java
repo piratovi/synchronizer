@@ -96,22 +96,23 @@ public class PhoneWorker implements LowLevelWorker {
         FTPFile[] subFiles = ftpClient.listFiles(dirToList);
         if (subFiles != null && subFiles.length > 0) {
             for (FTPFile aFile : subFiles) {
-                String currentFileName = convertEncodingForWeakFtp(aFile.getName());
+                String currentFileName = aFile.getName();
                 if (currentFileName.equals(".") || currentFileName.equals("..")) {
                     continue;
                 }
-                String relativePath = createRelativePath(fromRootDir, currentFileName);
-                relativePath = removeFirstSlash(relativePath);
+                String rightEncodingCurrentFileName = convertEncodingForWeakFtp(currentFileName);
+                String relativePathForSyncCreation = convertEncodingForWeakFtp(createRelativePath(fromRootDir, rightEncodingCurrentFileName));
+                relativePathForSyncCreation = removeFirstSlash(relativePathForSyncCreation);
                 if (aFile.isDirectory()) {
                     FolderSync currentFolderSync;
                     if (parentFolderSync == null) {
-                        currentFolderSync = createRootFolderSync(result, currentFileName, relativePath);
+                        currentFolderSync = createRootFolderSync(result, rightEncodingCurrentFileName, relativePathForSyncCreation);
                     } else {
-                        currentFolderSync = createFolderSync(parentFolderSync, currentFileName, relativePath);
+                        currentFolderSync = createFolderSync(parentFolderSync, rightEncodingCurrentFileName, relativePathForSyncCreation);
                     }
                     listDirectory(dirToList, currentFileName, result, createRelativePath(fromRootDir, currentFileName), currentFolderSync);
                 } else {
-                    createFileSync(parentFolderSync, currentFileName, relativePath);
+                    createFileSync(parentFolderSync, rightEncodingCurrentFileName, relativePathForSyncCreation);
                 }
             }
         }
