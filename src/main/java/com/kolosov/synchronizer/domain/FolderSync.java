@@ -28,7 +28,7 @@ public class FolderSync extends Sync {
     }
 
     protected FolderSync(@NonNull String relativePath, @NonNull String name, @NonNull Location location) {
-        super(relativePath, name, location, null);
+        super(relativePath, name, location);
     }
 
     @Override

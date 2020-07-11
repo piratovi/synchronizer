@@ -1,9 +1,9 @@
 package com.kolosov.synchronizer.service.lowLevel;
 
 import com.kolosov.synchronizer.domain.FileSync;
+import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.domain.Sync;
-import com.kolosov.synchronizer.domain.FolderSync;
 
 import java.io.InputStream;
 import java.io.OutputStream;

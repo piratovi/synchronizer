@@ -65,9 +65,9 @@ public abstract class PhoneWorker implements LowLevelWorker {
     public List<RootFolderSync> collectSyncs() {
         connect();
         List<RootFolderSync> syncList = new ArrayList<>();
-        List<String> folders = locationService.getAbsolutePathsForPhoneFolders();
-        for (String folder : folders) {
-            listDirectory(folder, "", syncList, folder, null);
+        List<String> foldersWithAbsolutePath = locationService.getAbsolutePathsForPhoneFolders();
+        for (String folderWithAbsolutePath : foldersWithAbsolutePath) {
+            listDirectory(folderWithAbsolutePath, "", syncList, folderWithAbsolutePath, null);
         }
         disconnect();
         return syncList;
@@ -75,29 +75,8 @@ public abstract class PhoneWorker implements LowLevelWorker {
 
     protected abstract void listDirectory(String parentDir, String currentDir, List<RootFolderSync> result, String fromRootDir, FolderSync parentFolderSync);
 
-    protected FolderSync createFolderSync(FolderSync parentFolderSync, String currentFileName, String relativePath) {
-        FolderSync folderSync = new FolderSync(relativePath, currentFileName, Location.PHONE, parentFolderSync);
-        parentFolderSync.list.add(folderSync);
-        return folderSync;
-    }
-
-    protected FolderSync createRootFolderSync(List<RootFolderSync> result, String currentFileName, String relativePath) {
-        FolderSync folderSync = new RootFolderSync(relativePath, currentFileName, Location.PHONE);
-        result.add(folderSync.asRootFolder());
-        return folderSync;
-    }
-
-    protected String createRelativePath(String fromRootDir, String currentFileName) {
+    protected String appendFileName(String fromRootDir, String currentFileName) {
         return fromRootDir + "\\" + currentFileName;
-    }
-
-    protected void createFileSync(FolderSync parentFolderSync, String currentFileName, String relativePath) {
-        if (parentFolderSync == null) {
-            throw new RuntimeException("fileSync without parent");
-        } else {
-            FileSync fileSync = new FileSync(relativePath, currentFileName, Location.PHONE, parentFolderSync);
-            parentFolderSync.list.add(fileSync);
-        }
     }
 
     @SneakyThrows
@@ -192,8 +171,7 @@ public abstract class PhoneWorker implements LowLevelWorker {
     @SneakyThrows
     @Override
     public OutputStream getOutputStreamTo(FileSync sync) {
-        String relativePath = sync.relativePath;
-        relativePath = convertPathForFtp(relativePath);
+        String relativePath = convertPathForFtp(sync.relativePath);
         prepareCatalogs(relativePath);
         return ftpClient.storeFileStream(relativePath);
     }
@@ -201,8 +179,7 @@ public abstract class PhoneWorker implements LowLevelWorker {
     @SneakyThrows
     @Override
     public InputStream getInputStreamFrom(FileSync sync) {
-        String relativePath = sync.relativePath;
-        relativePath = convertPathForFtp(relativePath);
+        String relativePath = convertPathForFtp(sync.relativePath);
         return ftpClient.retrieveFileStream(relativePath);
     }
 
@@ -215,6 +192,10 @@ public abstract class PhoneWorker implements LowLevelWorker {
         } else {
             ftpClient.deleteFile(pathToDelete);
         }
+    }
+
+    protected String removeFirstSlash(String relativePath) {
+        return relativePath.substring(1);
     }
 
     protected abstract String convertPathForFtp(String relativePath);

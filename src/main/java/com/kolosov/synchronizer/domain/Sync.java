@@ -67,11 +67,15 @@ public abstract class Sync {
     private HistorySync historySync;
 
     public Sync(String relativePath, String name, Location location, FolderSync parent) {
+        this(relativePath, name, location);
+        parent.add(this);
+    }
+
+    public Sync(String relativePath, String name, Location location) {
         this.relativePath = relativePath;
         this.name = name;
         this.existOnPC = Location.PC.equals(location);
         this.existOnPhone = Location.PHONE.equals(location);
-        this.parent = parent;
     }
 
     @JsonIgnore

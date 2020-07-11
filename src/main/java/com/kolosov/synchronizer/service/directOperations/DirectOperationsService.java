@@ -10,7 +10,6 @@ import com.kolosov.synchronizer.service.directOperations.transferStrategy.Folder
 import com.kolosov.synchronizer.service.directOperations.transferStrategy.FolderFromPhoneToPcStrategy;
 import com.kolosov.synchronizer.service.directOperations.transferStrategy.TransferStrategy;
 import com.kolosov.synchronizer.service.lowLevel.pc.PcWorker;
-import com.kolosov.synchronizer.service.lowLevel.phone.EsPhoneWorker;
 import com.kolosov.synchronizer.service.lowLevel.phone.PhoneWorker;
 import com.kolosov.synchronizer.service.transporter.validator.TransferType;
 import com.kolosov.synchronizer.utils.MergeSyncsUtils;
@@ -63,13 +62,13 @@ public class DirectOperationsService {
     private TransferStrategy getTransferStrategy(Sync sync, TransferType transferType) {
         switch (transferType) {
             case FOLDER_FROM_PC_TO_PHONE:
-                return new FolderFromPcToPhoneStrategy(sync, phoneWorker);
+                return new FolderFromPcToPhoneStrategy(sync.asFolder(), phoneWorker);
             case FILE_FROM_PC_TO_PHONE:
-                return new FileFromPcToPhoneStrategy(sync, pcWorker, phoneWorker);
+                return new FileFromPcToPhoneStrategy(sync.asFile(), pcWorker, phoneWorker);
             case FOLDER_FROM_PHONE_TO_PC:
-                return new FolderFromPhoneToPcStrategy(sync, pcWorker);
+                return new FolderFromPhoneToPcStrategy(sync.asFolder(), pcWorker);
             case FILE_FROM_PHONE_TO_PC:
-                return new FileFromPhoneToPcStrategy(sync, pcWorker, phoneWorker);
+                return new FileFromPhoneToPcStrategy(sync.asFile(), pcWorker, phoneWorker);
             default:
                 throw new RuntimeException();
         }
