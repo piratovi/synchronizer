@@ -13,19 +13,18 @@ import java.util.stream.Collectors;
 
 public class SyncUtils {
 
-
     public static List<Sync> getFlatSyncs(List<? extends Sync> folderSyncs) {
         List<Sync> result = new ArrayList<>();
-            folderSyncs.forEach(sync -> result.addAll(getFlatSyncs(sync)));
+        folderSyncs.forEach(sync -> result.addAll(getFlatSyncs(sync)));
         return result;
     }
 
     public static List<Sync> getFlatSyncs(Sync sync) {
         List<Sync> result = new ArrayList<>();
-            result.add(sync);
-            if (sync.isFolder()) {
-                getNestedSyncsRecursively(sync.asFolder(), result);
-            }
+        result.add(sync);
+        if (sync.isFolder()) {
+            getNestedSyncsRecursively(sync.asFolder(), result);
+        }
         return result;
     }
 
@@ -38,41 +37,11 @@ public class SyncUtils {
         });
     }
 
-    //TODO сделать нормальный обход по дереву
-//    public static Optional<AbstractSync> getAbstractSyncFromTree(AbstractSync desiredSync, TreeSync treeSync) {
-//        for (FolderSync folderSync : treeSync.folderSyncs) {
-//            Optional<AbstractSync> syncOpt = getAbstractSyncRecursively(folderSync, desiredSync);
-//            if (syncOpt.isPresent()) {
-//                return syncOpt;
-//            }
-//        }
-//        return Optional.empty();
-//    }
-
-    private static Optional<Sync> getAbstractSyncRecursively(FolderSync folderSync, Sync desiredSync) {
-        if (folderSync.equals(desiredSync)) {
-            return Optional.of(folderSync);
+    public static RootFolderSync getRootFolder(Sync sync) {
+        while (!sync.isRootFolder()) {
+            sync = sync.getParent();
         }
-        for (Sync sync : folderSync.list) {
-            if (sync.equals(desiredSync)) {
-                return Optional.of(sync);
-            }
-            if (sync instanceof FolderSync) {
-                Optional<Sync> syncOpt = getAbstractSyncRecursively((FolderSync) sync, desiredSync);
-                if (syncOpt.isPresent()) {
-                    return syncOpt;
-                }
-            }
-        }
-        return Optional.empty();
-    }
-
-    public static FolderSync getRootFolder(Sync sync) {
-        if (sync.parent == null) {
-            return (FolderSync) sync;
-        } else {
-            return getRootFolder(sync.parent);
-        }
+        return sync.asRootFolder();
     }
 
     public static List<FolderSync> getParents(Sync sync) {

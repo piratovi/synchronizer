@@ -12,12 +12,15 @@ import static com.kolosov.synchronizer.enums.ProposedAction.TRANSFER;
 
 public class ActionValidator {
 
-    public static ProposedAction validate(Sync newSync, Optional<HistorySync> oldHistorySyncOpt, Map<String, Sync> oldFlatSyncs) {
-        Sync oldSync = oldFlatSyncs.get(newSync.relativePath);
-        if (oldSync != null) {
-            return OldSyncValidator.validate(newSync, oldHistorySyncOpt, oldFlatSyncs, oldSync);
+    public static ProposedAction validate(Sync newSync, Optional<HistorySync> oldHistorySyncOpt, Map<String, Sync> mappedOldSyncs) {
+        if (newSync.isSynchronized()) {
+            return NOTHING;
         }
-        if (newSync.existOnPC != newSync.existOnPhone) {
+        Sync oldSync = mappedOldSyncs.get(newSync.relativePath);
+        if (oldSync != null) {
+            return OldSyncValidator.validate(newSync, oldHistorySyncOpt, mappedOldSyncs, oldSync);
+        }
+        if (newSync.isNotSynchronized()) {
             return TRANSFER;
         }
         return NOTHING;

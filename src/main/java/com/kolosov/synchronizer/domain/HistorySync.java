@@ -1,5 +1,6 @@
 package com.kolosov.synchronizer.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kolosov.synchronizer.enums.ProposedAction;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,6 +22,7 @@ public class HistorySync {
     public Integer id;
 
     @OneToOne()
+    @JsonIgnore
     public Sync sync;
 
     public ProposedAction action;

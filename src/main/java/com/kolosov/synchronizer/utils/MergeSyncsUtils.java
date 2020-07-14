@@ -12,21 +12,21 @@ public class MergeSyncsUtils {
 
     public static List<RootFolderSync> mergeSyncs(List<RootFolderSync> ftpFiles, List<RootFolderSync> pcFiles) {
         List<RootFolderSync> result = new ArrayList<>(pcFiles);
-        List<Sync> flatList = SyncUtils.getFlatSyncs(ftpFiles);
-        for (Sync syncToMerge : flatList) {
+        List<Sync> flatFtpSyncs = SyncUtils.getFlatSyncs(ftpFiles);
+        for (Sync syncToMerge : flatFtpSyncs) {
             mergeOneSync(result, syncToMerge);
         }
         return result;
     }
 
     private static void mergeOneSync(List<RootFolderSync> result, Sync syncToMerge) {
-        Optional<? extends FolderSync> root = findRootFolder(result, syncToMerge);
-        root.ifPresentOrElse(
-                rootFolder -> mergeSyncWithBranch(syncToMerge, rootFolder),
+        Optional<RootFolderSync> rootFolderSyncOpt = findRootFolderSync(result, syncToMerge);
+        rootFolderSyncOpt.ifPresentOrElse(
+                rootFolderSync -> mergeSyncWithBranch(rootFolderSync, syncToMerge),
                 () -> createNewRootFolder(result, syncToMerge));
     }
 
-    private static Optional<RootFolderSync> findRootFolder(List<RootFolderSync> result, Sync syncToMerge) {
+    private static Optional<RootFolderSync> findRootFolderSync(List<RootFolderSync> result, Sync syncToMerge) {
         String rootRelativePath = SyncUtils.getRootFolder(syncToMerge).relativePath;
         return result.stream()
                 .filter(folder -> rootRelativePath.equals(folder.relativePath))
@@ -37,7 +37,7 @@ public class MergeSyncsUtils {
         result.add(syncToMerge.asRootFolder());
     }
 
-    private static void mergeSyncWithBranch(Sync syncToMerge, FolderSync folderSync) {
+    private static void mergeSyncWithBranch(FolderSync folderSync, Sync syncToMerge) {
         Optional<Sync> syncInTreeOpt = findSyncInBranch(folderSync, syncToMerge);
         syncInTreeOpt.ifPresentOrElse(
                 syncInTree -> syncInTree.setExistOnPhone(true),
@@ -47,7 +47,7 @@ public class MergeSyncsUtils {
 
     private static void createNewSyncInBranch(Sync syncToMerge, FolderSync folderSync) {
         Optional<Sync> parentOpt = findSyncInBranch(folderSync, syncToMerge.parent);
-        Sync parent = parentOpt.orElseThrow(() -> new RuntimeException("Problems with merge Syncs"));
+        Sync parent = parentOpt.orElseThrow();
         parent.asFolder().add(syncToMerge);
     }
 
@@ -60,7 +60,7 @@ public class MergeSyncsUtils {
                 return Optional.of(sync);
             }
             if (sync.isFolder()) {
-                Optional<Sync> syncInFolder = findSyncInBranch((FolderSync) sync, desiredSync);
+                Optional<Sync> syncInFolder = findSyncInBranch(sync.asFolder(), desiredSync);
                 if (syncInFolder.isPresent()) {
                     return syncInFolder;
                 }

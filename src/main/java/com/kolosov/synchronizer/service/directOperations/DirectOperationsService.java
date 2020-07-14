@@ -45,7 +45,7 @@ public class DirectOperationsService {
         log.info("{} deleted from {}", sync.relativePath, location);
     }
 
-    public List<RootFolderSync> getMergedList() {
+    public List<RootFolderSync> getMergedSyncs() {
         List<RootFolderSync> pcFiles = pcWorker.collectSyncs();
         List<RootFolderSync> ftpFiles = phoneWorker.collectSyncs();
         return MergeSyncsUtils.mergeSyncs(ftpFiles, pcFiles);

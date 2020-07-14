@@ -35,20 +35,24 @@ public class Refresher {
 
     public void refresh() {
         log.info("refresh start");
-        List<RootFolderSync> mergedList = directOperations.getMergedList();
-        createHistorySyncs(mergedList);
+        List<RootFolderSync> mergedSyncs = directOperations.getMergedSyncs();
+        createHistorySyncs(mergedSyncs);
         syncRepository.deleteAll();
-        syncRepository.saveAll(mergedList);
+        syncRepository.saveAll(mergedSyncs);
         log.info("refresh done");
     }
 
-    private void createHistorySyncs(List<? extends FolderSync> mergedList) {
-        Map<String, Sync> oldFlatSyncs = SyncUtils.getFlatSyncs(rootFolderSyncRepository.findAll()).stream()
-                .collect(Collectors.toMap(sync -> sync.relativePath, Function.identity()));
+    private void createHistorySyncs(List<? extends FolderSync> newSyncs) {
+        List<Sync> oldFlatSyncs = SyncUtils.getFlatSyncs(rootFolderSyncRepository.findAll());
+        Map<String, Sync> mappedOldSyncs = oldFlatSyncs
+                .stream()
+                .collect(Collectors.toMap(
+                        sync -> sync.relativePath,
+                        Function.identity()));
         List<HistorySync> oldHistorySyncs = historySyncRepository.findAll();
-        SyncUtils.getFlatSyncs(mergedList).forEach(newSync -> {
+        SyncUtils.getFlatSyncs(newSyncs).forEach(newSync -> {
             Optional<HistorySync> oldHistorySync = getOldHistorySync(oldHistorySyncs, newSync);
-            ProposedAction action = ActionValidator.validate(newSync, oldHistorySync, oldFlatSyncs);
+            ProposedAction action = ActionValidator.validate(newSync, oldHistorySync, mappedOldSyncs);
             if (action != NOTHING) {
                 newSync.setHistorySync(new HistorySync(newSync, action));
             }

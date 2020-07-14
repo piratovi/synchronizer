@@ -63,7 +63,6 @@ public abstract class Sync {
     public FolderSync parent;
 
     @OneToOne(cascade = {CascadeType.ALL}, mappedBy = "sync")
-    @JsonIgnore
     private HistorySync historySync;
 
     public Sync(String relativePath, String name, Location location, FolderSync parent) {
