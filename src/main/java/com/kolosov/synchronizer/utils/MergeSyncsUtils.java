@@ -4,16 +4,19 @@ import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.FolderSync;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class MergeSyncsUtils {
 
-    public static void mergeSyncs(List<RootFolderSync> ftpFiles, List<RootFolderSync> result) {
+    public static List<RootFolderSync> mergeSyncs(List<RootFolderSync> ftpFiles, List<RootFolderSync> pcFiles) {
+        List<RootFolderSync> result = new ArrayList<>(pcFiles);
         List<Sync> flatList = SyncUtils.getFlatSyncs(ftpFiles);
         for (Sync syncToMerge : flatList) {
             mergeOneSync(result, syncToMerge);
         }
+        return result;
     }
 
     private static void mergeOneSync(List<RootFolderSync> result, Sync syncToMerge) {

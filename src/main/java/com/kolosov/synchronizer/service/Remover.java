@@ -37,16 +37,16 @@ public class Remover {
                 .collect(Collectors.toList());
         directOperations.connect();
         syncsToDelete.forEach(this::delete);
-        removeEmptyFoldersInLowLevelAndRepo();
+        removeEmptyFolders();
         directOperations.disconnect();
         log.info("Deleting end");
     }
 
-    private void removeEmptyFoldersInLowLevelAndRepo() {
-        List<FolderSync> folders = SyncUtils.getEmptyFolders(rootFolderSyncRepository.findAll());
-        while (!folders.isEmpty()) {
-            folders.forEach(this::delete);
-            folders = SyncUtils.getEmptyFolders(rootFolderSyncRepository.findAll());
+    private void removeEmptyFolders() {
+        List<FolderSync> emptyFolders = SyncUtils.getEmptyFolders(rootFolderSyncRepository.findAll());
+        while (!emptyFolders.isEmpty()) {
+            emptyFolders.forEach(this::delete);
+            emptyFolders = SyncUtils.getEmptyFolders(rootFolderSyncRepository.findAll());
         }
     }
 

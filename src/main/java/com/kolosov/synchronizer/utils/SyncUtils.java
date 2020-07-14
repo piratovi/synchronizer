@@ -38,13 +38,6 @@ public class SyncUtils {
         });
     }
 
-    public static void processExtensions(List<RootFolderSync> folderSyncs) {
-        List<Sync> flatSyncs = getFlatSyncs(folderSyncs);
-        flatSyncs.stream()
-                .filter(sync -> sync instanceof FileSync)
-                .forEach(sync -> ((FileSync) sync).ext = FilenameUtils.getExtension(sync.relativePath).toLowerCase());
-    }
-
     //TODO сделать нормальный обход по дереву
 //    public static Optional<AbstractSync> getAbstractSyncFromTree(AbstractSync desiredSync, TreeSync treeSync) {
 //        for (FolderSync folderSync : treeSync.folderSyncs) {

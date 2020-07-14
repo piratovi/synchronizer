@@ -48,10 +48,7 @@ public class DirectOperationsService {
     public List<RootFolderSync> getMergedList() {
         List<RootFolderSync> pcFiles = pcWorker.collectSyncs();
         List<RootFolderSync> ftpFiles = phoneWorker.collectSyncs();
-        List<RootFolderSync> result = new ArrayList<>(pcFiles);
-        MergeSyncsUtils.mergeSyncs(ftpFiles, result);
-        SyncUtils.processExtensions(result);
-        return result;
+        return MergeSyncsUtils.mergeSyncs(ftpFiles, pcFiles);
     }
 
     public void transfer(Sync sync, TransferType transferType) {
