@@ -187,7 +187,7 @@ public abstract class PhoneWorker implements LowLevelWorker {
     @Override
     public void delete(Sync sync) {
         String pathToDelete = locationService.getRootPhone() + "/" + convertPathForFtp(sync.relativePath);
-        if (sync instanceof FolderSync) {
+        if (sync.isFolder()) {
             removeDirectory(pathToDelete, "");
         } else {
             ftpClient.deleteFile(pathToDelete);

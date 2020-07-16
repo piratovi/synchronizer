@@ -48,7 +48,8 @@ public class Transporter {
         log.info("Transferring end");
     }
 
-    private void transfer(Sync sync) {
+    public void transfer(Sync sync) {
+        directOperations.connect();
         TransferType transferType = TransferValidator.validate(sync);
         directOperations.transfer(sync, transferType);
         syncRepository.save(sync);

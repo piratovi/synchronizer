@@ -19,6 +19,7 @@ public class HistorySync {
 
     @Id
     @GeneratedValue
+    @JsonIgnore
     public Integer id;
 
     @OneToOne()

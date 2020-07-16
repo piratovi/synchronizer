@@ -101,4 +101,10 @@ public class SyncRestController {
         syncService.disconnect();
         return new ResponseEntity<>("disconnect", HttpStatus.OK);
     }
+
+    @GetMapping("/auto")
+    public ResponseEntity<String> auto() {
+        syncService.auto();
+        return new ResponseEntity<>("auto", HttpStatus.OK);
+    }
 }

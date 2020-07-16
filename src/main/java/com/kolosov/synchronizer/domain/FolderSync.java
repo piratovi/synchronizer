@@ -58,4 +58,13 @@ public class FolderSync extends Sync {
         list.add(sync);
         sync.parent = this;
     }
+
+    @Override
+    @JsonIgnore
+    public List<Sync> getNestedSyncs() {
+        List<Sync> result = new ArrayList<>();
+        result.add(this);
+        list.forEach(sync -> result.addAll(sync.getNestedSyncs()));
+        return result;
+    }
 }

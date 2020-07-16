@@ -21,6 +21,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 @Getter
 @Setter
@@ -122,5 +123,7 @@ public abstract class Sync {
     public boolean hasParent() {
         return parent != null;
     }
+
+    public abstract List<Sync> getNestedSyncs();
 
 }

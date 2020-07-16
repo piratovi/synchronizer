@@ -26,7 +26,7 @@ public class Remover {
     private final RootFolderSyncRepository rootFolderSyncRepository;
 
     @Synchronized
-    public void delete(List<Integer> ids) {
+    public void remove(List<Integer> ids) {
         log.info("Deleting start");
         List<Sync> syncsToDelete = ids.stream()
                 .map(id -> syncRepository.findById(id).orElseThrow(ExceptionSupplier.syncNotFound(id)))
@@ -36,7 +36,7 @@ public class Remover {
                 .filter(Sync::isFile)
                 .collect(Collectors.toList());
         directOperations.connect();
-        syncsToDelete.forEach(this::delete);
+        syncsToDelete.forEach(this::remove);
         removeEmptyFolders();
         directOperations.disconnect();
         log.info("Deleting end");
@@ -45,12 +45,13 @@ public class Remover {
     private void removeEmptyFolders() {
         List<FolderSync> emptyFolders = SyncUtils.getEmptyFolders(rootFolderSyncRepository.findAll());
         while (!emptyFolders.isEmpty()) {
-            emptyFolders.forEach(this::delete);
+            emptyFolders.forEach(this::remove);
             emptyFolders = SyncUtils.getEmptyFolders(rootFolderSyncRepository.findAll());
         }
     }
 
-    private void delete(Sync sync) {
+    public void remove(Sync sync) {
+        directOperations.connect();
         directOperations.delete(sync);
         sync.removeFromParent();
         syncRepository.delete(sync);

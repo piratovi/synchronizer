@@ -1,7 +1,7 @@
 package com.kolosov.synchronizer.enums;
 
 public enum ProposedAction {
-    DELETE,
+    REMOVE,
     TRANSFER,
     NOTHING,
     DELETE_OR_TRANSFER;
