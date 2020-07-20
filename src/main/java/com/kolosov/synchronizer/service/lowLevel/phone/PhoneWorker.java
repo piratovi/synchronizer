@@ -50,7 +50,7 @@ public abstract class PhoneWorker implements LowLevelWorker {
 
     @SneakyThrows
     public void connect() {
-        if (!(ftpClient.isConnected() && ftpClient.isAvailable())) {
+        if (!ftpClient.isConnected()) {
             ftpClient.connect(ftpServerUrl, ftpServerPort);
             ftpClient.login(username, password);
             ftpClient.enterLocalPassiveMode();
@@ -58,6 +58,16 @@ public abstract class PhoneWorker implements LowLevelWorker {
             String rootPath = locationService.getRootPhone();
             ftpClient.changeWorkingDirectory(rootPath);
             log.info("Connected to FTP");
+        }
+    }
+
+    @SneakyThrows
+    @PreDestroy
+    public void disconnect() {
+        if (ftpClient.isConnected()) {
+            ftpClient.logout();
+            ftpClient.disconnect();
+            log.info("Disconnected from FTP");
         }
     }
 
@@ -69,7 +79,7 @@ public abstract class PhoneWorker implements LowLevelWorker {
         for (String folderWithAbsolutePath : foldersWithAbsolutePath) {
             listDirectory(folderWithAbsolutePath, "", syncList, folderWithAbsolutePath, null);
         }
-        disconnect();
+//        disconnect();
         return syncList;
     }
 
@@ -98,28 +108,14 @@ public abstract class PhoneWorker implements LowLevelWorker {
         ftpClient.completePendingCommand();
     }
 
-    @SneakyThrows
-    public void disconnect() {
-        try {
-            if (ftpClient.isConnected()) {
-                ftpClient.logout();
-                ftpClient.disconnect();
-                log.info("Disconnected from FTP");
-            }
-        } catch (IOException e) {
-            ftpClient.disconnect();
-        }
-    }
-
-    @PreDestroy
-    private void tearDown() {
-        disconnect();
-        log.info("tearDown");
-    }
-
     @Override
+    @SneakyThrows
+    //TODO всетаки сделать
     public void createFolder(FolderSync folderSync) {
-        //empty
+        connect();
+        String result = appendFileName(locationService.getRootPhone(), convertPathForFtp(folderSync.getRelativePath()));
+        ftpClient.makeDirectory(result);
+
     }
 
     public void removeDirectory(String parentDir, String currentDir) throws IOException {
@@ -171,6 +167,7 @@ public abstract class PhoneWorker implements LowLevelWorker {
     @SneakyThrows
     @Override
     public OutputStream getOutputStreamTo(FileSync sync) {
+        connect();
         String relativePath = convertPathForFtp(sync.relativePath);
         prepareCatalogs(relativePath);
         return ftpClient.storeFileStream(relativePath);
@@ -179,6 +176,7 @@ public abstract class PhoneWorker implements LowLevelWorker {
     @SneakyThrows
     @Override
     public InputStream getInputStreamFrom(FileSync sync) {
+        connect();
         String relativePath = convertPathForFtp(sync.relativePath);
         return ftpClient.retrieveFileStream(relativePath);
     }
@@ -186,6 +184,7 @@ public abstract class PhoneWorker implements LowLevelWorker {
     @SneakyThrows
     @Override
     public void delete(Sync sync) {
+        connect();
         String pathToDelete = locationService.getRootPhone() + "/" + convertPathForFtp(sync.relativePath);
         if (sync.isFolder()) {
             removeDirectory(pathToDelete, "");

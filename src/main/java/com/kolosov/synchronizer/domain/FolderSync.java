@@ -7,10 +7,14 @@ import lombok.NonNull;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
+
+import static javax.persistence.FetchType.*;
 
 @Entity
 @NoArgsConstructor
@@ -61,10 +65,11 @@ public class FolderSync extends Sync {
 
     @Override
     @JsonIgnore
-    public List<Sync> getNestedSyncs() {
-        List<Sync> result = new ArrayList<>();
-        result.add(this);
-        list.forEach(sync -> result.addAll(sync.getNestedSyncs()));
-        return result;
+    public Stream<Sync> getNestedSyncs() {
+        Stream<Sync> stream = Stream.of(this);
+        for (Sync sync : list) {
+            stream = Stream.concat(stream, sync.getNestedSyncs());
+        }
+        return stream;
     }
 }

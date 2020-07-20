@@ -65,7 +65,10 @@ public class Refresher {
     }
 
     public void disconnect() {
-        directOperations.disconnect();
-        log.info("disconnected");
+        directOperations.disconnectPhone();
+    }
+
+    public void connectPhone() {
+        directOperations.connectPhone();
     }
 }

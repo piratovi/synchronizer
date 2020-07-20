@@ -2,6 +2,7 @@ package com.kolosov.synchronizer.controller;
 
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.RootFolderSync;
+import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.dto.ExtensionStat;
 import com.kolosov.synchronizer.dto.HistorySyncDTO;
 import com.kolosov.synchronizer.service.SyncService;
@@ -96,15 +97,35 @@ public class SyncRestController {
         return new ResponseEntity<>(extensionStat, HttpStatus.OK);
     }
 
-    @GetMapping("/disconnect")
-    public ResponseEntity<String> disconnect() {
+    @GetMapping("/disconnect-phone")
+    public ResponseEntity<String> disconnectPhone() {
         syncService.disconnect();
         return new ResponseEntity<>("disconnect", HttpStatus.OK);
     }
 
-    @GetMapping("/auto")
-    public ResponseEntity<String> auto() {
-        syncService.auto();
-        return new ResponseEntity<>("auto", HttpStatus.OK);
+    @GetMapping("/auto-synchronization")
+    public ResponseEntity<String> autoSynchronization() {
+        syncService.autoSynchronization();
+        return new ResponseEntity<>("autoSynchronization", HttpStatus.OK);
     }
+
+    @GetMapping("/connect-phone")
+    public ResponseEntity<String> connectPhone() {
+        syncService.connectPhone();
+        return new ResponseEntity<>("connected", HttpStatus.OK);
+    }
+
+    @GetMapping("/duplicate-syncs")
+    public ResponseEntity<List<List<Sync>>> findDuplicateSyncs() {
+        List<List<Sync>> duplicateSyncs = syncService.findDuplicateSyncs();
+        return new ResponseEntity<>(duplicateSyncs, HttpStatus.OK);
+    }
+
+    //TODO посмотреть проблему с маппингом урлов
+    @DeleteMapping("/delete-duplicate-syncs")
+    public ResponseEntity<String> deleteDuplicateSyncs() {
+        syncService.deleteDuplicateSyncs();
+        return new ResponseEntity<>("duplicate Syncs Deleted", HttpStatus.OK);
+    }
+
 }

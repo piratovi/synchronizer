@@ -22,6 +22,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Getter
 @Setter
@@ -124,6 +125,6 @@ public abstract class Sync {
         return parent != null;
     }
 
-    public abstract List<Sync> getNestedSyncs();
+    public abstract Stream<Sync> getNestedSyncs();
 
 }

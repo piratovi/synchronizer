@@ -11,17 +11,21 @@ import com.kolosov.synchronizer.repository.SyncRepository;
 import com.kolosov.synchronizer.service.transporter.Transporter;
 import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.kolosov.synchronizer.enums.ProposedAction.REMOVE;
 import static com.kolosov.synchronizer.enums.ProposedAction.TRANSFER;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SyncService {
 
     private final SyncRepository syncRepository;
@@ -29,15 +33,16 @@ public class SyncService {
     private final HistorySyncRepository historySyncRepository;
     private final Remover remover;
     private final Transporter transporter;
-    private final Scout scout;
+    private final SynchronizedScout synchronizedScout;
     private final Refresher refresher;
+    private final DuplicateScout duplicateScout;
 
     public List<FolderSync> getEmptyFolders() {
         return SyncUtils.getEmptyFolders(rootFolderSyncRepository.findAll());
     }
 
     public List<ExtensionStat> getExtensionStats() {
-        return scout.getExtensionStats();
+        return synchronizedScout.getExtensionStats();
     }
 
     public void clear() {
@@ -58,7 +63,7 @@ public class SyncService {
     }
 
     public List<RootFolderSync> getNotSynchronizedSyncs() {
-        return scout.findNotSynchronizedSyncs();
+        return synchronizedScout.findNotSynchronizedSyncs();
     }
 
     public void refresh() {
@@ -69,11 +74,12 @@ public class SyncService {
         refresher.disconnect();
     }
 
-    public void auto() {
-        scout.findNotSynchronizedSyncs().stream()
-                .map(FolderSync::getNestedSyncs)
-                .flatMap(Collection::stream)
+    public void autoSynchronization() {
+        log.info("Auto Synchronizing start");
+        synchronizedScout.findNotSynchronizedSyncs().stream()
+                .flatMap(FolderSync::getNestedSyncs)
                 .forEach(this::applyProposedAction);
+        log.info("Auto Synchronizing end");
     }
 
     private void applyProposedAction(Sync sync) {
@@ -86,5 +92,22 @@ public class SyncService {
                     }
                 });
     }
+
+    public void connectPhone() {
+        refresher.connectPhone();
+    }
+
+    public List<List<Sync>> findDuplicateSyncs() {
+        return duplicateScout.findDuplicateSyncs();
+    }
+
+    public void deleteDuplicateSyncs() {
+        List<List<Sync>> duplicateSyncs = duplicateScout.findDuplicateSyncs();
+        duplicateSyncs.stream()
+                .peek(list -> list.remove(0))
+                .flatMap(Collection::stream)
+                .forEach(remover::remove);
+    }
+
 }
 

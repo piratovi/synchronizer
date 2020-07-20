@@ -10,6 +10,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Entity
 @NoArgsConstructor
@@ -30,7 +31,7 @@ public class FileSync extends Sync {
 
     @Override
     @JsonIgnore
-    public List<Sync> getNestedSyncs() {
-        return new ArrayList<>(List.of(this));
+    public Stream<Sync> getNestedSyncs() {
+        return Stream.of(this);
     }
 }

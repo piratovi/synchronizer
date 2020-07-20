@@ -36,7 +36,7 @@ public class Transporter {
                 .flatMap(Collection::stream)
                 .filter(Sync::isNotSynchronized)
                 .collect(Collectors.toList());
-        directOperations.connect();
+//        directOperations.connectPhone();
         syncsToTransfer.forEach(sync -> {
             List<FolderSync> parents = SyncUtils.getParents(sync);
             CollectionUtils.filter(parents, Sync::isNotSynchronized);
@@ -44,12 +44,12 @@ public class Transporter {
             syncs.add(sync);
             syncs.forEach(this::transfer);
         });
-        directOperations.disconnect();
+//        directOperations.disconnectPhone();
         log.info("Transferring end");
     }
 
     public void transfer(Sync sync) {
-        directOperations.connect();
+//        directOperations.connectPhone();
         TransferType transferType = TransferValidator.validate(sync);
         directOperations.transfer(sync, transferType);
         syncRepository.save(sync);

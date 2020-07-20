@@ -35,10 +35,10 @@ public class Remover {
                 .filter(Sync::isNotSynchronized)
                 .filter(Sync::isFile)
                 .collect(Collectors.toList());
-        directOperations.connect();
+//        directOperations.connectPhone();
         syncsToDelete.forEach(this::remove);
         removeEmptyFolders();
-        directOperations.disconnect();
+//        directOperations.disconnectPhone();
         log.info("Deleting end");
     }
 
@@ -51,7 +51,6 @@ public class Remover {
     }
 
     public void remove(Sync sync) {
-        directOperations.connect();
         directOperations.delete(sync);
         sync.removeFromParent();
         syncRepository.delete(sync);

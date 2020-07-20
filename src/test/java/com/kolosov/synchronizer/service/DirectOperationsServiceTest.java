@@ -47,9 +47,9 @@ public class DirectOperationsServiceTest {
 
         @Test
     public void merge() {
-            directOperationsService.connect();
+            directOperationsService.connectPhone();
             List<RootFolderSync> mergedList = directOperationsService.getMergedSyncs();
-            directOperationsService.disconnect();
+            directOperationsService.disconnectPhone();
             System.out.println(mergedList.size());
     }
 

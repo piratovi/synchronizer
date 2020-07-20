@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,7 +27,7 @@ class SyncRepositoryTest {
     void checkNested() {
         List<Sync> syncs = repository.findAll();
         Sync sync = syncs.get(0);
-        List<Sync> nestedSyncs = sync.getNestedSyncs();
+        Stream<Sync> nestedSyncs = sync.getNestedSyncs();
         System.out.println();
     }
 }

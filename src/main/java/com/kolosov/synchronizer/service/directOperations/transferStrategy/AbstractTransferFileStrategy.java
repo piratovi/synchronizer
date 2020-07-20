@@ -38,7 +38,7 @@ public abstract class AbstractTransferFileStrategy implements TransferStrategy {
             throw new RuntimeException(fileSync.toString(), e);
         }
         phoneWorker.closeStream();
-        String formattedOutput = String.format("%s transferred to %s. Speed = %.2f Mbytes/sec", fileSync.relativePath, location, speed);
+        String formattedOutput = String.format("Transferred to %s : %s. Speed = %.2f Mbytes/sec", location, fileSync.relativePath, speed);
         log.info(formattedOutput);
     }
 

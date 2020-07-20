@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class Scout {
+public class SynchronizedScout {
 
     private final RootFolderSyncRepository rootFolderSyncRepository;
 

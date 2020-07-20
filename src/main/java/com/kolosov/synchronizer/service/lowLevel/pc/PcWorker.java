@@ -8,7 +8,9 @@ import com.kolosov.synchronizer.service.LocationService;
 import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
 import org.springframework.util.FileSystemUtils;
 
 import java.io.File;
@@ -16,9 +18,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.kolosov.synchronizer.enums.Location.PC;
 
@@ -86,4 +91,36 @@ public class PcWorker implements LowLevelWorker {
         new File(locationService.getAbsolutePathForPc(folderSync)).mkdir();
     }
 
+    @SneakyThrows
+    public String getMD5(Sync sync) {
+        try (InputStream is = Files.newInputStream(Paths.get(locationService.getAbsolutePathForPc(sync)))) {
+            return DigestUtils.md5DigestAsHex(is);
+        }
+    }
+
+    public long getSyncSize(Sync sync) {
+        File file = new File(locationService.getAbsolutePathForPc(sync));
+        return FileUtils.sizeOf(file);
+    }
+
+    @SneakyThrows
+    public byte[] getFileContent(Sync sync) {
+        File file = new File(locationService.getAbsolutePathForPc(sync));
+        byte[] bytes = FileUtils.readFileToByteArray(file);
+        return bytes;
+    }
+
+    @SneakyThrows
+    public boolean isContentEquals(List<Sync> list) {
+        List<File> files = list.stream()
+                .map(sync -> new File(locationService.getAbsolutePathForPc(sync)))
+                .collect(Collectors.toList());
+        File firstFile = files.get(0);
+        for (int i = 1; i < files.size(); i++) {
+            if (!FileUtils.contentEquals(firstFile, files.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

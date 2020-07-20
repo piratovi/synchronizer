@@ -21,6 +21,9 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.kolosov.synchronizer.enums.Location.PC;
+import static com.kolosov.synchronizer.enums.Location.PHONE;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -33,16 +36,14 @@ public class DirectOperationsService {
         if (!sync.existOnPhone && !sync.existOnPC) {
             throw new FileNotFoundException("File already deleted " + sync.relativePath);
         }
-        Location location = null;
         if (sync.existOnPhone) {
             phoneWorker.delete(sync);
-            location = Location.PHONE;
+            log.info("Deleted from {} : {}", PHONE, sync.relativePath);
         }
         if (sync.existOnPC) {
             pcWorker.delete(sync);
-            location = Location.PC;
+            log.info("Deleted from {} : {}", PC, sync.relativePath);
         }
-        log.info("{} deleted from {}", sync.relativePath, location);
     }
 
     public List<RootFolderSync> getMergedSyncs() {
@@ -71,12 +72,28 @@ public class DirectOperationsService {
         }
     }
 
-    public void connect() {
+    public void connectPhone() {
         phoneWorker.connect();
     }
 
-    public void disconnect() {
+    public void disconnectPhone() {
         phoneWorker.disconnect();
+    }
+
+    public String getMD5(Sync sync) {
+        return pcWorker.getMD5(sync);
+    }
+
+    public long getSyncSize(Sync sync) {
+        return pcWorker.getSyncSize(sync);
+    }
+
+    public byte[] getFileContent(Sync sync) {
+        return pcWorker.getFileContent(sync);
+    }
+
+    public boolean isContentEquals(List<Sync> list) {
+        return pcWorker.isContentEquals(list);
     }
 }
 
