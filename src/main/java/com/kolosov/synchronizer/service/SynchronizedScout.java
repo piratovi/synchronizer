@@ -73,4 +73,7 @@ public class SynchronizedScout {
                 .collect(Collectors.toList());
     }
 
+    public boolean isAllSyncsSynchronized() {
+        return findNotSynchronizedSyncs().isEmpty();
+    }
 }

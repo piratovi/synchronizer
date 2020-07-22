@@ -4,5 +4,5 @@ public enum ProposedAction {
     REMOVE,
     TRANSFER,
     NOTHING,
-    DELETE_OR_TRANSFER;
+    REMOVE_OR_TRANSFER;
 }

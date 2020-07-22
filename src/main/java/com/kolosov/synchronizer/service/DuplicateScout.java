@@ -20,8 +20,12 @@ public class DuplicateScout {
 
     private final RootFolderSyncRepository rootFolderSyncRepository;
     private final DirectOperationsService directOperationsService;
+    private final SynchronizedScout synchronizedScout;
 
     public List<List<Sync>> findDuplicateSyncs() {
+        if (synchronizedScout.isAllSyncsSynchronized()) {
+            throw new RuntimeException("Need synchronization!");
+        }
         List<RootFolderSync> rootFolderSyncs = rootFolderSyncRepository.findAll();
         return rootFolderSyncs.stream()
                 .flatMap(FolderSync::getNestedSyncs)
