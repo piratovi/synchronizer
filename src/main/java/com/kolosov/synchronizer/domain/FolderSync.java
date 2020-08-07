@@ -7,18 +7,15 @@ import lombok.NonNull;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static javax.persistence.FetchType.*;
-
 @Entity
 @NoArgsConstructor
-public class FolderSync extends Sync {
+public class FolderSync extends Sync implements Composite {
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "parent")
     public List<Sync> list = new ArrayList<>();

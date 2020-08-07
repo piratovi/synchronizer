@@ -1,8 +1,7 @@
 package com.kolosov.synchronizer.service.directOperations;
 
-import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.domain.Sync;
-import com.kolosov.synchronizer.enums.Location;
+import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.exceptions.FileNotFoundException;
 import com.kolosov.synchronizer.service.directOperations.transferStrategy.FileFromPcToPhoneStrategy;
 import com.kolosov.synchronizer.service.directOperations.transferStrategy.FileFromPhoneToPcStrategy;
@@ -13,12 +12,10 @@ import com.kolosov.synchronizer.service.lowLevel.pc.PcWorker;
 import com.kolosov.synchronizer.service.lowLevel.phone.PhoneWorker;
 import com.kolosov.synchronizer.service.transporter.validator.TransferType;
 import com.kolosov.synchronizer.utils.MergeSyncsUtils;
-import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.kolosov.synchronizer.enums.Location.PC;
@@ -46,10 +43,10 @@ public class DirectOperationsService {
         }
     }
 
-    public List<RootFolderSync> getMergedSyncs() {
-        List<RootFolderSync> pcFiles = pcWorker.collectSyncs();
-        List<RootFolderSync> ftpFiles = phoneWorker.collectSyncs();
-        return MergeSyncsUtils.mergeSyncs(ftpFiles, pcFiles);
+    public TreeSync getNewTreeSync() {
+        TreeSync pcTreeSync = pcWorker.getNewTreeSync();
+        TreeSync ftpTreeSync = phoneWorker.getNewTreeSync();
+        return MergeSyncsUtils.mergeSyncs(pcTreeSync, ftpTreeSync);
     }
 
     public void transfer(Sync sync, TransferType transferType) {

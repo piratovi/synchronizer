@@ -2,15 +2,14 @@ package com.kolosov.synchronizer.domain;
 
 import com.kolosov.synchronizer.enums.Location;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
 import javax.persistence.Entity;
 
 @Entity
 @NoArgsConstructor
-public class RootFolderSync extends FolderSync {
+public class TreeSync extends FolderSync {
 
-    public RootFolderSync(@NonNull String relativePath, @NonNull String name, @NonNull Location location) {
+    public TreeSync(String relativePath, String name, Location location) {
         super(relativePath, name, location);
     }
 

@@ -2,8 +2,8 @@ package com.kolosov.synchronizer.service.lowLevel.pc;
 
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
-import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.domain.Sync;
+import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.service.LocationService;
 import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,6 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,29 +33,23 @@ public class PcWorker implements LowLevelWorker {
     private final LocationService locationService;
 
     @Override
-    public List<RootFolderSync> collectSyncs() {
-        List<RootFolderSync> syncList = new ArrayList<>();
+    public TreeSync getNewTreeSync() {
+        TreeSync newTreeSync = new TreeSync("\\", "\\", PC);
         List<String> folders = locationService.getAbsolutePathsForPcFolders();
         for (String folder : folders) {
             File root = new File(folder);
-            processDirectoryRecursively(root, syncList, null);
+            processDirectoryRecursively(root, newTreeSync);
         }
-        return syncList;
+        return newTreeSync;
     }
 
-    public void processDirectoryRecursively(File parentDir, List<RootFolderSync> rootFolderSyncs, FolderSync parentFolderSync) {
-        for (final File file : parentDir.listFiles()) {
+    public void processDirectoryRecursively(File parentDirectory, FolderSync parentFolderSync) {
+        for (final File file : parentDirectory.listFiles()) {
             String relativePath = locationService.relativizePcPath(file);
             String fileName = file.getName();
             if (file.isDirectory()) {
-                FolderSync currentFolderSync;
-                if (parentFolderSync == null) {
-                    currentFolderSync = new RootFolderSync(relativePath, fileName, PC);
-                    rootFolderSyncs.add(currentFolderSync.asRootFolder());
-                } else {
-                    currentFolderSync = new FolderSync(relativePath, fileName, PC, parentFolderSync);
-                }
-                processDirectoryRecursively(file, rootFolderSyncs, currentFolderSync);
+                FolderSync currentFolderSync = new FolderSync(relativePath, fileName, PC, parentFolderSync);
+                processDirectoryRecursively(file, currentFolderSync);
             } else {
                 new FileSync(relativePath, fileName, PC, parentFolderSync);
             }
@@ -106,8 +99,7 @@ public class PcWorker implements LowLevelWorker {
     @SneakyThrows
     public byte[] getFileContent(Sync sync) {
         File file = new File(locationService.getAbsolutePathForPc(sync));
-        byte[] bytes = FileUtils.readFileToByteArray(file);
-        return bytes;
+        return FileUtils.readFileToByteArray(file);
     }
 
     @SneakyThrows

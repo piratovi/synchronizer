@@ -1,6 +1,6 @@
 package com.kolosov.synchronizer.service;
 
-import com.kolosov.synchronizer.domain.RootFolderSync;
+import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.service.directOperations.DirectOperationsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,9 +48,9 @@ public class DirectOperationsServiceTest {
         @Test
     public void merge() {
             directOperationsService.connectPhone();
-            List<RootFolderSync> mergedList = directOperationsService.getMergedSyncs();
+            TreeSync mergedList = directOperationsService.getNewTreeSync();
             directOperationsService.disconnectPhone();
-            System.out.println(mergedList.size());
+            mergedList.getNestedSyncs().forEach(System.out::println);
     }
 
 }

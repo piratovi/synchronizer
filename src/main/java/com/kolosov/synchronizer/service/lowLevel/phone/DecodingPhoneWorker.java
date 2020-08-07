@@ -2,7 +2,6 @@ package com.kolosov.synchronizer.service.lowLevel.phone;
 
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
-import com.kolosov.synchronizer.domain.RootFolderSync;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.List;
 
 import static com.kolosov.synchronizer.enums.Location.PHONE;
 
@@ -23,7 +21,7 @@ public class DecodingPhoneWorker extends PhoneWorker {
 
     @SneakyThrows
     @Override
-    protected void listDirectory(String directory, String currentDir, List<RootFolderSync> rootFolderSyncs, String fromRootDir, FolderSync parentFolderSync) {
+    protected void listDirectory(String directory, String currentDir, String fromRootDir, FolderSync parentFolderSync) {
         if (!currentDir.equals("")) {
             directory += "/" + currentDir;
         }
@@ -38,14 +36,8 @@ public class DecodingPhoneWorker extends PhoneWorker {
                 String rightEncodingRelativePathForSyncCreation = convertEncodingForWeakFtp(appendFileName(fromRootDir, fileName));
                 rightEncodingRelativePathForSyncCreation = removeFirstSlash(rightEncodingRelativePathForSyncCreation);
                 if (file.isDirectory()) {
-                    FolderSync currentFolderSync;
-                    if (parentFolderSync == null) {
-                        currentFolderSync = new RootFolderSync(rightEncodingRelativePathForSyncCreation, rightEncodingCurrentFileName, PHONE);
-                        rootFolderSyncs.add(currentFolderSync.asRootFolder());
-                    } else {
-                        currentFolderSync = new FolderSync(rightEncodingRelativePathForSyncCreation, rightEncodingCurrentFileName, PHONE, parentFolderSync);
-                    }
-                    listDirectory(directory, fileName, rootFolderSyncs, appendFileName(fromRootDir, fileName), currentFolderSync);
+                    FolderSync currentFolderSync = new FolderSync(rightEncodingRelativePathForSyncCreation, rightEncodingCurrentFileName, PHONE, parentFolderSync);
+                    listDirectory(directory, fileName, appendFileName(fromRootDir, fileName), currentFolderSync);
                 } else {
                     new FileSync(rightEncodingRelativePathForSyncCreation, rightEncodingCurrentFileName, PHONE, parentFolderSync);
                 }

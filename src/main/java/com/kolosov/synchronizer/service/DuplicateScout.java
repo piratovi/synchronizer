@@ -1,10 +1,8 @@
 package com.kolosov.synchronizer.service;
 
 
-import com.kolosov.synchronizer.domain.FolderSync;
-import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.domain.Sync;
-import com.kolosov.synchronizer.repository.RootFolderSyncRepository;
+import com.kolosov.synchronizer.repository.TreeSyncRepository;
 import com.kolosov.synchronizer.service.directOperations.DirectOperationsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +16,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DuplicateScout {
 
-    private final RootFolderSyncRepository rootFolderSyncRepository;
+    private final TreeSyncRepository treeSyncRepository;
     private final DirectOperationsService directOperationsService;
     private final SynchronizedScout synchronizedScout;
 
@@ -26,9 +24,8 @@ public class DuplicateScout {
         if (synchronizedScout.isAllSyncsSynchronized()) {
             throw new RuntimeException("Need synchronization!");
         }
-        List<RootFolderSync> rootFolderSyncs = rootFolderSyncRepository.findAll();
-        return rootFolderSyncs.stream()
-                .flatMap(FolderSync::getNestedSyncs)
+        return treeSyncRepository.findTree()
+                .getNestedSyncs()
                 .filter(Sync::isFile)
                 .collect(Collectors.groupingBy(directOperationsService::getSyncSize, Collectors.toList()))
                 .values().stream()

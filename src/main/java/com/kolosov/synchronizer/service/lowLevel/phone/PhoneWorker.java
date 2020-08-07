@@ -2,9 +2,8 @@ package com.kolosov.synchronizer.service.lowLevel.phone;
 
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
-import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.domain.Sync;
-import com.kolosov.synchronizer.enums.Location;
+import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.service.LocationService;
 import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
 import lombok.Setter;
@@ -24,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
+
+import static com.kolosov.synchronizer.enums.Location.PHONE;
 
 @Slf4j
 public abstract class PhoneWorker implements LowLevelWorker {
@@ -72,18 +73,17 @@ public abstract class PhoneWorker implements LowLevelWorker {
     }
 
     @Override
-    public List<RootFolderSync> collectSyncs() {
+    public TreeSync getNewTreeSync() {
         connect();
-        List<RootFolderSync> syncList = new ArrayList<>();
-        List<String> foldersWithAbsolutePath = locationService.getAbsolutePathsForPhoneFolders();
-        for (String folderWithAbsolutePath : foldersWithAbsolutePath) {
-            listDirectory(folderWithAbsolutePath, "", syncList, folderWithAbsolutePath, null);
+        TreeSync newTreeSync = new TreeSync("\\", "\\", PHONE);
+        List<String> folders = locationService.getAbsolutePathsForPhoneFolders();
+        for (String folder : folders) {
+            listDirectory(folder, "", folder, newTreeSync);
         }
-//        disconnect();
-        return syncList;
+        return newTreeSync;
     }
 
-    protected abstract void listDirectory(String parentDir, String currentDir, List<RootFolderSync> result, String fromRootDir, FolderSync parentFolderSync);
+    protected abstract void listDirectory(String parentDir, String currentDir, String fromRootDir, FolderSync parentFolderSync);
 
     protected String appendFileName(String fromRootDir, String currentFileName) {
         return fromRootDir + "\\" + currentFileName;
@@ -144,24 +144,12 @@ public abstract class PhoneWorker implements LowLevelWorker {
                     removeDirectory(dirToList, currentFileName);
                 } else {
                     // delete the file
-                    boolean deleted = ftpClient.deleteFile(filePath);
-                    if (deleted) {
-                        System.out.println("DELETED the file: " + filePath);
-                    } else {
-                        System.out.println("CANNOT delete the file: "
-                                + filePath);
-                    }
+                    ftpClient.deleteFile(filePath);
                 }
             }
         }
         // finally, remove the directory itself
-        boolean removed = ftpClient.removeDirectory(dirToList);
-        if (removed) {
-            System.out.println("REMOVED the directory: " + dirToList);
-        } else {
-            System.out.println("CANNOT remove the directory: " + dirToList);
-        }
-
+        ftpClient.removeDirectory(dirToList);
     }
 
     @SneakyThrows

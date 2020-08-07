@@ -2,12 +2,12 @@ package com.kolosov.synchronizer.service;
 
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.HistorySync;
-import com.kolosov.synchronizer.domain.RootFolderSync;
 import com.kolosov.synchronizer.domain.Sync;
+import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.dto.ExtensionStat;
 import com.kolosov.synchronizer.repository.HistorySyncRepository;
-import com.kolosov.synchronizer.repository.RootFolderSyncRepository;
 import com.kolosov.synchronizer.repository.SyncRepository;
+import com.kolosov.synchronizer.repository.TreeSyncRepository;
 import com.kolosov.synchronizer.service.transporter.Transporter;
 import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +17,6 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.kolosov.synchronizer.enums.ProposedAction.REMOVE;
 import static com.kolosov.synchronizer.enums.ProposedAction.TRANSFER;
@@ -29,7 +27,7 @@ import static com.kolosov.synchronizer.enums.ProposedAction.TRANSFER;
 public class SyncService {
 
     private final SyncRepository syncRepository;
-    private final RootFolderSyncRepository rootFolderSyncRepository;
+    private final TreeSyncRepository treeSyncRepository;
     private final HistorySyncRepository historySyncRepository;
     private final Remover remover;
     private final Transporter transporter;
@@ -38,14 +36,15 @@ public class SyncService {
     private final DuplicateScout duplicateScout;
 
     public List<FolderSync> getEmptyFolders() {
-        return SyncUtils.getEmptyFolders(rootFolderSyncRepository.findAll());
+        TreeSync tree = treeSyncRepository.findTree();
+        return SyncUtils.getEmptyFolders(tree);
     }
 
     public List<ExtensionStat> getExtensionStats() {
         return synchronizedScout.getExtensionStats();
     }
 
-    public void clear() {
+    public void deleteAll() {
         syncRepository.deleteAll();
         historySyncRepository.deleteAll();
     }
@@ -62,7 +61,7 @@ public class SyncService {
         transporter.transfer(ids);
     }
 
-    public List<RootFolderSync> getNotSynchronizedSyncs() {
+    public TreeSync getNotSynchronizedSyncs() {
         return synchronizedScout.findNotSynchronizedSyncs();
     }
 
@@ -76,8 +75,8 @@ public class SyncService {
 
     public void autoSynchronization() {
         log.info("Auto Synchronizing start");
-        synchronizedScout.findNotSynchronizedSyncs().stream()
-                .flatMap(FolderSync::getNestedSyncs)
+        synchronizedScout.findNotSynchronizedSyncs()
+                .getNestedSyncs()
                 .forEach(this::applyProposedAction);
         log.info("Auto Synchronizing end");
     }

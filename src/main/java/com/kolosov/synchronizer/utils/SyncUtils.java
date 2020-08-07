@@ -1,10 +1,8 @@
 package com.kolosov.synchronizer.utils;
 
-import com.kolosov.synchronizer.domain.RootFolderSync;
-import com.kolosov.synchronizer.domain.Sync;
-import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
-import org.apache.commons.io.FilenameUtils;
+import com.kolosov.synchronizer.domain.Sync;
+import com.kolosov.synchronizer.domain.TreeSync;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,35 +11,22 @@ import java.util.stream.Collectors;
 
 public class SyncUtils {
 
-    public static List<Sync> getFlatSyncs(List<? extends Sync> folderSyncs) {
-        List<Sync> result = new ArrayList<>();
-        folderSyncs.forEach(sync -> result.addAll(getFlatSyncs(sync)));
-        return result;
-    }
-
-    public static List<Sync> getFlatSyncs(Sync sync) {
-        List<Sync> result = new ArrayList<>();
-        result.add(sync);
-        if (sync.isFolder()) {
-            getNestedSyncsRecursively(sync.asFolder(), result);
+    public static Optional<Sync> findSyncInFolder(FolderSync syncInResultTree, Sync syncToMerge) {
+        if (syncInResultTree.equals(syncToMerge)) {
+            return Optional.of(syncInResultTree);
         }
-        return result;
-    }
-
-    private static void getNestedSyncsRecursively(FolderSync parent, List<Sync> result) {
-        parent.list.forEach(child -> {
-            result.add(child);
-            if (child.isFolder()) {
-                getNestedSyncsRecursively(child.asFolder(), result);
+        for (Sync sync : syncInResultTree.list) {
+            if (sync.equals(syncToMerge)) {
+                return Optional.of(sync);
             }
-        });
-    }
-
-    public static RootFolderSync getRootFolder(Sync sync) {
-        while (!sync.isRootFolder()) {
-            sync = sync.getParent();
+            if (sync.isFolder()) {
+                Optional<Sync> syncInFolder = findSyncInFolder(sync.asFolder(), syncToMerge);
+                if (syncInFolder.isPresent()) {
+                    return syncInFolder;
+                }
+            }
         }
-        return sync.asRootFolder();
+        return Optional.empty();
     }
 
     public static List<FolderSync> getParents(Sync sync) {
@@ -54,9 +39,8 @@ public class SyncUtils {
         return parents;
     }
 
-    public static List<FolderSync> getEmptyFolders(List<? extends Sync> syncs) {
-        List<Sync> flatSyncs = getFlatSyncs(syncs);
-        return flatSyncs.stream()
+    public static List<FolderSync> getEmptyFolders(TreeSync treeSync) {
+        return treeSync.getNestedSyncs()
                 .filter(Sync::isFolder)
                 .map(Sync::asFolder)
                 .filter(FolderSync::isEmpty)

@@ -15,7 +15,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,8 +31,7 @@ public class Transporter {
         log.info("Transferring start");
         List<Sync> syncsToTransfer = ids.stream()
                 .map(id -> syncRepository.findById(id).orElseThrow(ExceptionSupplier.syncNotFound(id)))
-                .map(SyncUtils::getFlatSyncs)
-                .flatMap(Collection::stream)
+                .flatMap(Sync::getNestedSyncs)
                 .filter(Sync::isNotSynchronized)
                 .collect(Collectors.toList());
 //        directOperations.connectPhone();

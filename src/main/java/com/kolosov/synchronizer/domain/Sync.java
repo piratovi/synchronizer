@@ -21,7 +21,6 @@ import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotBlank;
-import java.util.List;
 import java.util.stream.Stream;
 
 @Getter
@@ -37,7 +36,7 @@ import java.util.stream.Stream;
 @JsonSubTypes({
         @Type(value = FolderSync.class, name = "folder"),
         @Type(value = FileSync.class, name = "file")})
-public abstract class Sync {
+public abstract class Sync implements Component {
 
     @Id
     @GeneratedValue
@@ -90,7 +89,7 @@ public abstract class Sync {
     }
 
     public void removeFromParent() {
-        this.parent.remove(this);
+        parent.remove(this);
     }
 
     @JsonIgnore
@@ -103,11 +102,6 @@ public abstract class Sync {
         return this instanceof FolderSync;
     }
 
-    @JsonIgnore
-    public boolean isRootFolder() {
-        return this instanceof RootFolderSync;
-    }
-
     public FileSync asFile() {
         return (FileSync) this;
     }
@@ -116,15 +110,9 @@ public abstract class Sync {
         return (FolderSync) this;
     }
 
-    public RootFolderSync asRootFolder() {
-        return (RootFolderSync) this;
-    }
-
     @JsonIgnore
     public boolean hasParent() {
         return parent != null;
     }
-
-    public abstract Stream<Sync> getNestedSyncs();
 
 }

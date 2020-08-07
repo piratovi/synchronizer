@@ -2,10 +2,10 @@ package com.kolosov.synchronizer.service;
 
 import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
-import com.kolosov.synchronizer.domain.RootFolderSync;
+import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.dto.ExtensionStat;
-import com.kolosov.synchronizer.repository.RootFolderSyncRepository;
+import com.kolosov.synchronizer.repository.TreeSyncRepository;
 import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,55 +17,44 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SynchronizedScout {
 
-    private final RootFolderSyncRepository rootFolderSyncRepository;
+    private final TreeSyncRepository treeSyncRepository;
 
-    public List<RootFolderSync> findNotSynchronizedSyncs() {
-        List<RootFolderSync> rootFolders = rootFolderSyncRepository.findAll();
-        List<Sync> flatSyncs = SyncUtils.getFlatSyncs(rootFolders);
-        rememberChildQuantity(flatSyncs);
-        removeSynchronizedFiles(flatSyncs);
-        removeEmptyFoldersInList(rootFolders);
-        return rootFolders;
+    public TreeSync findNotSynchronizedSyncs() {
+        TreeSync treeSync = treeSyncRepository.findTree();
+        //TODO удалить?
+        rememberChildQuantity(treeSync);
+        removeSynchronizedFiles(treeSync);
+        removeEmptyFolders(treeSync);
+        return treeSync;
     }
 
-    private void rememberChildQuantity(List<Sync> flatSyncs) {
-        flatSyncs.stream()
+    private void rememberChildQuantity(TreeSync treeSync) {
+        treeSync.getNestedSyncs()
                 .filter(Sync::isFolder)
                 .map(Sync::asFolder)
                 .forEach(folderSync -> folderSync.rememberedChildQuantity = folderSync.list.size());
     }
 
-    private void removeSynchronizedFiles(List<Sync> flatSyncs) {
-        flatSyncs.stream()
+    private void removeSynchronizedFiles(TreeSync treeSync) {
+        treeSync.getNestedSyncs()
                 .filter(Sync::isFile)
                 .map(Sync::asFile)
                 .filter(FileSync::isSynchronized)
                 .forEach(FileSync::removeFromParent);
     }
 
-    private void removeEmptyFoldersInList(List<RootFolderSync> rootFolders) {
-        List<FolderSync> folders = SyncUtils.getEmptyFolders(rootFolders);
+    private void removeEmptyFolders(TreeSync treeSync) {
+        List<FolderSync> folders = SyncUtils.getEmptyFolders(treeSync);
         while (!folders.isEmpty()) {
-            removeEmptyFoldersInList(rootFolders, folders);
-            folders = SyncUtils.getEmptyFolders(rootFolders);
+            folders.forEach(Sync::removeFromParent);
+            folders = SyncUtils.getEmptyFolders(treeSync);
         }
     }
 
-    private void removeEmptyFoldersInList(List<RootFolderSync> rootFolders, List<FolderSync> folders) {
-        folders.forEach(folderSync -> {
-            if (folderSync.isRootFolder()) {
-                rootFolders.remove(folderSync);
-            } else {
-                folderSync.removeFromParent();
-            }
-        });
-    }
-
     public List<ExtensionStat> getExtensionStats() {
-        List<Sync> flatSyncs = SyncUtils.getFlatSyncs(rootFolderSyncRepository.findAll());
-        return flatSyncs.stream()
-                .filter(sync -> sync instanceof FileSync)
-                .map(sync -> (FileSync) sync)
+        return treeSyncRepository.findTree().getNestedSyncs()
+                .filter(Sync::isFile)
+                .map(Sync::asFile)
                 .collect(Collectors.groupingBy(sync -> sync.ext, Collectors.toList()))
                 .entrySet()
                 .stream()

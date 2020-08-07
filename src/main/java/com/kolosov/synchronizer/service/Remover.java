@@ -3,8 +3,8 @@ package com.kolosov.synchronizer.service;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.exceptions.ExceptionSupplier;
-import com.kolosov.synchronizer.repository.RootFolderSyncRepository;
 import com.kolosov.synchronizer.repository.SyncRepository;
+import com.kolosov.synchronizer.repository.TreeSyncRepository;
 import com.kolosov.synchronizer.service.directOperations.DirectOperationsService;
 import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,6 @@ import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,15 +22,14 @@ public class Remover {
 
     private final SyncRepository syncRepository;
     private final DirectOperationsService directOperations;
-    private final RootFolderSyncRepository rootFolderSyncRepository;
+    private final TreeSyncRepository treeSyncRepository;
 
     @Synchronized
     public void remove(List<Integer> ids) {
         log.info("Deleting start");
         List<Sync> syncsToDelete = ids.stream()
                 .map(id -> syncRepository.findById(id).orElseThrow(ExceptionSupplier.syncNotFound(id)))
-                .map(SyncUtils::getFlatSyncs)
-                .flatMap(Collection::stream)
+                .flatMap(Sync::getNestedSyncs)
                 .filter(Sync::isNotSynchronized)
                 .filter(Sync::isFile)
                 .collect(Collectors.toList());
@@ -43,10 +41,10 @@ public class Remover {
     }
 
     private void removeEmptyFolders() {
-        List<FolderSync> emptyFolders = SyncUtils.getEmptyFolders(rootFolderSyncRepository.findAll());
+        List<FolderSync> emptyFolders = SyncUtils.getEmptyFolders(treeSyncRepository.findTree());
         while (!emptyFolders.isEmpty()) {
             emptyFolders.forEach(this::remove);
-            emptyFolders = SyncUtils.getEmptyFolders(rootFolderSyncRepository.findAll());
+            emptyFolders = SyncUtils.getEmptyFolders(treeSyncRepository.findTree());
         }
     }
 

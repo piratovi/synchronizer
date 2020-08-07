@@ -25,9 +25,5 @@ class SyncRepositoryTest {
     @Test
     @Transactional
     void checkNested() {
-        List<Sync> syncs = repository.findAll();
-        Sync sync = syncs.get(0);
-        Stream<Sync> nestedSyncs = sync.getNestedSyncs();
-        System.out.println();
     }
 }
