@@ -11,20 +11,17 @@ import java.util.stream.Collectors;
 
 public class SyncUtils {
 
-    public static Optional<Sync> findSyncInFolder(FolderSync syncInResultTree, Sync syncToMerge) {
+    public static Optional<Sync> findSyncInFolder(Sync syncInResultTree, Sync syncToMerge) {
         if (syncInResultTree.equals(syncToMerge)) {
             return Optional.of(syncInResultTree);
         }
-        for (Sync sync : syncInResultTree.list) {
-            if (sync.equals(syncToMerge)) {
-                return Optional.of(sync);
-            }
-            if (sync.isFolder()) {
-                Optional<Sync> syncInFolder = findSyncInFolder(sync.asFolder(), syncToMerge);
-                if (syncInFolder.isPresent()) {
-                    return syncInFolder;
-                }
-            }
+        if (syncInResultTree.isFolder()) {
+            return syncInResultTree.asFolder().list.stream()
+                    .filter(sync -> syncToMerge.relativePath.startsWith(sync.relativePath))
+                    .map(sync -> findSyncInFolder(sync, syncToMerge))
+                    .filter(Optional::isPresent)
+                    .findFirst()
+                    .orElse(Optional.empty());
         }
         return Optional.empty();
     }
