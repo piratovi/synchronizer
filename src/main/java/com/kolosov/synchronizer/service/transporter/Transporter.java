@@ -34,7 +34,6 @@ public class Transporter {
                 .flatMap(Sync::getNestedSyncs)
                 .filter(Sync::isNotSynchronized)
                 .collect(Collectors.toList());
-//        directOperations.connectPhone();
         syncsToTransfer.forEach(sync -> {
             List<FolderSync> parents = SyncUtils.getParents(sync);
             CollectionUtils.filter(parents, Sync::isNotSynchronized);
@@ -42,7 +41,6 @@ public class Transporter {
             syncs.add(sync);
             syncs.forEach(this::transfer);
         });
-//        directOperations.disconnectPhone();
         log.info("Transferring end");
     }
 

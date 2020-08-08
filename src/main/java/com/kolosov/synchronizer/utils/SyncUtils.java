@@ -5,6 +5,7 @@ import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.TreeSync;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -18,10 +19,8 @@ public class SyncUtils {
         if (syncInResultTree.isFolder()) {
             return syncInResultTree.asFolder().list.stream()
                     .filter(sync -> syncToMerge.relativePath.startsWith(sync.relativePath))
-                    .map(sync -> findSyncInFolder(sync, syncToMerge))
-                    .filter(Optional::isPresent)
-                    .findFirst()
-                    .orElse(Optional.empty());
+                    .max(Comparator.comparingInt(o -> o.relativePath.length()))
+                    .flatMap(sync -> findSyncInFolder(sync, syncToMerge));
         }
         return Optional.empty();
     }
