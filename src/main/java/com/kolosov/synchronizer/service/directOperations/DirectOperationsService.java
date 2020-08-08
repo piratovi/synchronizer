@@ -35,11 +35,11 @@ public class DirectOperationsService {
         }
         if (sync.existOnPhone) {
             phoneWorker.delete(sync);
-            log.info("Deleted from {} : {}", PHONE, sync.relativePath);
+            log.info(String.format("Deleted from %7s : %s", PHONE, sync.relativePath));
         }
         if (sync.existOnPC) {
             pcWorker.delete(sync);
-            log.info("Deleted from {} : {}", PC, sync.relativePath);
+            log.info(String.format("Deleted from %7s : %s", PC, sync.relativePath));
         }
     }
 

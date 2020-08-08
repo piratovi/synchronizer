@@ -7,6 +7,7 @@ import lombok.NonNull;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import java.util.ArrayList;
@@ -17,19 +18,11 @@ import java.util.stream.Stream;
 @NoArgsConstructor
 public class FolderSync extends Sync implements Composite {
 
-    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "parent")
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "parent", fetch = FetchType.EAGER)
     public List<Sync> list = new ArrayList<>();
 
-    ////TODO переделать в трансферобжект
-    @Transient
-    public int rememberedChildQuantity;
-
-    public FolderSync(@NonNull String relativePath, @NonNull String name, @NonNull Location location, @NonNull FolderSync parent) {
-        super(relativePath, name, location, parent);
-    }
-
-    protected FolderSync(@NonNull String relativePath, @NonNull String name, @NonNull Location location) {
-        super(relativePath, name, location);
+    public FolderSync(String name, Location location, FolderSync parent) {
+        super(name, location, parent);
     }
 
     @Override

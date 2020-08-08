@@ -9,8 +9,8 @@ import javax.persistence.Entity;
 @NoArgsConstructor
 public class TreeSync extends FolderSync {
 
-    public TreeSync(String relativePath, String name, Location location) {
-        super(relativePath, name, location);
+    public TreeSync(Location location) {
+        super("\\", location, null);
     }
 
     @Override

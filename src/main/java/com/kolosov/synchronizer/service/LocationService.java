@@ -2,6 +2,7 @@ package com.kolosov.synchronizer.service;
 
 import com.kolosov.synchronizer.domain.Sync;
 import lombok.Data;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
@@ -32,17 +33,17 @@ public class LocationService {
         return rootPc + File.separator + sync.relativePath;
     }
 
-    public List<String> getAbsolutePathsForPcFolders() {
+    public List<Pair<String, String>> getAbsolutePathsForPcFolders() {
         return combineRootAndFolders(rootPc);
     }
 
-    public List<String> getAbsolutePathsForPhoneFolders() {
+    public List<Pair<String, String>> getAbsolutePathsForPhoneFolders() {
         return combineRootAndFolders(rootPhone);
     }
 
-    private List<String> combineRootAndFolders(String root) {
+    private List<Pair<String, String>> combineRootAndFolders(String root) {
         return folders.stream()
-                .map(folderPath -> root + folderPath)
+                .map(folderPath -> Pair.of(folderPath, root + folderPath))
                 .collect(Collectors.toList());
     }
 }

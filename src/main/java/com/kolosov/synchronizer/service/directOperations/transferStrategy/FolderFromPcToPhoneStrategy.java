@@ -18,6 +18,6 @@ public class FolderFromPcToPhoneStrategy implements TransferStrategy {
     public void transfer() {
         phoneWorker.createFolder(folderSync);
         folderSync.existOnPhone = true;
-        log.info("Transferred to " + PHONE + " : " + folderSync.relativePath);
+        log.info(String.format("Transferred to %5s : %s.", PHONE, folderSync.relativePath));
     }
 }

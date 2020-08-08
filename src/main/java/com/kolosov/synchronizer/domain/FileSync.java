@@ -16,8 +16,8 @@ public class FileSync extends Sync implements Leaf {
     @Column(nullable = false)
     public String ext;
 
-    public FileSync(String relativePath, String name, Location location, FolderSync folder) {
-        super(relativePath, name, location, folder);
+    public FileSync(String name, Location location, FolderSync folder) {
+        super(name, location, folder);
         this.ext = FilenameUtils.getExtension(relativePath).toLowerCase();
     }
 

@@ -27,12 +27,11 @@ public class PlanePhoneWorker extends PhoneWorker {
                     continue;
                 }
                 absolutePath = appendFileName(absolutePath, fileName);
-                String relativePathForSyncCreation = removeFirstSlash(absolutePath);
                 if (file.isDirectory()) {
-                    FolderSync currentFolderSync = new FolderSync(relativePathForSyncCreation, fileName, PHONE, parentFolderSync);
+                    FolderSync currentFolderSync = new FolderSync(fileName, PHONE, parentFolderSync);
                     listDirectory(directory, fileName, absolutePath, currentFolderSync);
                 } else {
-                    new FileSync(relativePathForSyncCreation, fileName, PHONE, parentFolderSync);
+                    new FileSync(fileName, PHONE, parentFolderSync);
                 }
             }
         }

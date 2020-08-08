@@ -4,7 +4,6 @@ import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.exceptions.ExceptionSupplier;
 import com.kolosov.synchronizer.repository.SyncRepository;
-import com.kolosov.synchronizer.repository.TreeSyncRepository;
 import com.kolosov.synchronizer.service.directOperations.DirectOperationsService;
 import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,7 @@ public class Remover {
 
     private final SyncRepository syncRepository;
     private final DirectOperationsService directOperations;
-    private final TreeSyncRepository treeSyncRepository;
+    private final TreeService treeService;
 
     @Synchronized
     public void remove(List<Integer> ids) {
@@ -33,18 +32,16 @@ public class Remover {
                 .filter(Sync::isNotSynchronized)
                 .filter(Sync::isFile)
                 .collect(Collectors.toList());
-//        directOperations.connectPhone();
         syncsToDelete.forEach(this::remove);
         removeEmptyFolders();
-//        directOperations.disconnectPhone();
         log.info("Deleting end");
     }
 
     private void removeEmptyFolders() {
-        List<FolderSync> emptyFolders = SyncUtils.getEmptyFolders(treeSyncRepository.findTree());
+        List<FolderSync> emptyFolders = SyncUtils.getEmptyFolders(treeService.getTreeSync());
         while (!emptyFolders.isEmpty()) {
             emptyFolders.forEach(this::remove);
-            emptyFolders = SyncUtils.getEmptyFolders(treeSyncRepository.findTree());
+            emptyFolders = SyncUtils.getEmptyFolders(treeService.getTreeSync());
         }
     }
 

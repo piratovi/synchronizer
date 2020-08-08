@@ -2,6 +2,7 @@ package com.kolosov.synchronizer.controller;
 
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.Sync;
+import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.dto.ExtensionStat;
 import com.kolosov.synchronizer.dto.HistorySyncDTO;
 import com.kolosov.synchronizer.service.SyncService;
@@ -127,4 +128,9 @@ public class SyncRestController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @GetMapping("/all-syncs")
+    public ResponseEntity<TreeSync> getAllSyncs() {
+        TreeSync treeSync = syncService.getTreeSync();
+        return new ResponseEntity<>(treeSync, HttpStatus.OK);
+    }
 }

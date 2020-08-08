@@ -19,6 +19,6 @@ public class FolderFromPhoneToPcStrategy implements TransferStrategy {
     public void transfer() {
         pcWorker.createFolder(folderSync);
         folderSync.existOnPC = true;
-        log.info("Transferred to " + PC + " : " + folderSync.relativePath);
+        log.info(String.format("Transferred to %5s : %s", PC, folderSync.relativePath));
     }
 }

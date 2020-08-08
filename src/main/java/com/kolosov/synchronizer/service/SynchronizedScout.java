@@ -5,7 +5,6 @@ import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.dto.ExtensionStat;
-import com.kolosov.synchronizer.repository.TreeSyncRepository;
 import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,22 +16,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SynchronizedScout {
 
-    private final TreeSyncRepository treeSyncRepository;
+    private final TreeService treeService;
 
     public TreeSync findNotSynchronizedSyncs() {
-        TreeSync treeSync = treeSyncRepository.findTree();
-        //TODO удалить?
-        rememberChildQuantity(treeSync);
+        TreeSync treeSync = treeService.getTreeSync();
         removeSynchronizedFiles(treeSync);
         removeEmptyFolders(treeSync);
         return treeSync;
-    }
-
-    private void rememberChildQuantity(TreeSync treeSync) {
-        treeSync.getNestedSyncs()
-                .filter(Sync::isFolder)
-                .map(Sync::asFolder)
-                .forEach(folderSync -> folderSync.rememberedChildQuantity = folderSync.list.size());
     }
 
     private void removeSynchronizedFiles(TreeSync treeSync) {
@@ -52,7 +42,7 @@ public class SynchronizedScout {
     }
 
     public List<ExtensionStat> getExtensionStats() {
-        return treeSyncRepository.findTree().getNestedSyncs()
+        return treeService.getTreeSync().getNestedSyncs()
                 .filter(Sync::isFile)
                 .map(Sync::asFile)
                 .collect(Collectors.groupingBy(sync -> sync.ext, Collectors.toList()))
@@ -62,7 +52,8 @@ public class SynchronizedScout {
                 .collect(Collectors.toList());
     }
 
-    public boolean isAllSyncsSynchronized() {
-        return findNotSynchronizedSyncs().isEmpty();
+    public boolean isTreeSyncNotSynchronized() {
+        return treeService.getTreeSync().getNestedSyncs()
+                .anyMatch(Sync::isNotSynchronized);
     }
 }

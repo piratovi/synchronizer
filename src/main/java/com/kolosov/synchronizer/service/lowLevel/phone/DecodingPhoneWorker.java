@@ -33,13 +33,11 @@ public class DecodingPhoneWorker extends PhoneWorker {
                     continue;
                 }
                 String rightEncodingCurrentFileName = convertEncodingForWeakFtp(fileName);
-                String rightEncodingRelativePathForSyncCreation = convertEncodingForWeakFtp(appendFileName(fromRootDir, fileName));
-                rightEncodingRelativePathForSyncCreation = removeFirstSlash(rightEncodingRelativePathForSyncCreation);
                 if (file.isDirectory()) {
-                    FolderSync currentFolderSync = new FolderSync(rightEncodingRelativePathForSyncCreation, rightEncodingCurrentFileName, PHONE, parentFolderSync);
+                    FolderSync currentFolderSync = new FolderSync(rightEncodingCurrentFileName, PHONE, parentFolderSync);
                     listDirectory(directory, fileName, appendFileName(fromRootDir, fileName), currentFolderSync);
                 } else {
-                    new FileSync(rightEncodingRelativePathForSyncCreation, rightEncodingCurrentFileName, PHONE, parentFolderSync);
+                    new FileSync(rightEncodingCurrentFileName, PHONE, parentFolderSync);
                 }
             }
         }

@@ -9,6 +9,7 @@ import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -75,10 +76,11 @@ public abstract class PhoneWorker implements LowLevelWorker {
     @Override
     public TreeSync getNewTreeSync() {
         connect();
-        TreeSync newTreeSync = new TreeSync("\\", "\\", PHONE);
-        List<String> folders = locationService.getAbsolutePathsForPhoneFolders();
-        for (String folder : folders) {
-            listDirectory(folder, "", folder, newTreeSync);
+        TreeSync newTreeSync = new TreeSync(PHONE);
+        List<Pair<String, String>> folderPairs = locationService.getAbsolutePathsForPhoneFolders();
+        for (Pair<String, String> pair : folderPairs) {
+            FolderSync folderSync = new FolderSync(pair.getKey(), PHONE, newTreeSync);
+            listDirectory(pair.getValue(), "", pair.getValue(), folderSync);
         }
         return newTreeSync;
     }

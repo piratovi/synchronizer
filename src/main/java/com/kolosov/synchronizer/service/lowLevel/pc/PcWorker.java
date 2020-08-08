@@ -9,6 +9,7 @@ import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.FileSystemUtils;
@@ -34,24 +35,24 @@ public class PcWorker implements LowLevelWorker {
 
     @Override
     public TreeSync getNewTreeSync() {
-        TreeSync newTreeSync = new TreeSync("\\", "\\", PC);
-        List<String> folders = locationService.getAbsolutePathsForPcFolders();
-        for (String folder : folders) {
-            File root = new File(folder);
-            processDirectoryRecursively(root, newTreeSync);
+        TreeSync newTreeSync = new TreeSync(PC);
+        List<Pair<String, String>> folderPairs = locationService.getAbsolutePathsForPcFolders();
+        for (Pair<String, String> pair : folderPairs) {
+            File file = new File(pair.getValue());
+            FolderSync folderSync = new FolderSync(pair.getKey(), PC, newTreeSync);
+            processDirectoryRecursively(file, folderSync);
         }
         return newTreeSync;
     }
 
     public void processDirectoryRecursively(File parentDirectory, FolderSync parentFolderSync) {
         for (final File file : parentDirectory.listFiles()) {
-            String relativePath = locationService.relativizePcPath(file);
             String fileName = file.getName();
             if (file.isDirectory()) {
-                FolderSync currentFolderSync = new FolderSync(relativePath, fileName, PC, parentFolderSync);
+                FolderSync currentFolderSync = new FolderSync(fileName, PC, parentFolderSync);
                 processDirectoryRecursively(file, currentFolderSync);
             } else {
-                new FileSync(relativePath, fileName, PC, parentFolderSync);
+                new FileSync(fileName, PC, parentFolderSync);
             }
         }
     }

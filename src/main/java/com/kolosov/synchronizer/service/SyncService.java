@@ -7,7 +7,6 @@ import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.dto.ExtensionStat;
 import com.kolosov.synchronizer.repository.HistorySyncRepository;
 import com.kolosov.synchronizer.repository.SyncRepository;
-import com.kolosov.synchronizer.repository.TreeSyncRepository;
 import com.kolosov.synchronizer.service.transporter.Transporter;
 import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +26,7 @@ import static com.kolosov.synchronizer.enums.ProposedAction.TRANSFER;
 public class SyncService {
 
     private final SyncRepository syncRepository;
-    private final TreeSyncRepository treeSyncRepository;
+    private final TreeService treeService;
     private final HistorySyncRepository historySyncRepository;
     private final Remover remover;
     private final Transporter transporter;
@@ -36,7 +35,7 @@ public class SyncService {
     private final DuplicateScout duplicateScout;
 
     public List<FolderSync> getEmptyFolders() {
-        TreeSync tree = treeSyncRepository.findTree();
+        TreeSync tree = treeService.getTreeSync();
         return SyncUtils.getEmptyFolders(tree);
     }
 
@@ -108,5 +107,8 @@ public class SyncService {
                 .forEach(remover::remove);
     }
 
+    public TreeSync getTreeSync() {
+        return treeService.getTreeSync();
+    }
 }
 

@@ -66,16 +66,16 @@ public abstract class Sync implements Component {
     @OneToOne(cascade = {CascadeType.ALL}, mappedBy = "sync")
     private HistorySync historySync;
 
-    public Sync(String relativePath, String name, Location location, FolderSync parent) {
-        this(relativePath, name, location);
-        parent.add(this);
-    }
-
-    public Sync(String relativePath, String name, Location location) {
-        this.relativePath = relativePath;
+    public Sync(String name, Location location, FolderSync parent) {
         this.name = name;
         this.existOnPC = Location.PC.equals(location);
         this.existOnPhone = Location.PHONE.equals(location);
+        if (parent != null) {
+            parent.add(this);
+            this.relativePath = parent.relativePath.concat("\\").concat(name);
+        } else {
+            this.relativePath = "\\";
+        }
     }
 
     @JsonIgnore
@@ -100,6 +100,11 @@ public abstract class Sync implements Component {
     @JsonIgnore
     public boolean isFolder() {
         return this instanceof FolderSync;
+    }
+
+    @JsonIgnore
+    public boolean isTree() {
+        return this instanceof TreeSync;
     }
 
     public FileSync asFile() {

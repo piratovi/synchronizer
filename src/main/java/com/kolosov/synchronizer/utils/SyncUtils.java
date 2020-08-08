@@ -44,6 +44,7 @@ public class SyncUtils {
                 .filter(Sync::isFolder)
                 .map(Sync::asFolder)
                 .filter(FolderSync::isEmpty)
+                .filter(folderSync -> !folderSync.isTree())
                 .collect(Collectors.toList());
     }
 }

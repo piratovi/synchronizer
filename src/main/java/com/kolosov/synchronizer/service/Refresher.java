@@ -6,7 +6,6 @@ import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.enums.ProposedAction;
 import com.kolosov.synchronizer.repository.HistorySyncRepository;
 import com.kolosov.synchronizer.repository.SyncRepository;
-import com.kolosov.synchronizer.repository.TreeSyncRepository;
 import com.kolosov.synchronizer.service.directOperations.DirectOperationsService;
 import com.kolosov.synchronizer.validators.action.ActionValidator;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +28,7 @@ public class Refresher {
 
     private final DirectOperationsService directOperations;
     private final SyncRepository syncRepository;
-    private final TreeSyncRepository treeSyncRepository;
+    private final TreeService treeService;
     private final HistorySyncRepository historySyncRepository;
 
     public void refresh() {
@@ -37,12 +36,12 @@ public class Refresher {
         TreeSync newTreeSync = directOperations.getNewTreeSync();
         createHistorySyncs(newTreeSync);
         syncRepository.deleteAll();
-        treeSyncRepository.save(newTreeSync);
+        treeService.save(newTreeSync);
         log.info("refresh done");
     }
 
     private void createHistorySyncs(TreeSync newTreeSync) {
-        TreeSync oldTreeSync = treeSyncRepository.findTree();
+        TreeSync oldTreeSync = treeService.getTreeSync();
         Map<String, Sync> mappedOldSyncs;
         if (oldTreeSync != null) {
             mappedOldSyncs = oldTreeSync
