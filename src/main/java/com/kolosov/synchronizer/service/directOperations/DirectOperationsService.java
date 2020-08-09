@@ -2,21 +2,26 @@ package com.kolosov.synchronizer.service.directOperations;
 
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.TreeSync;
+import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.exceptions.FileNotFoundException;
 import com.kolosov.synchronizer.service.directOperations.transferStrategy.FileFromPcToPhoneStrategy;
 import com.kolosov.synchronizer.service.directOperations.transferStrategy.FileFromPhoneToPcStrategy;
 import com.kolosov.synchronizer.service.directOperations.transferStrategy.FolderFromPcToPhoneStrategy;
 import com.kolosov.synchronizer.service.directOperations.transferStrategy.FolderFromPhoneToPcStrategy;
 import com.kolosov.synchronizer.service.directOperations.transferStrategy.TransferStrategy;
+import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
 import com.kolosov.synchronizer.service.lowLevel.pc.PcWorker;
 import com.kolosov.synchronizer.service.lowLevel.phone.PhoneWorker;
 import com.kolosov.synchronizer.service.transporter.validator.TransferType;
+import com.kolosov.synchronizer.utils.CalcUtils;
 import com.kolosov.synchronizer.utils.MergeSyncsUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.kolosov.synchronizer.enums.Location.PC;
 import static com.kolosov.synchronizer.enums.Location.PHONE;
@@ -44,9 +49,21 @@ public class DirectOperationsService {
     }
 
     public TreeSync getNewTreeSync() {
-        TreeSync pcTreeSync = pcWorker.getNewTreeSync();
-        TreeSync ftpTreeSync = phoneWorker.getNewTreeSync();
-        return MergeSyncsUtils.mergeSyncs(pcTreeSync, ftpTreeSync);
+        TreeSync pcTreeSync = getTreeSync(pcWorker, PC);
+        TreeSync ftpTreeSync = getTreeSync(phoneWorker, PHONE);
+        return MergeSyncsUtils.mergeTrees(pcTreeSync, ftpTreeSync);
+    }
+
+    private TreeSync getTreeSync(LowLevelWorker lowLevelWorker, Location location) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+        TreeSync newTreeSync = lowLevelWorker.getNewTreeSync();
+        watch.stop();
+        float milliseconds = watch.getTime(TimeUnit.MILLISECONDS);
+        long quantity = newTreeSync.getNestedSyncs().count();
+        float speed = CalcUtils.calculateTreeScanSpeed(quantity, milliseconds);
+        log.info(String.format("Tree from %5s scanned. Quantity = %d syncs. Time = %7.1f ms. Speed = %8.1f syncs/second", location, quantity, milliseconds, speed));
+        return newTreeSync;
     }
 
     public void transfer(Sync sync, TransferType transferType) {

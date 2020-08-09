@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static com.kolosov.synchronizer.enums.ProposedAction.REMOVE;
 import static com.kolosov.synchronizer.enums.ProposedAction.TRANSFER;
@@ -45,7 +46,6 @@ public class SyncService {
 
     public void deleteAll() {
         syncRepository.deleteAll();
-        historySyncRepository.deleteAll();
     }
 
     public List<HistorySync> getHistorySyncs() {
@@ -74,21 +74,20 @@ public class SyncService {
 
     public void autoSynchronization() {
         log.info("Auto Synchronizing start");
-        synchronizedScout.findNotSynchronizedSyncs()
-                .getNestedSyncs()
+        historySyncRepository.findAll()
                 .forEach(this::applyProposedAction);
         log.info("Auto Synchronizing end");
     }
 
-    private void applyProposedAction(Sync sync) {
-        Optional.ofNullable(sync.getHistorySync())
-                .ifPresent(historySync -> {
-                    if (TRANSFER.equals(historySync.action)) {
-                        transporter.transfer(sync);
-                    } else if (REMOVE.equals(historySync.action)) {
-                        remover.remove(sync);
-                    }
-                });
+    private void applyProposedAction(HistorySync historySync) {
+        Sync sync = historySync.sync;
+        if (TRANSFER.equals(historySync.action)) {
+            transporter.transfer(sync);
+        } else if (REMOVE.equals(historySync.action)) {
+            remover.remove(sync);
+        }
+        sync.setHistorySync(null);
+        historySyncRepository.delete(historySync);
     }
 
     public void connectPhone() {

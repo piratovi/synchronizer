@@ -9,6 +9,7 @@ import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,9 +18,11 @@ import java.util.stream.Collectors;
 public class SynchronizedScout {
 
     private final TreeService treeService;
+    private final EntityManager entityManager;
 
     public TreeSync findNotSynchronizedSyncs() {
         TreeSync treeSync = treeService.getTreeSync();
+        entityManager.detach(treeSync);
         removeSynchronizedFiles(treeSync);
         removeEmptyFolders(treeSync);
         return treeSync;

@@ -10,6 +10,9 @@ import static com.kolosov.synchronizer.service.transporter.validator.TransferTyp
 public class TransferValidator {
 
     public static TransferType validate(Sync sync) {
+        if (sync.isSynchronized()) {
+            throw new RuntimeException(String.format("%s уже синхронизирована", sync.relativePath));
+        }
         if (sync.existOnPC) {
             if (sync.isFolder()) {
                 return FOLDER_FROM_PC_TO_PHONE;
