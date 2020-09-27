@@ -15,8 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
 
 import static com.kolosov.synchronizer.enums.ProposedAction.REMOVE;
 import static com.kolosov.synchronizer.enums.ProposedAction.TRANSFER;
@@ -74,6 +72,7 @@ public class SyncService {
 
     public void autoSynchronization() {
         log.info("Auto Synchronizing start");
+        refresh();
         historySyncRepository.findAll()
                 .forEach(this::applyProposedAction);
         log.info("Auto Synchronizing end");

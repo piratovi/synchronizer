@@ -6,11 +6,9 @@ import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.service.LocationService;
 import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
-import com.kolosov.synchronizer.utils.CalcUtils;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -25,10 +23,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import static com.kolosov.synchronizer.enums.Location.PC;
 import static com.kolosov.synchronizer.enums.Location.PHONE;
 
 @Slf4j
