@@ -7,7 +7,6 @@ import com.kolosov.synchronizer.dto.ExtensionStat;
 import com.kolosov.synchronizer.dto.HistorySyncDTO;
 import com.kolosov.synchronizer.service.SyncService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -38,7 +37,7 @@ public class SyncRestController {
     @GetMapping("/syncs")
     public ResponseEntity<List<Sync>> getSyncs() {
         List<Sync> syncs = syncService.getNotSynchronizedSyncs().list;
-        return new ResponseEntity<>(syncs, HttpStatus.OK);
+        return ResponseEntity.ok(syncs);
     }
 
     @GetMapping("/actions")
@@ -46,37 +45,37 @@ public class SyncRestController {
         List<HistorySyncDTO> historySyncsDTO = syncService.getHistorySyncs().stream()
                 .map(HistorySyncDTO::new)
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(historySyncsDTO, HttpStatus.OK);
+        return ResponseEntity.ok(historySyncsDTO);
     }
 
     @GetMapping("/refresh")
     public ResponseEntity<Void> refresh() {
         syncService.refresh();
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/deleteAll")
     public ResponseEntity<Void> deleteAll() {
         syncService.deleteAll();
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/emptyFolders")
     public ResponseEntity<List<FolderSync>> emptyFolders() {
         List<FolderSync> emptyFolders = syncService.getEmptyFolders();
-        return new ResponseEntity<>(emptyFolders, HttpStatus.OK);
+        return ResponseEntity.ok(emptyFolders);
     }
 
     @DeleteMapping()
     public ResponseEntity<Void> deleteSyncs(@RequestBody List<Integer> ids) {
         syncService.delete(ids);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/transfer")
     public ResponseEntity<Void> transfer(@RequestBody List<Integer> ids) {
         syncService.transfer(ids);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/ext")
@@ -84,7 +83,7 @@ public class SyncRestController {
         List<ExtensionStat> extensionStats = syncService.getExtensionStats();
         Map<String, Integer> map = extensionStats.stream()
                 .collect(Collectors.toMap(extStat -> extStat.name, extStat -> extStat.count));
-        return new ResponseEntity<>(map, HttpStatus.OK);
+        return ResponseEntity.ok(map);
     }
 
     @GetMapping("/ext/{name}")
@@ -94,43 +93,44 @@ public class SyncRestController {
                 .filter(stat -> stat.name.equals(name))
                 .findFirst()
                 .orElse(null);
-        return new ResponseEntity<>(extensionStat, HttpStatus.OK);
+        return ResponseEntity.ok(extensionStat);
     }
 
     @GetMapping("/disconnect-phone")
     public ResponseEntity<Void> disconnectPhone() {
         syncService.disconnect();
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/auto-synchronization")
     public ResponseEntity<Void> autoSynchronization() {
         syncService.autoSynchronization();
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/connect-phone")
     public ResponseEntity<Void> connectPhone() {
         syncService.connectPhone();
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/duplicate-syncs")
     public ResponseEntity<List<List<Sync>>> findDuplicateSyncs() {
         List<List<Sync>> duplicateSyncs = syncService.findDuplicateSyncs();
-        return new ResponseEntity<>(duplicateSyncs, HttpStatus.OK);
+        return ResponseEntity.ok(duplicateSyncs);
     }
 
     //TODO посмотреть проблему с маппингом урлов
     @DeleteMapping("/delete-duplicate-syncs")
     public ResponseEntity<Void> deleteDuplicateSyncs() {
         syncService.deleteDuplicateSyncs();
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/all-syncs")
     public ResponseEntity<TreeSync> getAllSyncs() {
         TreeSync treeSync = syncService.getTreeSync();
-        return new ResponseEntity<>(treeSync, HttpStatus.OK);
+        return ResponseEntity.ok(treeSync);
     }
+
 }

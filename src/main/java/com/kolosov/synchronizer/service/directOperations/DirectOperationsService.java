@@ -60,9 +60,10 @@ public class DirectOperationsService {
         TreeSync newTreeSync = lowLevelWorker.getNewTreeSync();
         watch.stop();
         float milliseconds = watch.getTime(TimeUnit.MILLISECONDS);
+        long seconds = watch.getTime(TimeUnit.SECONDS);
         long quantity = newTreeSync.getNestedSyncs().count();
         float speed = CalcUtils.calculateTreeScanSpeed(quantity, milliseconds);
-        log.info(String.format("Tree from %5s scanned. Quantity = %d syncs. Time = %7.1f ms. Speed = %8.1f syncs/second", location, quantity, milliseconds, speed));
+        log.info(String.format("Tree from %5s scanned. Quantity = %d syncs. Time = %d seconds. Speed = %8.1f syncs/second", location, quantity, seconds, speed));
         return newTreeSync;
     }
 
