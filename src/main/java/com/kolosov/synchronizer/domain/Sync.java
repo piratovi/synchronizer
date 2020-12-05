@@ -74,7 +74,7 @@ public abstract class Sync implements Component {
             parent.add(this);
             this.relativePath = parent.relativePath.concat("\\").concat(name);
         } else {
-            this.relativePath = "\\";
+            this.relativePath = name;
         }
     }
 

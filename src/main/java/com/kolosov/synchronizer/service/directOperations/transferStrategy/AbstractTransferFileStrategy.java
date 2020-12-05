@@ -32,7 +32,7 @@ public abstract class AbstractTransferFileStrategy implements TransferStrategy {
             watch.start();
             long bytes = inputStream.transferTo(outputStream);
             watch.stop();
-            float milliseconds = watch.getTime(TimeUnit.MILLISECONDS);
+            long milliseconds = watch.getTime(TimeUnit.MILLISECONDS);
             speed = CalcUtils.calculateTransferSpeed(bytes, milliseconds);
         } catch (Exception e) {
             throw new RuntimeException(fileSync.toString(), e);

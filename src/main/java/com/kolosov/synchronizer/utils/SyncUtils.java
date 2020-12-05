@@ -12,15 +12,15 @@ import java.util.stream.Collectors;
 
 public class SyncUtils {
 
-    public static Optional<Sync> findSync(Sync syncWhereSearch, Sync desiredSync) {
-        if (syncWhereSearch.equals(desiredSync)) {
-            return Optional.of(syncWhereSearch);
+    public static Optional<Sync> findSync(Sync searchLocation, Sync searchTarget) {
+        if (searchLocation.equals(searchTarget)) {
+            return Optional.of(searchLocation);
         }
-        if (syncWhereSearch.isFolder()) {
-            return syncWhereSearch.asFolder().list.stream()
-                    .filter(sync -> desiredSync.relativePath.startsWith(sync.relativePath))
+        if (searchLocation.isFolder()) {
+            return searchLocation.asFolder().list.stream()
+                    .filter(sync -> searchTarget.relativePath.startsWith(sync.relativePath))
                     .max(Comparator.comparingInt(o -> o.relativePath.length()))
-                    .flatMap(sync -> findSync(sync, desiredSync));
+                    .flatMap(sync -> findSync(sync, searchTarget));
         }
         return Optional.empty();
     }
