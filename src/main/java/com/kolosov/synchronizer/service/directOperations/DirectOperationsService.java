@@ -63,7 +63,7 @@ public class DirectOperationsService {
         long seconds = watch.getTime(TimeUnit.SECONDS);
         long quantity = newTreeSync.getNestedSyncs().count();
         float speed = CalcUtils.calculateTreeScanSpeed(quantity, milliseconds);
-        log.info(String.format("Tree from %5s scanned. Quantity = %d syncs. Time = %d seconds. Speed = %8.1f syncs/second", location, quantity, seconds, speed));
+        log.info(String.format("Tree from %5s scanned. Quantity = %d syncs. Time = %3d seconds. Speed = %8.1f syncs/second", location, quantity, seconds, speed));
         return newTreeSync;
     }
 
@@ -83,7 +83,7 @@ public class DirectOperationsService {
             case FILE_FROM_PHONE_TO_PC:
                 return new FileFromPhoneToPcStrategy(sync.asFile(), pcWorker, phoneWorker);
             default:
-                throw new RuntimeException();
+                throw new RuntimeException("Ошибка в выборе стратегии копирования");
         }
     }
 

@@ -1,23 +1,19 @@
-package com.kolosov.synchronizer.service;
+package com.kolosov.synchronizer.service.refresher;
 
 import com.kolosov.synchronizer.domain.HistorySync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.enums.ProposedAction;
-import com.kolosov.synchronizer.repository.HistorySyncRepository;
 import com.kolosov.synchronizer.repository.SyncRepository;
+import com.kolosov.synchronizer.service.TreeService;
 import com.kolosov.synchronizer.service.directOperations.DirectOperationsService;
-import com.kolosov.synchronizer.validators.action.ActionValidator;
+import com.kolosov.synchronizer.service.refresher.validator.ActionValidator;
+import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.kolosov.synchronizer.enums.ProposedAction.NOTHING;
 
@@ -29,7 +25,6 @@ public class Refresher {
     private final DirectOperationsService directOperations;
     private final SyncRepository syncRepository;
     private final TreeService treeService;
-    private final HistorySyncRepository historySyncRepository;
 
     public void refresh() {
         log.info("refresh start");
@@ -42,29 +37,13 @@ public class Refresher {
 
     private void createHistorySyncs(TreeSync newTreeSync) {
         TreeSync oldTreeSync = treeService.getTreeSync();
-        Map<String, Sync> mappedOldSyncs;
-        if (oldTreeSync != null) {
-            mappedOldSyncs = oldTreeSync
-                    .getNestedSyncs()
-                    .collect(Collectors.toMap(
-                            sync -> sync.relativePath,
-                            Function.identity()));
-        } else {
-            mappedOldSyncs = Collections.emptyMap();
-        }
-        List<HistorySync> oldHistorySyncs = historySyncRepository.findAll();
         newTreeSync.getNestedSyncs().forEach(newSync -> {
-            Optional<HistorySync> oldHistorySync = getOldHistorySync(oldHistorySyncs, newSync);
-            ProposedAction action = ActionValidator.validate(newSync, oldHistorySync, mappedOldSyncs);
+            Optional<Sync> oldSyncOpt = SyncUtils.findSync(oldTreeSync, newSync);
+            ProposedAction action = ActionValidator.validate(newSync, oldSyncOpt);
             if (action != NOTHING) {
                 newSync.setHistorySync(new HistorySync(newSync, action));
             }
         });
-    }
-
-    private static Optional<HistorySync> getOldHistorySync(List<HistorySync> oldHistorySyncs, Sync newSync) {
-        return oldHistorySyncs.stream()
-                .filter(historySync -> newSync.equals(historySync.getSync())).findFirst();
     }
 
     public void disconnect() {

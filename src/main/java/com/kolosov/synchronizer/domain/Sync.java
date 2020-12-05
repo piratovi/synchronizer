@@ -66,7 +66,7 @@ public abstract class Sync implements Component {
     @OneToOne(cascade = {CascadeType.ALL}, mappedBy = "sync")
     private HistorySync historySync;
 
-    public Sync(String name, Location location, FolderSync parent) {
+    protected Sync(String name, Location location, FolderSync parent) {
         this.name = name;
         this.existOnPC = Location.PC.equals(location);
         this.existOnPhone = Location.PHONE.equals(location);

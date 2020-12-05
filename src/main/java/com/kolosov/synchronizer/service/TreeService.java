@@ -17,7 +17,7 @@ public class TreeService {
     public TreeSync getTreeSync() {
         List<TreeSync> treeSyncs = treeSyncRepository.findAll();
         if (treeSyncs.isEmpty()) {
-            return null;
+            return new TreeSync();
         }
         if (treeSyncs.size() > 1) {
             throw new RuntimeException("More than 1 tree in DB");

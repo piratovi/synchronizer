@@ -20,11 +20,11 @@ class SyncServiceTest {
     @Test
     @Transactional
     void dirtiesContextTest() {
-        HistorySync historySync = repository.findById(221270).get();
-        System.out.println(historySync);
-        historySync.action = ProposedAction.TRANSFER;
-        repository.save(historySync);
-        System.out.println(repository.findById(221270).get());
+//        HistorySync historySync = repository.findById(221270).get();
+//        System.out.println(historySync);
+//        historySync.action = ProposedAction.TRANSFER;
+//        repository.save(historySync);
+//        System.out.println(repository.findById(221270).get());
     }
 
     @Test

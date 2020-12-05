@@ -7,6 +7,7 @@ import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.dto.ExtensionStat;
 import com.kolosov.synchronizer.repository.HistorySyncRepository;
 import com.kolosov.synchronizer.repository.SyncRepository;
+import com.kolosov.synchronizer.service.refresher.Refresher;
 import com.kolosov.synchronizer.service.transporter.Transporter;
 import com.kolosov.synchronizer.utils.SyncUtils;
 import lombok.RequiredArgsConstructor;

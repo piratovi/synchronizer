@@ -11,7 +11,7 @@ public class TransferValidator {
 
     public static TransferType validate(Sync sync) {
         if (sync.isSynchronized()) {
-            throw new RuntimeException(String.format("%s уже синхронизирована", sync.relativePath));
+            throw new RuntimeException(String.format("%s уже синхронизирован", sync.relativePath));
         }
         if (sync.existOnPC) {
             if (sync.isFolder()) {
