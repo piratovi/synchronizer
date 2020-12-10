@@ -77,7 +77,7 @@ public abstract class PhoneWorker implements LowLevelWorker {
     public TreeSync getNewTreeSync() {
         connect();
         TreeSync newTreeSync = new TreeSync(PHONE);
-        List<Pair<String, String>> folderPairs = locationService.getAbsolutePathsForPhoneFolders();
+        List<Pair<String, String>> folderPairs = locationService.getFolderNamesAndAbsolutePathsForPhoneRootFolders();
         for (Pair<String, String> pair : folderPairs) {
             FolderSync folderSync = new FolderSync(pair.getKey(), PHONE, newTreeSync);
             listDirectory(pair.getValue(), "", pair.getValue(), folderSync);

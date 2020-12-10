@@ -11,6 +11,7 @@ import static com.kolosov.synchronizer.enums.ProposedAction.TRANSFER;
 
 public class ActionValidator {
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public static ProposedAction validate(Sync newSync, Optional<Sync> oldSyncOpt) {
         if (newSync.isSynchronized()) {
             return NOTHING;

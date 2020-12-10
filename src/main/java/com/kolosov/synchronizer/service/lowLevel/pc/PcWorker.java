@@ -6,12 +6,10 @@ import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.service.LocationService;
 import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
-import com.kolosov.synchronizer.utils.CalcUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -26,7 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.kolosov.synchronizer.enums.Location.PC;
@@ -41,7 +38,7 @@ public class PcWorker implements LowLevelWorker {
     @Override
     public TreeSync getNewTreeSync() {
         TreeSync newTreeSync = new TreeSync(PC);
-        List<Pair<String, String>> folderPairs = locationService.getAbsolutePathsForPcFolders();
+        List<Pair<String, String>> folderPairs = locationService.getFolderNamesAndAbsolutePathsForPcRootFolders();
         for (Pair<String, String> pair : folderPairs) {
             File file = new File(pair.getValue());
             FolderSync folderSync = new FolderSync(pair.getKey(), PC, newTreeSync);

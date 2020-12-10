@@ -14,15 +14,15 @@ public class MergeSyncsUtils {
         return resultTree;
     }
 
-    private static void mergeSyncWithTree(TreeSync treeSync, Sync syncToMerge) {
+    static void mergeSyncWithTree(TreeSync treeSync, Sync syncToMerge) {
         Optional<Sync> syncInTreeOpt = SyncUtils.findSync(treeSync, syncToMerge);
         syncInTreeOpt.ifPresentOrElse(
-                syncInTree -> syncInTree.setExistOnPhone(true),
-                () -> createNewSyncInFolder(treeSync, syncToMerge)
+                Sync::setSynchronized,
+                () -> addSyncToParentFolder(treeSync, syncToMerge)
         );
     }
 
-    private static void createNewSyncInFolder(FolderSync folderSync, Sync syncToMerge) {
+    static void addSyncToParentFolder(FolderSync folderSync, Sync syncToMerge) {
         Optional<Sync> parentOpt = SyncUtils.findSync(folderSync, syncToMerge.parent);
         Sync parent = parentOpt.orElseThrow(() -> new RuntimeException("Не найден родитель для " + syncToMerge.relativePath));
         parent.asFolder().add(syncToMerge);

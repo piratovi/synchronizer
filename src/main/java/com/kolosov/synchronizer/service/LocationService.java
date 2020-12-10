@@ -7,9 +7,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,24 +21,19 @@ public class LocationService {
 
     private List<String> folders;
 
-    public String relativizePcPath(File file) {
-        Path path = Paths.get(rootPc);
-        return path.relativize(file.toPath()).toString();
-    }
-
     public String getAbsolutePathForPc(Sync sync) {
         return rootPc + File.separator + sync.relativePath;
     }
 
-    public List<Pair<String, String>> getAbsolutePathsForPcFolders() {
-        return combineRootAndFolders(rootPc);
+    public List<Pair<String, String>> getFolderNamesAndAbsolutePathsForPcRootFolders() {
+        return combineRootPathAndFolderNames(rootPc);
     }
 
-    public List<Pair<String, String>> getAbsolutePathsForPhoneFolders() {
-        return combineRootAndFolders(rootPhone);
+    public List<Pair<String, String>> getFolderNamesAndAbsolutePathsForPhoneRootFolders() {
+        return combineRootPathAndFolderNames(rootPhone);
     }
 
-    private List<Pair<String, String>> combineRootAndFolders(String root) {
+    private List<Pair<String, String>> combineRootPathAndFolderNames(String root) {
         return folders.stream()
                 .map(folderPath -> Pair.of(folderPath, root + folderPath))
                 .collect(Collectors.toList());

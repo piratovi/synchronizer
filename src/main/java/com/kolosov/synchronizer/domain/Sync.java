@@ -120,4 +120,9 @@ public abstract class Sync implements Component {
         return parent != null;
     }
 
+    public void setSynchronized() {
+        this.existOnPC = true;
+        this.existOnPhone = true;
+    }
+
 }

@@ -19,8 +19,9 @@ class SyncUtilsTest {
         // setup
         FolderSync searchLocation = new FolderSync("folder", Location.PC, null);
         FileSync fileSync = new FileSync("file", Location.PC, searchLocation);
-        FileSync searchTarget = new FileSync("file", Location.PHONE, null);
-        searchTarget.relativePath = "folder\\file";
+
+        FolderSync folderSync = new FolderSync("folder", Location.PHONE, null);
+        FileSync searchTarget = new FileSync("file", Location.PHONE, folderSync);
 
         // act
         Optional<Sync> result = SyncUtils.findSync(searchLocation, searchTarget);
@@ -35,8 +36,9 @@ class SyncUtilsTest {
         // setup
         FolderSync searchLocation = new FolderSync("folder", Location.PC, null);
         FileSync fileSync = new FileSync("file", Location.PC, searchLocation);
-        FileSync searchTarget = new FileSync("file1", Location.PHONE, null);
-        searchTarget.relativePath = "folder\\file1";
+
+        FolderSync folderSync = new FolderSync("folder", Location.PHONE, null);
+        FileSync searchTarget = new FileSync("file1", Location.PHONE, folderSync);
 
         // act
         Optional<Sync> result = SyncUtils.findSync(searchLocation, searchTarget);
