@@ -6,7 +6,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +21,7 @@ public class LocationService {
     private List<String> folders;
 
     public String getAbsolutePathForPc(Sync sync) {
-        return rootPc + File.separator + sync.relativePath;
+        return rootPc + sync.relativePath;
     }
 
     public List<Pair<String, String>> getFolderNamesAndAbsolutePathsForPcRootFolders() {

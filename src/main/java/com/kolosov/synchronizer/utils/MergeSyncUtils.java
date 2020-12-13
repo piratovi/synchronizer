@@ -6,7 +6,7 @@ import com.kolosov.synchronizer.domain.TreeSync;
 
 import java.util.Optional;
 
-public class MergeSyncsUtils {
+public class MergeSyncUtils {
 
     public static TreeSync mergeTrees(TreeSync resultTree, TreeSync treeToMerge) {
         treeToMerge.getNestedSyncs()

@@ -1,7 +1,5 @@
 package com.kolosov.synchronizer.service;
 
-import com.kolosov.synchronizer.domain.HistorySync;
-import com.kolosov.synchronizer.enums.ProposedAction;
 import com.kolosov.synchronizer.repository.HistorySyncRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

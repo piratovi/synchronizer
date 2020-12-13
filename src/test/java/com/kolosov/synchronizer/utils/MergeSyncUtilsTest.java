@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MergeSyncsUtilsTest {
+class MergeSyncUtilsTest {
 
     @Test
     void mergeTrees() {
@@ -22,7 +22,7 @@ class MergeSyncsUtilsTest {
         FileSync fileSyncPhone = new FileSync("file", Location.PHONE, folderSyncPhone);
 
         // act
-        MergeSyncsUtils.mergeTrees(resultTree, treeToMerge);
+        MergeSyncUtils.mergeTrees(resultTree, treeToMerge);
 
         // verify
         assertTrue(resultTree.existOnPhone);
@@ -42,7 +42,7 @@ class MergeSyncsUtilsTest {
         FileSync fileSyncPhone = new FileSync("file", Location.PHONE, folderSyncPhone);
 
         // act
-        MergeSyncsUtils.mergeSyncWithTree(treeSyncPc, fileSyncPhone);
+        MergeSyncUtils.mergeSyncWithTree(treeSyncPc, fileSyncPhone);
 
         // verify
         assertTrue(fileSyncPc.existOnPhone);
@@ -60,7 +60,7 @@ class MergeSyncsUtilsTest {
         FileSync fileSyncPhone = new FileSync("file2", Location.PHONE, folderSyncPhone);
 
         // act
-        MergeSyncsUtils.mergeSyncWithTree(treeSyncPc, fileSyncPhone);
+        MergeSyncUtils.mergeSyncWithTree(treeSyncPc, fileSyncPhone);
 
         // verify
         assertEquals(folderSyncPc, fileSyncPhone.parent);

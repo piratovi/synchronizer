@@ -14,7 +14,7 @@ import com.kolosov.synchronizer.service.lowLevel.pc.PcWorker;
 import com.kolosov.synchronizer.service.lowLevel.phone.PhoneWorker;
 import com.kolosov.synchronizer.service.transporter.validator.TransferType;
 import com.kolosov.synchronizer.utils.CalcUtils;
-import com.kolosov.synchronizer.utils.MergeSyncsUtils;
+import com.kolosov.synchronizer.utils.MergeSyncUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
@@ -51,7 +51,7 @@ public class DirectOperationsService {
     public TreeSync getNewTreeSync() {
         TreeSync pcTreeSync = getTreeSync(pcWorker, PC);
         TreeSync ftpTreeSync = getTreeSync(phoneWorker, PHONE);
-        return MergeSyncsUtils.mergeTrees(pcTreeSync, ftpTreeSync);
+        return MergeSyncUtils.mergeTrees(pcTreeSync, ftpTreeSync);
     }
 
     private TreeSync getTreeSync(LowLevelWorker lowLevelWorker, Location location) {
