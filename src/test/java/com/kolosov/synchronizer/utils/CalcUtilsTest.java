@@ -8,11 +8,11 @@ class CalcUtilsTest {
 
     @Test
     void calculateTransferSpeed() {
-        assertEquals(100, CalcUtils.calculateTransferSpeed(100 * 1024 * 1024, 1000));
+        assertEquals(100.0f, CalcUtils.calculateTransferSpeed(100 * 1024 * 1024, 1000));
     }
 
     @Test
-    void calculateTreeScanSpeed() {
+    void calculateTreeScanSpeed_1() {
         assertEquals(20, CalcUtils.calculateTreeScanSpeed(20, 1000));
     }
 }

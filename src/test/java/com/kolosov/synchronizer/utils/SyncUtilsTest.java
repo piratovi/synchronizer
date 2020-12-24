@@ -28,7 +28,7 @@ class SyncUtilsTest {
 
         // verify
         assertTrue(result.isPresent());
-        assertEquals(fileSync, result.get());
+        assertSame(fileSync, result.get());
     }
 
     @Test
@@ -59,8 +59,8 @@ class SyncUtilsTest {
 
         // verify
         assertEquals(2, result.size());
-        assertEquals(rootFolderSync, result.get(0));
-        assertEquals(subFolderSync, result.get(1));
+        assertSame(rootFolderSync, result.get(0));
+        assertSame(subFolderSync, result.get(1));
     }
 
     @Test
@@ -86,7 +86,7 @@ class SyncUtilsTest {
 
         // verify
         assertEquals(1, result.size());
-        assertEquals(folderSync, result.get(0));
+        assertSame(folderSync, result.get(0));
     }
 
     @Test

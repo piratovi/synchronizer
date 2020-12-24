@@ -15,9 +15,4 @@ class DuplicateScoutTest {
     @Autowired
     TreeSyncRepository treeSyncRepository;
 
-    @Test
-    @Transactional
-    void getDuplicates() {
-    }
-
 }

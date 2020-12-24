@@ -10,23 +10,5 @@ import org.springframework.transaction.annotation.Transactional;
 class SyncServiceTest {
 
     @Autowired
-    HistorySyncRepository repository;
-
-    @Autowired
-    LocationService locationService;
-
-    @Test
-    @Transactional
-    void dirtiesContextTest() {
-//        HistorySync historySync = repository.findById(221270).get();
-//        System.out.println(historySync);
-//        historySync.action = ProposedAction.TRANSFER;
-//        repository.save(historySync);
-//        System.out.println(repository.findById(221270).get());
-    }
-
-    @Test
-    void checkLocationConfig() {
-        System.out.println(locationService);
-    }
+    private SyncService syncService;
 }

@@ -9,15 +9,21 @@ import java.util.Optional;
 public class MergeSyncUtils {
 
     public static TreeSync mergeTrees(TreeSync resultTree, TreeSync treeToMerge) {
-        treeToMerge.getNestedSyncs()
-                .forEach(syncToMerge -> mergeSyncWithTree(resultTree, syncToMerge));
+        treeToMerge.list.forEach(syncToMerge -> mergeSyncWithTree(resultTree, syncToMerge));
         return resultTree;
     }
 
     static void mergeSyncWithTree(TreeSync treeSync, Sync syncToMerge) {
         Optional<Sync> syncInTreeOpt = SyncUtils.findSync(treeSync, syncToMerge);
         syncInTreeOpt.ifPresentOrElse(
-                Sync::setSynchronized,
+                sync -> {
+                    sync.setSynchronized();
+                    if (syncToMerge.isFolder()) {
+                        syncToMerge.asFolder().list.forEach(nestedSync -> {
+                            mergeSyncWithTree(treeSync, nestedSync);
+                        });
+                    }
+                },
                 () -> addSyncToParentFolder(treeSync, syncToMerge)
         );
     }

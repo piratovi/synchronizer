@@ -3,7 +3,6 @@ package com.kolosov.synchronizer.service.directOperations;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.enums.Location;
-import com.kolosov.synchronizer.exceptions.FileNotFoundException;
 import com.kolosov.synchronizer.service.directOperations.transferStrategy.FileFromPcToPhoneStrategy;
 import com.kolosov.synchronizer.service.directOperations.transferStrategy.FileFromPhoneToPcStrategy;
 import com.kolosov.synchronizer.service.directOperations.transferStrategy.FolderFromPcToPhoneStrategy;
@@ -16,10 +15,12 @@ import com.kolosov.synchronizer.service.transporter.validator.TransferType;
 import com.kolosov.synchronizer.utils.CalcUtils;
 import com.kolosov.synchronizer.utils.MergeSyncUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 import org.springframework.stereotype.Service;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -34,6 +35,7 @@ public class DirectOperationsService {
     private final PhoneWorker phoneWorker;
     private final PcWorker pcWorker;
 
+    @SneakyThrows
     public void delete(Sync sync) {
         if (!sync.existOnPhone && !sync.existOnPC) {
             throw new FileNotFoundException("File already deleted " + sync.relativePath);

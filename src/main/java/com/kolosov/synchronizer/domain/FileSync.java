@@ -7,11 +7,13 @@ import org.apache.commons.io.FilenameUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Entity
 @NoArgsConstructor
-public class FileSync extends Sync implements Leaf {
+public class FileSync extends Sync {
 
     @Column(nullable = false)
     public String ext;

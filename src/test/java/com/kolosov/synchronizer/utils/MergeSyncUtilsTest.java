@@ -63,7 +63,26 @@ class MergeSyncUtilsTest {
         MergeSyncUtils.mergeSyncWithTree(treeSyncPc, fileSyncPhone);
 
         // verify
-        assertEquals(folderSyncPc, fileSyncPhone.parent);
+        assertSame(folderSyncPc, fileSyncPhone.parent);
+    }
+
+    @Test
+    void mergeTrees_resultTreeIsEmpty() {
+        // setup
+        TreeSync treeSyncPc = new TreeSync(Location.PC);
+        FolderSync folderSyncPc = new FolderSync("folder", Location.PC, treeSyncPc);
+
+        TreeSync treeSyncPhone = new TreeSync(Location.PHONE);
+        FolderSync folderSyncPhone1 = new FolderSync("folder", Location.PHONE, treeSyncPhone);
+        FolderSync folderSyncPhone2 = new FolderSync("folder2", Location.PHONE, folderSyncPhone1);
+        FileSync fileSyncPhone = new FileSync("file", Location.PHONE, folderSyncPhone2);
+
+        // act
+        MergeSyncUtils.mergeTrees(treeSyncPc, treeSyncPhone);
+
+        // verify
+        assertSame(folderSyncPc, folderSyncPhone2.getParent());
+        assertSame(folderSyncPc, fileSyncPhone.getParent().getParent());
     }
 
 }

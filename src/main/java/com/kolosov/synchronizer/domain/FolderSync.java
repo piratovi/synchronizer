@@ -12,11 +12,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Entity
 @NoArgsConstructor
-public class FolderSync extends Sync implements Composite {
+public class FolderSync extends Sync {
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "parent", fetch = FetchType.EAGER)
     public List<Sync> list = new ArrayList<>();

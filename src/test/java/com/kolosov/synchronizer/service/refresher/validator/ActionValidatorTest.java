@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 
 class ActionValidatorTest {
@@ -35,7 +36,7 @@ class ActionValidatorTest {
         ProposedAction result = ActionValidator.validate(newSync, Optional.empty());
 
         // verify
-        assertEquals(ProposedAction.TRANSFER, result);
+        assertSame(ProposedAction.TRANSFER, result);
     }
 
     @Test
