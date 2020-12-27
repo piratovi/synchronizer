@@ -92,8 +92,10 @@ public abstract class Sync implements Component {
         return this.existOnPhone && this.existOnPC;
     }
 
+    @Override
     public void removeFromParent() {
         parent.remove(this);
+        this.parent = null;
     }
 
     @JsonIgnore
@@ -129,4 +131,8 @@ public abstract class Sync implements Component {
         this.existOnPhone = true;
     }
 
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + ". relativePath = " + relativePath;
+    }
 }

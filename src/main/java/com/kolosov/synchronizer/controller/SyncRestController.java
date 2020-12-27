@@ -36,7 +36,7 @@ public class SyncRestController {
 
     @GetMapping("/syncs")
     public ResponseEntity<List<Sync>> getSyncs() {
-        List<Sync> syncs = syncService.getNotSynchronizedSyncs().list;
+        List<Sync> syncs = syncService.getNotSynchronizedSyncs();
         return ResponseEntity.ok(syncs);
     }
 

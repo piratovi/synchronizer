@@ -102,4 +102,17 @@ class SyncUtilsTest {
         // verify
         assertEquals(0, result.size());
     }
+
+    @Test
+    void getEmptyFolders_empty121() {
+        // setup
+        TreeSync treeSync = new TreeSync(Location.PC);
+        FolderSync folderSync = new FolderSync("folder", Location.PC, treeSync);
+        FileSync fileSync = new FileSync("file", Location.PC, folderSync);
+
+        // act
+        System.out.println(treeSync);
+        System.out.println(folderSync);
+        System.out.println(fileSync);
+    }
 }

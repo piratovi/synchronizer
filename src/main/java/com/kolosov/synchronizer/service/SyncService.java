@@ -33,6 +33,7 @@ public class SyncService {
     private final SynchronizedScout synchronizedScout;
     private final Refresher refresher;
     private final DuplicateScout duplicateScout;
+    private final ExtensionService extensionService;
 
     public List<FolderSync> getEmptyFolders() {
         TreeSync tree = treeService.getTreeSync();
@@ -40,7 +41,7 @@ public class SyncService {
     }
 
     public List<ExtensionStat> getExtensionStats() {
-        return synchronizedScout.getExtensionStats();
+        return extensionService.getExtensionStats();
     }
 
     public void deleteAll() {
@@ -59,8 +60,8 @@ public class SyncService {
         transporter.transfer(ids);
     }
 
-    public TreeSync getNotSynchronizedSyncs() {
-        return synchronizedScout.findNotSynchronizedSyncs();
+    public List<Sync> getNotSynchronizedSyncs() {
+        return synchronizedScout.findNotSynchronizedSyncs().list;
     }
 
     public void refresh() {

@@ -44,17 +44,6 @@ public class SynchronizedScout {
         }
     }
 
-    public List<ExtensionStat> getExtensionStats() {
-        return treeService.getTreeSync().getNestedSyncs()
-                .filter(Sync::isFile)
-                .map(Sync::asFile)
-                .collect(Collectors.groupingBy(sync -> sync.ext, Collectors.toList()))
-                .entrySet()
-                .stream()
-                .map(entry -> new ExtensionStat(entry.getKey(), entry.getValue().size(), entry.getValue()))
-                .collect(Collectors.toList());
-    }
-
     public boolean isTreeSyncNotSynchronized() {
         return treeService.getTreeSync().getNestedSyncs()
                 .anyMatch(Sync::isNotSynchronized);

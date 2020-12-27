@@ -31,6 +31,8 @@ public class Refresher {
         TreeSync newTreeSync = directOperations.getNewTreeSync();
         createHistorySyncs(newTreeSync);
         syncRepository.deleteAll();
+        //TODO проверить
+        //        syncRepository.save(newTreeSync);
         treeService.save(newTreeSync);
         log.info("refresh done");
     }

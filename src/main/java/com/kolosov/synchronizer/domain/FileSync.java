@@ -7,6 +7,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Transient;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -15,17 +16,11 @@ import java.util.stream.Stream;
 @NoArgsConstructor
 public class FileSync extends Sync {
 
-    @Column(nullable = false)
+    @Transient
     public String ext;
 
     public FileSync(String name, Location location, FolderSync folder) {
         super(name, location, folder);
-        this.ext = FilenameUtils.getExtension(relativePath).toLowerCase();
-    }
-
-    @Override
-    public String toString() {
-        return "FileSync. relativePath = " + relativePath;
     }
 
     @Override

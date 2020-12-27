@@ -3,13 +3,19 @@ package com.kolosov.synchronizer.utils;
 public class CalcUtils {
 
     /**
-     * @return MegaBytes/second
+     * @return Megabytes/second
      */
     public static float calculateTransferSpeed(float bytes, float milliseconds) {
-        return (bytes / (1024 * 1024)) / (milliseconds / 1000);
+        float megabytes = bytes / (1024 * 1024);
+        float seconds = milliseconds / 1000;
+        return megabytes / seconds;
     }
 
+    /**
+     * @return Syncs/second
+     */
     public static float calculateTreeScanSpeed(float quantity, float milliseconds) {
-        return quantity / milliseconds / 1000;
+        float seconds = milliseconds / 1000;
+        return quantity / seconds;
     }
 }

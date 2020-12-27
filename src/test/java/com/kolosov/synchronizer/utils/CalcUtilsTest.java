@@ -13,6 +13,6 @@ class CalcUtilsTest {
 
     @Test
     void calculateTreeScanSpeed_1() {
-        assertEquals(20, CalcUtils.calculateTreeScanSpeed(20, 1000));
+        assertEquals(20.0f, CalcUtils.calculateTreeScanSpeed(20, 1000));
     }
 }

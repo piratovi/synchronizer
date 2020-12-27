@@ -11,7 +11,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TreeService {
 
-
     private final TreeSyncRepository treeSyncRepository;
 
     public TreeSync getTreeSync() {

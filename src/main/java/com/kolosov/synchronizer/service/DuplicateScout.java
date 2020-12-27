@@ -31,7 +31,6 @@ public class DuplicateScout {
                 .values().stream()
                 .filter(list -> list.size() > 1)
                 .flatMap(this::getMD5Equals)
-//                .filter(directOperationsService::isContentEquals)
                 .collect(Collectors.toList());
     }
 

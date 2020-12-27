@@ -2,8 +2,11 @@ package com.kolosov.synchronizer.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kolosov.synchronizer.enums.Location;
+import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.Setter;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -27,16 +30,11 @@ public class FolderSync extends Sync {
         super(name, location, parent);
     }
 
-    @Override
-    public String toString() {
-        return "FolderSync. relativePath = " + relativePath;
-    }
-
-    public void remove(Sync sync) {
-        if (!list.remove(sync)) {
+    protected void remove(Sync sync) {
+        if (!list.contains(sync)) {
             throw new RuntimeException("Child Not Found In List");
         }
-        sync.parent = null;
+        list.remove(sync);
     }
 
     @JsonIgnore
