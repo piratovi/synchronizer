@@ -32,15 +32,15 @@ public class Refresher {
         createHistorySyncs(newTreeSync);
         syncRepository.deleteAll();
         //TODO проверить
-        //        syncRepository.save(newTreeSync);
+//        syncRepository.save(newTreeSync);
         treeService.save(newTreeSync);
         log.info("refresh done");
     }
 
     private void createHistorySyncs(TreeSync newTreeSync) {
-        TreeSync oldTreeSync = treeService.getTreeSync();
+        Optional<TreeSync> oldTreeSyncOpt = treeService.findTreeSync();
         newTreeSync.getNestedSyncs().forEach(newSync -> {
-            Optional<Sync> oldSyncOpt = SyncUtils.findSync(oldTreeSync, newSync);
+            Optional<Sync> oldSyncOpt = oldTreeSyncOpt.flatMap(oldTreeSync -> SyncUtils.findSync(oldTreeSync, newSync));
             ProposedAction action = ActionValidator.validate(newSync, oldSyncOpt);
             if (action != NOTHING) {
                 newSync.setHistorySync(new HistorySync(newSync, action));
