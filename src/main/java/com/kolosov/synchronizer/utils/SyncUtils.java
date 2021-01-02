@@ -44,12 +44,12 @@ public class SyncUtils {
                 .collect(Collectors.toList());
     }
 
-    public static List<FolderSync> getFoldersWithoutNestedFiles(TreeSync treeSync) {
+    public static List<FolderSync> getFoldersWithoutNestedFiles(TreeSync treeSync, boolean includeRootFolders) {
         return treeSync.getNestedSyncs()
                 .filter(Sync::isFolder)
                 .map(Sync::asFolder)
                 .filter(folderSync -> folderSync.getNestedSyncs().allMatch(Sync::isFolder))
-                .filter(folderSync -> !folderSync.getParent().isTree())
+                .filter(folderSync -> includeRootFolders ? true : !folderSync.getParent().isTree())
                 .collect(Collectors.toList());
     }
 

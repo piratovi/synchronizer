@@ -35,7 +35,7 @@ public class Remover {
                 .collect(Collectors.toList());
         syncsToDelete.forEach(this::remove);
         TreeSync treeSync = treeService.getTreeSync();
-        List<FolderSync> foldersWithoutNestedFiles = SyncUtils.getFoldersWithoutNestedFiles(treeSync);
+        List<FolderSync> foldersWithoutNestedFiles = SyncUtils.getFoldersWithoutNestedFiles(treeSync, false);
         foldersWithoutNestedFiles.forEach(this::remove);
         log.info("Deleting end");
     }

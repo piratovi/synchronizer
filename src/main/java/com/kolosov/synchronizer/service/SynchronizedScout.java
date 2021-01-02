@@ -18,11 +18,11 @@ public class SynchronizedScout {
     private final TreeService treeService;
     private final EntityManager entityManager;
 
-    public TreeSync findNotSynchronizedSyncs() {
+    public TreeSync getNotSynchronizedSyncs() {
         TreeSync treeSync = treeService.getTreeSync();
         entityManager.detach(treeSync);
         removeSynchronizedFiles(treeSync);
-        List<FolderSync> foldersWithoutNestedFiles = SyncUtils.getFoldersWithoutNestedFiles(treeSync);
+        List<FolderSync> foldersWithoutNestedFiles = SyncUtils.getFoldersWithoutNestedFiles(treeSync, true);
         foldersWithoutNestedFiles.forEach(Sync::removeFromParent);
         return treeSync;
     }

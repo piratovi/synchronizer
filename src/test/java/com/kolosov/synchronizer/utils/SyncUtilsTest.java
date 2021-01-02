@@ -104,7 +104,7 @@ class SyncUtilsTest {
     }
 
     @Test
-    void getFoldersWithoutNestedFiles() {
+    void getFoldersWithoutNestedFiles_RootFoldersNotInclude() {
         // setup
         TreeSync treeSync = new TreeSync(Location.PC);
         FolderSync folderSync1 = new FolderSync("folder1", Location.PC, treeSync);
@@ -118,11 +118,37 @@ class SyncUtilsTest {
         FileSync fileSync2 = new FileSync("file2", Location.PC, subFolderSync1);
 
         // act
-        List<FolderSync> result = SyncUtils.getFoldersWithoutNestedFiles(treeSync);
+        List<FolderSync> result = SyncUtils.getFoldersWithoutNestedFiles(treeSync, false);
 
         // verify
         assertEquals(2, result.size());
         assertSame(subFolderSync2, result.get(0));
         assertSame(subFolderSync3, result.get(1));
     }
+
+    @Test
+    void getFoldersWithoutNestedFiles_RootFoldersInclude() {
+        // setup
+        TreeSync treeSync = new TreeSync(Location.PC);
+        FolderSync folderSync1 = new FolderSync("folder1", Location.PC, treeSync);
+        FolderSync folderSync2 = new FolderSync("folder2", Location.PC, treeSync);
+        FolderSync folderSync3 = new FolderSync("folder3", Location.PC, treeSync);
+        FolderSync folderSync4 = new FolderSync("folder4", Location.PC, treeSync);
+        FolderSync subFolderSync1 = new FolderSync("subFolder1", Location.PC, folderSync2);
+        FolderSync subFolderSync2 = new FolderSync("subFolder2", Location.PC, folderSync3);
+        FolderSync subFolderSync3 = new FolderSync("subFolder3", Location.PC, folderSync4);
+        FileSync fileSync1 = new FileSync("file1", Location.PC, folderSync1);
+        FileSync fileSync2 = new FileSync("file2", Location.PC, subFolderSync1);
+
+        // act
+        List<FolderSync> result = SyncUtils.getFoldersWithoutNestedFiles(treeSync, true);
+
+        // verify
+        assertEquals(4, result.size());
+        assertSame(folderSync3, result.get(0));
+        assertSame(subFolderSync2, result.get(1));
+        assertSame(folderSync4, result.get(2));
+        assertSame(subFolderSync3, result.get(3));
+    }
+
 }
