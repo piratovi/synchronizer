@@ -1,5 +1,6 @@
 package com.kolosov.synchronizer.controller;
 
+import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.TreeSync;
@@ -115,8 +116,8 @@ public class SyncRestController {
     }
 
     @GetMapping("/duplicate-syncs")
-    public ResponseEntity<List<List<Sync>>> findDuplicateSyncs() {
-        List<List<Sync>> duplicateSyncs = syncService.findDuplicateSyncs();
+    public ResponseEntity<List<List<FileSync>>> findDuplicateSyncs() {
+        List<List<FileSync>> duplicateSyncs = syncService.findDuplicateSyncs();
         return ResponseEntity.ok(duplicateSyncs);
     }
 

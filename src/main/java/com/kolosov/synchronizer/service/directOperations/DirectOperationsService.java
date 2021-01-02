@@ -1,5 +1,6 @@
 package com.kolosov.synchronizer.service.directOperations;
 
+import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.enums.Location;
@@ -101,8 +102,8 @@ public class DirectOperationsService {
         return pcWorker.getMD5(sync);
     }
 
-    public long getSyncSize(Sync sync) {
-        return pcWorker.getSyncSize(sync);
+    public long getSyncSize(FileSync fileSync) {
+        return pcWorker.getFileSyncSize(fileSync);
     }
 
     public byte[] getFileContent(Sync sync) {

@@ -51,12 +51,26 @@ class SyncRestControllerTest {
         FolderSync folderSyncPc = new FolderSync("folder", Location.PC, resultTree);
         FileSync fileSyncPc = new FileSync("file", Location.PC, folderSyncPc);
 
-        when(syncService.getNotSynchronizedSyncs()).thenReturn(List.of(folderSyncPc));
+//        when(syncService.getNotSynchronizedSyncs()).thenReturn(List.of(folderSyncPc));
 
-        Object asyncResult = mockMvc.perform(get("/rest/syncs"))
+        mockMvc.perform(get("/rest/all-syncs"))
                 .andDo(print())
-                .andExpect(status().isOk()).andReturn().getAsyncResult();
+                .andExpect(status().isOk()).andReturn();
     }
+
+    @Test
+    void syncs12() throws Exception {
+        TreeSync resultTree = new TreeSync(Location.PC);
+        FolderSync folderSyncPc = new FolderSync("folder", Location.PC, resultTree);
+        FileSync fileSyncPc = new FileSync("file", Location.PC, folderSyncPc);
+
+//        when(syncService.getNotSynchronizedSyncs()).thenReturn(List.of(folderSyncPc));
+
+        mockMvc.perform(get("/rest/all-syncs"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
 
     @Test
     @Disabled

@@ -94,7 +94,7 @@ public class PcWorker implements LowLevelWorker {
         }
     }
 
-    public long getSyncSize(Sync sync) {
+    public long getFileSyncSize(Sync sync) {
         File file = new File(locationService.getAbsolutePathForPc(sync));
         return FileUtils.sizeOf(file);
     }

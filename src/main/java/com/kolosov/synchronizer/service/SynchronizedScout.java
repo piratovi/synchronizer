@@ -44,8 +44,4 @@ public class SynchronizedScout {
         }
     }
 
-    public boolean isTreeSyncNotSynchronized() {
-        return treeService.getTreeSync().getNestedSyncs()
-                .anyMatch(Sync::isNotSynchronized);
-    }
 }

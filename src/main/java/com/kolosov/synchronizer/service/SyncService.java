@@ -1,5 +1,6 @@
 package com.kolosov.synchronizer.service;
 
+import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.HistorySync;
 import com.kolosov.synchronizer.domain.Sync;
@@ -95,12 +96,12 @@ public class SyncService {
         refresher.connectPhone();
     }
 
-    public List<List<Sync>> findDuplicateSyncs() {
+    public List<List<FileSync>> findDuplicateSyncs() {
         return duplicateScout.findDuplicateSyncs();
     }
 
     public void deleteDuplicateSyncs() {
-        List<List<Sync>> duplicateSyncs = duplicateScout.findDuplicateSyncs();
+        List<List<FileSync>> duplicateSyncs = duplicateScout.findDuplicateSyncs();
         duplicateSyncs.stream()
                 .peek(list -> list.remove(0))
                 .flatMap(Collection::stream)

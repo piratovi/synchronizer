@@ -1,6 +1,8 @@
 package com.kolosov.synchronizer.service;
 
+import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.TreeSync;
+import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.repository.TreeSyncRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -77,4 +80,31 @@ class TreeServiceTest {
         RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> treeService.getTreeSync());
         assertEquals("No tree in DB", runtimeException.getMessage());
     }
+
+    @Test
+    void isTreeSyncFullySynchronized() {
+        // setup
+        TreeSync treeSync = new TreeSync(Location.PC);
+        treeSync.setSynchronized();
+        FolderSync folderSync = new FolderSync("folder", Location.PC, treeSync);
+        folderSync.setSynchronized();
+        // act
+        boolean result = treeService.isTreeSyncFullySynchronized(treeSync);
+
+        // verify
+        assertTrue(result);
+    }
+
+    @Test
+    void isTreeSyncFullySynchronized_false() {
+        // setup
+        TreeSync treeSync = new TreeSync(Location.PC);
+        FolderSync folderSync = new FolderSync("folder", Location.PC, treeSync);
+        // act
+        boolean result = treeService.isTreeSyncFullySynchronized(treeSync);
+
+        // verify
+        assertFalse(result);
+    }
+
 }

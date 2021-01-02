@@ -1,5 +1,6 @@
 package com.kolosov.synchronizer.service;
 
+import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.repository.TreeSyncRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,8 +30,14 @@ public class TreeService {
         return findTreeSync().orElseThrow(() -> new RuntimeException("No tree in DB"));
     }
 
+    public boolean isTreeSyncFullySynchronized(TreeSync treeSync) {
+        return treeSync.getNestedSyncs()
+                .allMatch(Sync::isSynchronized);
+    }
+
     //TODO maybe remove
     public void save(TreeSync newTreeSync) {
         treeSyncRepository.save(newTreeSync);
     }
+
 }

@@ -62,13 +62,13 @@ class TransferValidatorTest {
     @Test
     public void syncAlreadyTransferred() {
         // setup
-        Sync sync = new FileSync("", Location.PHONE, null);
-
-        // act
+        Sync sync = new FileSync("file", Location.PHONE, null);
         sync.existOnPC = true;
 
+        // act
         // verify
-        assertThrows(RuntimeException.class, () -> TransferValidator.validate(sync));
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> TransferValidator.validate(sync));
+        assertEquals("file уже синхронизирован", runtimeException.getMessage());
     }
 
 }
