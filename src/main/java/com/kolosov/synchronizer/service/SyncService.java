@@ -38,7 +38,7 @@ public class SyncService {
 
     public List<FolderSync> getEmptyFolders() {
         TreeSync tree = treeService.getTreeSync();
-        return SyncUtils.getEmptyFolders(tree);
+        return SyncUtils.getFoldersWithoutNestedFiles(tree);
     }
 
     public List<ExtensionStat> getExtensionStats() {

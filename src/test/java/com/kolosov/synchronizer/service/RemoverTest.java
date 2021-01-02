@@ -36,25 +36,27 @@ class RemoverTest {
     Remover remover;
 
     @Test
-    void removeEmptyFolders() {
-         // setup
+    void remove() {
+        // setup
         TreeSync treeSync = new TreeSync(Location.PC);
-         FolderSync folderSync1 = new FolderSync("folder1", Location.PC, treeSync);
-         FolderSync folderSync2 = new FolderSync("folder2", Location.PC, treeSync);
-         FolderSync subFolderSync = new FolderSync("subFolder", Location.PC, folderSync2);
+        FolderSync folderSync1 = new FolderSync("folder1", Location.PC, treeSync);
+        FolderSync folderSync2 = new FolderSync("folder2", Location.PC, treeSync);
+        FolderSync subFolderSync = new FolderSync("subFolder", Location.PC, folderSync2);
         FileSync fileSync1 = new FileSync("file1", Location.PC, folderSync1);
         FileSync fileSync2 = new FileSync("file2", Location.PC, subFolderSync);
+        FileSync fileSync3 = new FileSync("file3", Location.PC, subFolderSync);
+        fileSync3.setSynchronized();
 
-        when(syncRepository.findById(anyInt())).thenReturn(Optional.of(fileSync2));
+        when(syncRepository.findById(anyInt())).thenReturn(Optional.of(subFolderSync));
         when(treeService.getTreeSync()).thenReturn(treeSync);
 
         // act
         remover.remove(List.of(1));
 
-         // verify
+        // verify
         assertNotNull(folderSync1.getParent());
-        assertNull(folderSync2.getParent());
-        assertNull(subFolderSync.getParent());
+        assertNotNull(subFolderSync.getParent());
         assertNull(fileSync2.getParent());
+        assertNotNull(fileSync3.getParent());
     }
 }

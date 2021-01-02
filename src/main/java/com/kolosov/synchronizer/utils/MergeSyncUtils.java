@@ -9,7 +9,7 @@ import java.util.Optional;
 public class MergeSyncUtils {
 
     public static TreeSync mergeTrees(TreeSync resultTree, TreeSync treeToMerge) {
-        treeToMerge.list.forEach(syncToMerge -> mergeSyncWithTree(resultTree, syncToMerge));
+        mergeSyncWithTree(resultTree, treeToMerge);
         return resultTree;
     }
 

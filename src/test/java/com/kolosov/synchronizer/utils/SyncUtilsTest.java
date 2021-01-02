@@ -104,15 +104,25 @@ class SyncUtilsTest {
     }
 
     @Test
-    void getEmptyFolders_empty121() {
+    void getFoldersWithoutNestedFiles() {
         // setup
         TreeSync treeSync = new TreeSync(Location.PC);
-        FolderSync folderSync = new FolderSync("folder", Location.PC, treeSync);
-        FileSync fileSync = new FileSync("file", Location.PC, folderSync);
+        FolderSync folderSync1 = new FolderSync("folder1", Location.PC, treeSync);
+        FolderSync folderSync2 = new FolderSync("folder2", Location.PC, treeSync);
+        FolderSync folderSync3 = new FolderSync("folder3", Location.PC, treeSync);
+        FolderSync folderSync4 = new FolderSync("folder4", Location.PC, treeSync);
+        FolderSync subFolderSync1 = new FolderSync("subFolder1", Location.PC, folderSync2);
+        FolderSync subFolderSync2 = new FolderSync("subFolder2", Location.PC, folderSync3);
+        FolderSync subFolderSync3 = new FolderSync("subFolder3", Location.PC, folderSync4);
+        FileSync fileSync1 = new FileSync("file1", Location.PC, folderSync1);
+        FileSync fileSync2 = new FileSync("file2", Location.PC, subFolderSync1);
 
         // act
-        System.out.println(treeSync);
-        System.out.println(folderSync);
-        System.out.println(fileSync);
+        List<FolderSync> result = SyncUtils.getFoldersWithoutNestedFiles(treeSync);
+
+        // verify
+        assertEquals(2, result.size());
+        assertSame(subFolderSync2, result.get(0));
+        assertSame(subFolderSync3, result.get(1));
     }
 }

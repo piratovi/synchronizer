@@ -2,6 +2,7 @@ package com.kolosov.synchronizer.service;
 
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.Sync;
+import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.exceptions.ExceptionSupplier;
 import com.kolosov.synchronizer.repository.SyncRepository;
 import com.kolosov.synchronizer.service.directOperations.DirectOperationsService;
@@ -33,16 +34,10 @@ public class Remover {
                 .filter(Sync::isFile)
                 .collect(Collectors.toList());
         syncsToDelete.forEach(this::remove);
-        removeEmptyFolders();
+        TreeSync treeSync = treeService.getTreeSync();
+        List<FolderSync> foldersWithoutNestedFiles = SyncUtils.getFoldersWithoutNestedFiles(treeSync);
+        foldersWithoutNestedFiles.forEach(this::remove);
         log.info("Deleting end");
-    }
-
-    private void removeEmptyFolders() {
-        List<FolderSync> emptyFolders = SyncUtils.getEmptyFolders(treeService.getTreeSync());
-        while (!emptyFolders.isEmpty()) {
-            emptyFolders.forEach(this::remove);
-            emptyFolders = SyncUtils.getEmptyFolders(treeService.getTreeSync());
-        }
     }
 
     public void remove(Sync sync) {
