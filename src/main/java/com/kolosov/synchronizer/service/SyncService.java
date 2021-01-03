@@ -18,9 +18,6 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.List;
 
-import static com.kolosov.synchronizer.enums.ProposedAction.REMOVE;
-import static com.kolosov.synchronizer.enums.ProposedAction.TRANSFER;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -35,6 +32,7 @@ public class SyncService {
     private final Refresher refresher;
     private final DuplicateScout duplicateScout;
     private final ExtensionService extensionService;
+    public final AutoSynchronizationService autoSynchronizationService;
 
     public List<FolderSync> getEmptyFolders() {
         TreeSync tree = treeService.getTreeSync();
@@ -73,25 +71,6 @@ public class SyncService {
         refresher.disconnect();
     }
 
-    public void autoSynchronization() {
-        log.info("Auto Synchronizing start");
-        refresh();
-        historySyncRepository.findAll()
-                .forEach(this::applyProposedAction);
-        log.info("Auto Synchronizing end");
-    }
-
-    private void applyProposedAction(HistorySync historySync) {
-        Sync sync = historySync.sync;
-        if (TRANSFER.equals(historySync.action)) {
-            transporter.transfer(sync);
-        } else if (REMOVE.equals(historySync.action)) {
-            remover.remove(sync);
-        }
-        sync.setHistorySync(null);
-        historySyncRepository.delete(historySync);
-    }
-
     public void connectPhone() {
         refresher.connectPhone();
     }
@@ -111,5 +90,10 @@ public class SyncService {
     public TreeSync getTreeSync() {
         return treeService.getTreeSync();
     }
+
+    public void autoSynchronization() {
+        autoSynchronizationService.autoSynchronization();
+    }
+
 }
 
