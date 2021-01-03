@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -80,11 +79,7 @@ public class SyncService {
     }
 
     public void deleteDuplicateSyncs() {
-        List<List<FileSync>> duplicateSyncs = duplicateScout.findDuplicateSyncs();
-        duplicateSyncs.stream()
-                .peek(list -> list.remove(0))
-                .flatMap(Collection::stream)
-                .forEach(remover::remove);
+        duplicateScout.deleteDuplicateSyncs();
     }
 
     public TreeSync getTreeSync() {

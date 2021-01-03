@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,6 +21,7 @@ public class DuplicateScout {
 
     private final TreeService treeService;
     private final DirectOperationsService directOperationsService;
+    private final Remover remover;
 
     public List<List<FileSync>> findDuplicateSyncs() {
         TreeSync treeSync = treeService.getTreeSync();
@@ -52,4 +54,13 @@ public class DuplicateScout {
                 .collect(Collectors.groupingBy(directOperationsService::getMD5, Collectors.toList()))
                 .values().stream();
     }
+
+    public void deleteDuplicateSyncs() {
+        List<List<FileSync>> duplicateSyncs = findDuplicateSyncs();
+        duplicateSyncs.stream()
+                .peek(list -> list.remove(0))
+                .flatMap(Collection::stream)
+                .forEach(remover::remove);
+    }
+
 }

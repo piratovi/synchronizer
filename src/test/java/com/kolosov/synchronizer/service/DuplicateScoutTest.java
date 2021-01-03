@@ -9,14 +9,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,7 +33,11 @@ class DuplicateScoutTest {
     @Mock
     DirectOperationsService directOperationsService;
 
+    @Mock
+    Remover remover;
+
     @InjectMocks
+    @Spy
     DuplicateScout duplicateScout;
 
     @Test
@@ -65,6 +74,29 @@ class DuplicateScoutTest {
         List<FileSync> duplicates = duplicateSyncs.get(0);
         assertSame(fileSync2, duplicates.get(0));
         assertSame(fileSync3, duplicates.get(1));
+    }
+
+    @Test
+    void deleteDuplicateSyncs() {
+        // setup
+        FileSync fileSync1 = new FileSync("file1", Location.PC, null);
+        FileSync fileSync2 = new FileSync("file2", Location.PC, null);
+        FileSync fileSync3 = new FileSync("file3", Location.PC, null);
+        FileSync fileSync4 = new FileSync("file4", Location.PC, null);
+
+        doReturn(List.of(
+                new ArrayList<>(List.of(fileSync1, fileSync2)),
+                new ArrayList<>(List.of(fileSync3, fileSync4))
+        )).when(duplicateScout).findDuplicateSyncs();
+
+        // act
+        duplicateScout.deleteDuplicateSyncs();
+
+        // verify
+        verify(remover, never()).remove(fileSync1);
+        verify(remover).remove(fileSync2);
+        verify(remover, never()).remove(fileSync3);
+        verify(remover).remove(fileSync4);
     }
 
 }
