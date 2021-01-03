@@ -45,7 +45,6 @@ public class Transporter {
     }
 
     public void transfer(Sync sync) {
-//        directOperations.connectPhone();
         TransferType transferType = TransferValidator.validate(sync);
         directOperations.transfer(sync, transferType);
         syncRepository.save(sync);

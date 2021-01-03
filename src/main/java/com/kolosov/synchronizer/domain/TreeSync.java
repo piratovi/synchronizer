@@ -17,4 +17,5 @@ public class TreeSync extends FolderSync {
     public void removeFromParent() {
         //Empty method
     }
+
 }
