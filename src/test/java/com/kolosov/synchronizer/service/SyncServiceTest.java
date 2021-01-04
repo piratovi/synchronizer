@@ -29,4 +29,5 @@ class SyncServiceTest {
         Sync fileSync = folderSync.asFolder().list.get(0);
         assertEquals("\\\\Music Folder1\\Composition 2", fileSync.getRelativePath());
     }
+
 }

@@ -1,50 +1,30 @@
 package com.kolosov.synchronizer.controller;
 
-import com.kolosov.synchronizer.domain.FileSync;
-import com.kolosov.synchronizer.domain.FolderSync;
-import com.kolosov.synchronizer.domain.TreeSync;
-import com.kolosov.synchronizer.enums.Location;
-import com.kolosov.synchronizer.service.SyncService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-//TODO Дописать
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class SyncRestControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
-    @MockBean
-    private SyncService syncService;
+    TestRestTemplate testRestTemplate;
 
     @Test
-    void test() throws Exception {
-        mockMvc.perform(get("/rest/test"))
-                .andExpect(content().string("test"))
-                .andExpect(status().isOk());
+    void test() {
+        String forObject = testRestTemplate.getForObject("/rest/test", String.class);
+        assertEquals("test", forObject);
     }
 
     @Test
-    void syncs() throws Exception {
-        TreeSync resultTree = new TreeSync(Location.PC);
-        FolderSync folderSyncPc = new FolderSync("folder", Location.PC, resultTree);
-        FileSync fileSyncPc = new FileSync("file", Location.PC, folderSyncPc);
-
-//        when(syncService.getNotSynchronizedSyncs()).thenReturn(List.of(folderSyncPc));
-
-        mockMvc.perform(get("/rest/all-syncs"))
-                .andDo(print())
-                .andExpect(status().isOk()).andReturn();
+    void syncs() {
+        String forObject = testRestTemplate.getForObject("/rest/syncs", String.class);
+        assertEquals("[" +
+                "{\"type\":\"folder\",\"id\":2,\"relativePath\":\"\\\\\\\\Music Folder1\",\"name\":\"Music Folder1\",\"existOnPC\":true,\"existOnPhone\":true,\"historySync\":null,\"list\":" +
+                "[{\"type\":\"file\",\"id\":5,\"relativePath\":\"\\\\\\\\Music Folder1\\\\Composition 2\",\"name\":\"Composition 2\",\"existOnPC\":true,\"existOnPhone\":false,\"historySync\":null,\"ext\":null}]}]", forObject);
     }
 
 }

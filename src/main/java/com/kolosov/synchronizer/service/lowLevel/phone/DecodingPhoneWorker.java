@@ -47,13 +47,6 @@ public class DecodingPhoneWorker extends PhoneWorker {
         return new String(fileName.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
     }
 
-    private String removeProblemSymbols(String relativePath) {
-        String[] blackChars = {"«", "»", "й", "[", "]", "."};
-        String[] arrayWithEmptyChars = new String[blackChars.length];
-        Arrays.fill(arrayWithEmptyChars, "");
-        return StringUtils.replaceEach(relativePath, blackChars, arrayWithEmptyChars);
-    }
-
     @Override
     protected String convertPathForFtp(String relativePath) {
         String replaced = relativePath.replaceAll("\\\\", "/");
