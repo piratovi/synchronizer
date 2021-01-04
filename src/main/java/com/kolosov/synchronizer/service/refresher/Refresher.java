@@ -22,13 +22,13 @@ import static com.kolosov.synchronizer.enums.ProposedAction.NOTHING;
 @Slf4j
 public class Refresher {
 
-    private final DirectOperationsService directOperations;
+    private final DirectOperationsService directOperationsService;
     private final SyncRepository syncRepository;
     private final TreeService treeService;
 
     public void refresh() {
         log.info("refresh start");
-        TreeSync newTreeSync = directOperations.getNewTreeSync();
+        TreeSync newTreeSync = directOperationsService.getNewTreeSync();
         createHistorySyncs(newTreeSync);
         syncRepository.deleteAll();
         //TODO проверить
@@ -49,10 +49,10 @@ public class Refresher {
     }
 
     public void disconnect() {
-        directOperations.disconnectPhone();
+        directOperationsService.disconnectPhone();
     }
 
     public void connectPhone() {
-        directOperations.connectPhone();
+        directOperationsService.connectPhone();
     }
 }

@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,7 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class Transporter {
 
-    private final DirectOperationsService directOperations;
+    private final DirectOperationsService directOperationsService;
     private final SyncRepository syncRepository;
 
     @Synchronized
@@ -37,16 +36,15 @@ public class Transporter {
         syncsToTransfer.forEach(sync -> {
             List<FolderSync> parents = SyncUtils.getParents(sync);
             CollectionUtils.filter(parents, Sync::isNotSynchronized);
-            List<Sync> syncs = new ArrayList<>(parents);
-            syncs.add(sync);
-            syncs.forEach(this::transfer);
+            parents.forEach(this::transfer);
+            transfer(sync);
         });
         log.info("Transferring end");
     }
 
     public void transfer(Sync sync) {
         TransferType transferType = TransferValidator.validate(sync);
-        directOperations.transfer(sync, transferType);
+        directOperationsService.transfer(sync, transferType);
         syncRepository.save(sync);
     }
 
