@@ -21,10 +21,10 @@ class SyncRestControllerTest {
 
     @Test
     void syncs() {
-        String forObject = testRestTemplate.getForObject("/rest/syncs", String.class);
+        String syncs = testRestTemplate.getForObject("/rest/syncs", String.class);
         assertEquals("[" +
                 "{\"type\":\"folder\",\"id\":2,\"relativePath\":\"\\\\\\\\Music Folder1\",\"name\":\"Music Folder1\",\"existOnPC\":true,\"existOnPhone\":true,\"historySync\":null,\"list\":" +
-                "[{\"type\":\"file\",\"id\":5,\"relativePath\":\"\\\\\\\\Music Folder1\\\\Composition 2\",\"name\":\"Composition 2\",\"existOnPC\":true,\"existOnPhone\":false,\"historySync\":null,\"ext\":null}]}]", forObject);
+                "[{\"type\":\"file\",\"id\":5,\"relativePath\":\"\\\\\\\\Music Folder1\\\\Composition 2\",\"name\":\"Composition 2\",\"existOnPC\":true,\"existOnPhone\":false,\"historySync\":null,\"ext\":null}]}]", syncs);
     }
 
 }
