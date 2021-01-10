@@ -50,9 +50,12 @@ public class SyncRestController {
     }
 
     @GetMapping("/refresh")
-    public ResponseEntity<Void> refresh() {
+    public ResponseEntity<List<HistorySyncDTO>> refresh() {
         syncService.refresh();
-        return ResponseEntity.ok().build();
+        List<HistorySyncDTO> historySyncsDTO = syncService.getHistorySyncs().stream()
+                .map(HistorySyncDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(historySyncsDTO);
     }
 
     @GetMapping("/deleteAll")
