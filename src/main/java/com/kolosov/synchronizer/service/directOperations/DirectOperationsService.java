@@ -38,14 +38,14 @@ public class DirectOperationsService {
 
     @SneakyThrows
     public void delete(Sync sync) {
-        if (!sync.existOnPhone && !sync.existOnPC) {
+        if (!sync.existOnPhone && !sync.existOnPc) {
             throw new FileNotFoundException("File already deleted " + sync.relativePath);
         }
         if (sync.existOnPhone) {
             phoneWorker.delete(sync);
             log.info(String.format("Deleted from %7s : %s", PHONE, sync.relativePath));
         }
-        if (sync.existOnPC) {
+        if (sync.existOnPc) {
             pcWorker.delete(sync);
             log.info(String.format("Deleted from %7s : %s", PC, sync.relativePath));
         }

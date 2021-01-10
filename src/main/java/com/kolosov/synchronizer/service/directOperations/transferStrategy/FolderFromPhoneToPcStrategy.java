@@ -5,11 +5,7 @@ import com.kolosov.synchronizer.service.lowLevel.pc.PcWorker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Set;
-import java.util.TreeSet;
-
 import static com.kolosov.synchronizer.enums.Location.PC;
-import static com.kolosov.synchronizer.enums.Location.PHONE;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -21,7 +17,7 @@ public class FolderFromPhoneToPcStrategy implements TransferStrategy {
     @Override
     public void transfer() {
         pcWorker.createFolder(folderSync);
-        folderSync.existOnPC = true;
+        folderSync.existOnPc = true;
         log.info(String.format("Transferred to %5s : %s", PC, folderSync.relativePath));
     }
 }

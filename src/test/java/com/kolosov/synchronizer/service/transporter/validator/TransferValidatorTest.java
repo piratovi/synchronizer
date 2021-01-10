@@ -63,7 +63,7 @@ class TransferValidatorTest {
     public void syncAlreadyTransferred() {
         // setup
         Sync sync = new FileSync("file", Location.PHONE, null);
-        sync.existOnPC = true;
+        sync.existOnPc = true;
 
         // act
         // verify

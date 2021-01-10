@@ -13,7 +13,7 @@ public class TransferValidator {
         if (sync.isSynchronized()) {
             throw new RuntimeException(String.format("%s уже синхронизирован", sync.relativePath));
         }
-        if (sync.existOnPC) {
+        if (sync.existOnPc) {
             if (sync.isFolder()) {
                 return FOLDER_FROM_PC_TO_PHONE;
             } else {

@@ -53,7 +53,7 @@ public abstract class Sync implements Component {
     public String name;
 
     @Column(nullable = false)
-    public Boolean existOnPC;
+    public Boolean existOnPc;
 
     @Column(nullable = false)
     public Boolean existOnPhone;
@@ -67,7 +67,7 @@ public abstract class Sync implements Component {
 
     protected Sync(String name, Location location, FolderSync parent) {
         this.name = name;
-        this.existOnPC = Location.PC.equals(location);
+        this.existOnPc = Location.PC.equals(location);
         this.existOnPhone = Location.PHONE.equals(location);
         if (parent != null) {
             parent.add(this);
@@ -79,12 +79,12 @@ public abstract class Sync implements Component {
 
     @JsonIgnore
     public boolean isNotSynchronized() {
-        return this.existOnPhone != this.existOnPC;
+        return this.existOnPhone != this.existOnPc;
     }
 
     @JsonIgnore
     public boolean isSynchronized() {
-        return this.existOnPhone && this.existOnPC;
+        return this.existOnPhone && this.existOnPc;
     }
 
     @Override
@@ -122,7 +122,7 @@ public abstract class Sync implements Component {
     }
 
     public void setSynchronized() {
-        this.existOnPC = true;
+        this.existOnPc = true;
         this.existOnPhone = true;
     }
 

@@ -15,7 +15,7 @@ public class FileFromPhoneToPcStrategy extends AbstractTransferFileStrategy {
     @Override
     public void transfer() {
         transferFileSync(phoneWorker, pcWorker, PC);
-        fileSync.existOnPC = true;
+        fileSync.existOnPc = true;
     }
 
 }
