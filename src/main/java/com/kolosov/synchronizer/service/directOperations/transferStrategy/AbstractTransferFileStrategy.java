@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +23,7 @@ public abstract class AbstractTransferFileStrategy implements TransferStrategy {
     protected final PhoneWorker phoneWorker;
     protected final FileSync fileSync;
 
-    protected void transferFileSync(LowLevelWorker workerFrom, LowLevelWorker workerTo, Location location) {
+    protected void transferFileSync(LowLevelWorker workerFrom, LowLevelWorker workerTo, Location location) throws IOException {
         float speed;
         try (
                 InputStream inputStream = workerFrom.getInputStreamFrom(fileSync);
@@ -34,8 +35,6 @@ public abstract class AbstractTransferFileStrategy implements TransferStrategy {
             watch.stop();
             long milliseconds = watch.getTime(TimeUnit.MILLISECONDS);
             speed = CalcUtils.calculateTransferSpeed(bytes, milliseconds);
-        } catch (Exception e) {
-            throw new RuntimeException(fileSync.toString(), e);
         }
         phoneWorker.closeStream();
         String formattedOutput = String.format("Transferred to %5s : %s. Speed = %.2f Mbytes/sec", location, fileSync.relativePath, speed);

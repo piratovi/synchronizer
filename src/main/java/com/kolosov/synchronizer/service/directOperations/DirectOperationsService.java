@@ -4,6 +4,7 @@ import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.TreeSync;
 import com.kolosov.synchronizer.enums.Location;
+import com.kolosov.synchronizer.exceptions.ExceptionSupplier;
 import com.kolosov.synchronizer.service.directOperations.transferStrategy.FileFromPcToPhoneStrategy;
 import com.kolosov.synchronizer.service.directOperations.transferStrategy.FileFromPhoneToPcStrategy;
 import com.kolosov.synchronizer.service.directOperations.transferStrategy.FolderFromPcToPhoneStrategy;
@@ -16,12 +17,11 @@ import com.kolosov.synchronizer.service.transporter.validator.TransferType;
 import com.kolosov.synchronizer.utils.CalcUtils;
 import com.kolosov.synchronizer.utils.MergeSyncUtils;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 import org.springframework.stereotype.Service;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -36,19 +36,35 @@ public class DirectOperationsService {
     private final PhoneWorker phoneWorker;
     private final PcWorker pcWorker;
 
-    @SneakyThrows
     public void delete(Sync sync) {
         if (!sync.existOnPhone && !sync.existOnPc) {
-            throw new FileNotFoundException("File already deleted " + sync.relativePath);
+            throw ExceptionSupplier.syncNotFound(sync).get();
         }
         if (sync.existOnPhone) {
-            phoneWorker.delete(sync);
-            log.info(String.format("Deleted from %7s : %s", PHONE, sync.relativePath));
+            removeFromPhone(sync);
         }
         if (sync.existOnPc) {
-            pcWorker.delete(sync);
-            log.info(String.format("Deleted from %7s : %s", PC, sync.relativePath));
+            removeFromPc(sync);
         }
+    }
+
+    private void removeFromPhone(Sync sync) {
+        try {
+            phoneWorker.delete(sync);
+        } catch (IOException exception) {
+            String syncType = sync.isFile() ? "file" : "folder";
+            throw new RuntimeException(String.format("Problem with removing %s %s from phone", syncType, sync.relativePath), exception);
+        }
+        log.info(String.format("Deleted from %7s : %s", PHONE, sync.relativePath));
+    }
+
+    private void removeFromPc(Sync sync) {
+        try {
+            pcWorker.delete(sync);
+        } catch (IOException exception) {
+            throw new RuntimeException(String.format("Problem with removing %s from pc", sync.relativePath), exception);
+        }
+        log.info(String.format("Deleted from %7s : %s", PC, sync.relativePath));
     }
 
     public TreeSync getNewTreeSync() {

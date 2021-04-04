@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,13 +26,12 @@ public class Remover {
     @Synchronized
     public void remove(List<Integer> ids) {
         log.info("Deleting start");
-        List<Sync> syncsToDelete = ids.stream()
+        ids.stream()
                 .map(id -> syncRepository.findById(id).orElseThrow(ExceptionSupplier.syncNotFound(id)))
                 .flatMap(Sync::getNestedSyncs)
                 .filter(Sync::isNotSynchronized)
                 .filter(Sync::isFile)
-                .collect(Collectors.toList());
-        syncsToDelete.forEach(this::remove);
+                .forEach(this::remove);
         TreeSync treeSync = treeService.getTreeSync();
         List<FolderSync> foldersWithoutNestedFiles = SyncUtils.getFoldersWithoutNestedFiles(treeSync, false);
         foldersWithoutNestedFiles.forEach(this::remove);

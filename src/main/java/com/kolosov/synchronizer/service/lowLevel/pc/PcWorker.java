@@ -18,6 +18,7 @@ import org.springframework.util.FileSystemUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -47,7 +48,7 @@ public class PcWorker implements LowLevelWorker {
         return newTreeSync;
     }
 
-    public void processDirectoryRecursively(File parentDirectory, FolderSync parentFolderSync) {
+    private void processDirectoryRecursively(File parentDirectory, FolderSync parentFolderSync) {
         for (final File file : parentDirectory.listFiles()) {
             String fileName = file.getName();
             if (file.isDirectory()) {
@@ -60,8 +61,7 @@ public class PcWorker implements LowLevelWorker {
     }
 
     @Override
-    @SneakyThrows
-    public void delete(Sync sync) {
+    public void delete(Sync sync) throws IOException {
         String absolutePath = locationService.getAbsolutePathForPc(sync);
         FileSystemUtils.deleteRecursively(Path.of(absolutePath));
     }
@@ -83,8 +83,11 @@ public class PcWorker implements LowLevelWorker {
     }
 
     @Override
-    public void createFolder(FolderSync folderSync) {
-        new File(locationService.getAbsolutePathForPc(folderSync)).mkdir();
+    public void createFolder(FolderSync folderSync) throws IOException {
+        boolean created = new File(locationService.getAbsolutePathForPc(folderSync)).mkdir();
+        if (!created) {
+            throw new IOException();
+        }
     }
 
     @SneakyThrows

@@ -111,9 +111,7 @@ public abstract class PhoneWorker implements LowLevelWorker {
     }
 
     @Override
-    @SneakyThrows
-    //TODO всетаки сделать
-    public void createFolder(FolderSync folderSync) {
+    public void createFolder(FolderSync folderSync) throws IOException {
         connect();
         String result = appendFileName(locationService.getRootPhone(), convertPathForFtp(folderSync.getRelativePath()));
         ftpClient.makeDirectory(result);
@@ -171,9 +169,8 @@ public abstract class PhoneWorker implements LowLevelWorker {
         return ftpClient.retrieveFileStream(relativePath);
     }
 
-    @SneakyThrows
     @Override
-    public void delete(Sync sync) {
+    public void delete(Sync sync) throws IOException {
         connect();
         String pathToDelete = locationService.getRootPhone() + "/" + convertPathForFtp(sync.relativePath);
         if (sync.isFolder()) {

@@ -5,6 +5,8 @@ import com.kolosov.synchronizer.service.lowLevel.pc.PcWorker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
+
 import static com.kolosov.synchronizer.enums.Location.PC;
 
 @RequiredArgsConstructor
@@ -16,7 +18,11 @@ public class FolderFromPhoneToPcStrategy implements TransferStrategy {
 
     @Override
     public void transfer() {
-        pcWorker.createFolder(folderSync);
+        try {
+            pcWorker.createFolder(folderSync);
+        } catch (IOException exception) {
+            throw new RuntimeException(String.format("Problem with creating folder %s on pc", folderSync.relativePath), exception);
+        }
         folderSync.existOnPc = true;
         log.info(String.format("Transferred to %5s : %s", PC, folderSync.relativePath));
     }

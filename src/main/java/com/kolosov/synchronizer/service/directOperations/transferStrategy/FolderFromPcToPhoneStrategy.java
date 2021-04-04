@@ -5,6 +5,8 @@ import com.kolosov.synchronizer.service.lowLevel.phone.PhoneWorker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
+
 import static com.kolosov.synchronizer.enums.Location.PHONE;
 
 @RequiredArgsConstructor
@@ -16,7 +18,11 @@ public class FolderFromPcToPhoneStrategy implements TransferStrategy {
 
     @Override
     public void transfer() {
-        phoneWorker.createFolder(folderSync);
+        try {
+            phoneWorker.createFolder(folderSync);
+        } catch (IOException exception) {
+            throw new RuntimeException(String.format("Problem with creating folder %s on phone", folderSync.relativePath), exception);
+        }
         folderSync.existOnPhone = true;
         log.info(String.format("Transferred to %5s : %s.", PHONE, folderSync.relativePath));
     }
