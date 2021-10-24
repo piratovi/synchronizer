@@ -113,7 +113,7 @@ public abstract class PhoneWorker implements LowLevelWorker {
     @Override
     public void createFolder(FolderSync folderSync) throws IOException {
         connect();
-        String result = appendFileName(locationService.getRootPhone(), convertPathForFtp(folderSync.getRelativePath()));
+        String result = convertPathForFtp(folderSync.getRelativePath());
         ftpClient.makeDirectory(result);
 
     }
