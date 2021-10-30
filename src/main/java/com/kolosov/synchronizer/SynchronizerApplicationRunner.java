@@ -14,6 +14,7 @@ public class SynchronizerApplicationRunner implements CommandLineRunner {
 
     public static void main(String[] args) {
         SpringApplication.run(SynchronizerApplicationRunner.class, args);
+        System.exit(1);
     }
 
     @Override
