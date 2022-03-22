@@ -17,13 +17,14 @@ import com.kolosov.synchronizer.service.transporter.validator.TransferType;
 import com.kolosov.synchronizer.utils.CalcUtils;
 import com.kolosov.synchronizer.utils.MergeSyncUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static com.kolosov.synchronizer.enums.Location.PC;
 import static com.kolosov.synchronizer.enums.Location.PHONE;
@@ -67,13 +68,23 @@ public class DirectOperationsService {
         log.info(String.format("Deleted from %7s : %s", PC, sync.relativePath));
     }
 
+    @SneakyThrows
     public TreeSync getNewTreeSync() {
-        TreeSync pcTreeSync = getTreeSync(pcWorker, PC);
-        TreeSync ftpTreeSync = getTreeSync(phoneWorker, PHONE);
+        Callable<TreeSync> callablePc = () -> getTreeSync(pcWorker);
+        Callable<TreeSync> callablePhone = () -> getTreeSync(phoneWorker);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+        Future<TreeSync> treeSyncFuturePhone = executorService.submit(callablePhone);
+        Future<TreeSync> treeSyncFuturePc = executorService.submit(callablePc);
+
+        TreeSync pcTreeSync = treeSyncFuturePc.get();
+        TreeSync ftpTreeSync = treeSyncFuturePhone.get();
+
         return MergeSyncUtils.mergeTrees(pcTreeSync, ftpTreeSync);
     }
 
-    private TreeSync getTreeSync(LowLevelWorker lowLevelWorker, Location location) {
+    private TreeSync getTreeSync(LowLevelWorker lowLevelWorker) {
         StopWatch watch = new StopWatch();
         watch.start();
         TreeSync newTreeSync = lowLevelWorker.getNewTreeSync();
@@ -82,7 +93,13 @@ public class DirectOperationsService {
         long seconds = watch.getTime(TimeUnit.SECONDS);
         long quantity = newTreeSync.getNestedSyncs().count();
         float speed = CalcUtils.calculateTreeScanSpeed(quantity, milliseconds);
-        log.info(String.format("Tree from %5s scanned. Quantity = %d syncs. Time = %3d seconds. Speed = %8.1f syncs/second", location, quantity, seconds, speed));
+        log.info(String.format(
+                "Tree from %5s scanned. Quantity = %d syncs. Time = %3d seconds. Speed = %8.1f syncs/second",
+                lowLevelWorker.getLocation(),
+                quantity,
+                seconds,
+                speed)
+        );
         return newTreeSync;
     }
 

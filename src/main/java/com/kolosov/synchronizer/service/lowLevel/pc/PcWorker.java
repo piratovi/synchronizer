@@ -4,6 +4,7 @@ import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.TreeSync;
+import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.service.LocationService;
 import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
 import lombok.RequiredArgsConstructor;
@@ -120,5 +121,10 @@ public class PcWorker implements LowLevelWorker {
             }
         }
         return true;
+    }
+
+    @Override
+    public Location getLocation() {
+        return PC;
     }
 }

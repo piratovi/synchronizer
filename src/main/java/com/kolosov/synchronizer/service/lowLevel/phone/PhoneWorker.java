@@ -4,6 +4,7 @@ import com.kolosov.synchronizer.domain.FileSync;
 import com.kolosov.synchronizer.domain.FolderSync;
 import com.kolosov.synchronizer.domain.Sync;
 import com.kolosov.synchronizer.domain.TreeSync;
+import com.kolosov.synchronizer.enums.Location;
 import com.kolosov.synchronizer.service.LocationService;
 import com.kolosov.synchronizer.service.lowLevel.LowLevelWorker;
 import lombok.Setter;
@@ -185,4 +186,10 @@ public abstract class PhoneWorker implements LowLevelWorker {
     }
 
     protected abstract String convertPathForFtp(String relativePath);
+
+    @Override
+    public Location getLocation() {
+        return PHONE;
+    }
+
 }
